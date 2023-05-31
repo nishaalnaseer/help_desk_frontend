@@ -114,7 +114,7 @@ class _DevicesScreenState extends State<DevicesScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
+    return ListView(
       children: [
         Center(
           child: SizedBox(
@@ -179,7 +179,7 @@ class _DevicesScreenState extends State<DevicesScreen> {
             ),
           ),
         )
-            : Container(),
+        : Container(),
 
         categorySelected ? Center(
           child: Scrollbar(
@@ -187,27 +187,24 @@ class _DevicesScreenState extends State<DevicesScreen> {
             child: SingleChildScrollView(
               controller: controller2,
               scrollDirection: Axis.horizontal,
-              child: SingleChildScrollView(
-                controller: controller,
-                child: DataTable(
-                  columns: const [
-                    DataColumn(label: Text('Brand'),),
-                    DataColumn(label: Text('Description'),),
-                    DataColumn(label: Text('Location'),),
-                    DataColumn(label: Text('Year'),),
-                    DataColumn(label: Text('Serial Number'),),
-                    DataColumn(label: Text('Static IP?'),),
-                    DataColumn(label: Text('Last Known IP'),),
-                    DataColumn(label: Text('MAC'),),
-                    DataColumn(label: Text('Remarks'),),
-                    DataColumn(label: Text('Supplies'),),
-                    DataColumn(label: Text('Obtained'),),
-                    DataColumn(label: Text('Obtained From'),),
-                    DataColumn(label: Text('Last Serviced'),),
-                    DataColumn(label: Text('Total Serviced'),),
-                  ],
-                  rows: rows,
-                ),
+              child: DataTable(
+                columns: const [
+                  DataColumn(label: Text('Brand'),),
+                  DataColumn(label: Text('Description'),),
+                  DataColumn(label: Text('Location'),),
+                  DataColumn(label: Text('Year'),),
+                  DataColumn(label: Text('Serial Number'),),
+                  DataColumn(label: Text('Static IP?'),),
+                  DataColumn(label: Text('Last Known IP'),),
+                  DataColumn(label: Text('MAC'),),
+                  DataColumn(label: Text('Remarks'),),
+                  DataColumn(label: Text('Supplies'),),
+                  DataColumn(label: Text('Obtained'),),
+                  DataColumn(label: Text('Obtained From'),),
+                  DataColumn(label: Text('Last Serviced'),),
+                  DataColumn(label: Text('Total Serviced'),),
+                ],
+                rows: rows,
               ),
             ),
           ),

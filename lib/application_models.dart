@@ -85,7 +85,7 @@ class Device {
         obtainedOn: json["obtained_on"],
         obtainedFrom: json["obtained_from"],
         lastServiced: json["last_serviced"],
-        totalServiced: json["total_serviced"],
+        totalServiced: int.parse(json["total_serviced"]),
         model: Model.fromJson(json["model"]),
     );
   }

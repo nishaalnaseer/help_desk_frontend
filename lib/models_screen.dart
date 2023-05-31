@@ -24,18 +24,9 @@ class _ModelsScreenState extends State<ModelsScreen> {
   String selectedCategory = "";
   bool categorySelected = false;
 
-  DataTable childrenModels = DataTable(
-    columns: const [
-      DataColumn(label: Text('ID')),
-      DataColumn(label: Text('Brand')),
-      DataColumn(label: Wrap(children: [Text('Description')])),
-      DataColumn(label: Text('Department')),
-      DataColumn(label: Text('Category')),
-      DataColumn(label: Text('Qty'), numeric: true),
-      DataColumn(label: Text('Year'), numeric: true),
-    ],
-    rows: [],
-  );
+  final ScrollController controller = ScrollController();
+  final ScrollController controller2 = ScrollController();
+  List<DataRow> rows = [];
 
   Future<void> getModels() async {
     String contents = await supporting.getApiData(
@@ -44,20 +35,7 @@ class _ModelsScreenState extends State<ModelsScreen> {
       widget.protocol
     );
     List<dynamic> coded = jsonDecode(contents);
-    List<DataRow> rows = [];
-
-    childrenModels = DataTable(
-      columns: const [
-        DataColumn(label: Text('ID')),
-        DataColumn(label: Text('Brand')),
-        DataColumn(label: Text('Description')),
-        DataColumn(label: Text('Department')),
-        DataColumn(label: Text('Category')),
-        DataColumn(label: Text('Qty')),
-        DataColumn(label: Text('Year')),
-      ],
-      rows: rows,
-    );
+    rows = [];
     for(var obj in coded){
       Map<String, dynamic> dataMap = supporting.convertDynamicToMap(obj);
 
@@ -65,7 +43,6 @@ class _ModelsScreenState extends State<ModelsScreen> {
       rows.add(
         DataRow(
           cells: [
-            DataCell(Text('${model.uId}'),),
             DataCell(Text(model.brand),),
             DataCell(Text(model.description)),
             DataCell(Text(model.department)),
@@ -124,83 +101,104 @@ class _ModelsScreenState extends State<ModelsScreen> {
     super.initState();
   }
 
+  double getWindowWidth(BuildContext context) {
+    return MediaQuery.of(context).size.width;
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: SizedBox(
-        child: Center(
-          child: ListView(
-            children: [
-              Padding(
-                padding: const EdgeInsets.all(10),
-                child: DropdownButton<String>(
-                  hint: departmentSelected ? Text(selectedDepartment) : const Text('Select a Department'),
-                  elevation: 16,
-                  dropdownColor: Colors.purple[100],
-                  onChanged: (String? newValue) {
-                    if(newValue == null) {
-                      return;
-                    }
+    return ListView(
+      children: [
+        Center(
+          child: SizedBox(
+            width: getWindowWidth(context) - 20,
+            child: Padding(
+              padding: const EdgeInsets.all(10),
+              child: DropdownButton<String>(
+                hint: departmentSelected ? Text(selectedDepartment) : const Text('Select a Department'),
+                elevation: 16,
+                dropdownColor: Colors.purple[100],
+                onChanged: (String? newValue) {
+                  if(newValue == null) {
+                    return;
+                  }
 
-                    categorySelected = false;
-                    selectedDepartment = newValue;
-                    departmentSelected = true;
-                    getCategories();
-                    setState(() {
-                    });
-                  },
-                  items: departments.map<DropdownMenuItem<String>>((String value) {
-                    return DropdownMenuItem<String>(
-                      value: value,
-                      child: Text(value),
-                    );
-                  }).toList(),
-                ),
+                  categorySelected = false;
+                  selectedDepartment = newValue;
+                  departmentSelected = true;
+                  getCategories();
+                  setState(() {
+                  });
+                },
+                items: departments.map<DropdownMenuItem<String>>((String value) {
+                  return DropdownMenuItem<String>(
+                    value: value,
+                    child: Text(value),
+                  );
+                }).toList(),
               ),
-              departmentSelected ? Padding(
-                padding: const EdgeInsets.all(10),
-                child: DropdownButton<String>(
-                  hint: categorySelected ? Text(selectedCategory) : const Text('Select a Category'),
-                  elevation: 16,
-                  dropdownColor: Colors.purple[100],
-                  onChanged: (String? newValue) {
-                    if(newValue == null) {
-                      return;
-                    }
-
-                    getModels();
-                    setState(() {
-                      selectedCategory = newValue;
-                      categorySelected = true;
-                    });
-                  },
-                  items: categories.map<DropdownMenuItem<String>>((String value) {
-                    return DropdownMenuItem<String>(
-                      value: value,
-                      child: Text(value),
-                    );
-                  }).toList(),
-                ),
-              )
-              : Container(),
-              categorySelected ? Container(
-                  padding: const EdgeInsets.all(10),
-                  child: Container(
-                    decoration: BoxDecoration(
-                      border: Border.all(
-                        color: Colors.black,
-                        width: 1.0,
-                      ),
-                      borderRadius: BorderRadius.circular(8.0),
-                    ),
-                    child: childrenModels,
-                  ),
-                )
-              : Container(),
-            ],
+            ),
           ),
         ),
-      ),
+        departmentSelected ? Center(
+          child: SizedBox(
+            width: getWindowWidth(context) - 20,
+            child: Padding(
+              padding: const EdgeInsets.all(10),
+              child: DropdownButton<String>(
+                hint: categorySelected ? Text(selectedCategory) : const Text('Select a Category'),
+                elevation: 16,
+                dropdownColor: Colors.purple[100],
+                onChanged: (String? newValue) {
+                  if(newValue == null) {
+                    return;
+                  }
+                  selectedCategory = newValue;
+                  categorySelected = true;
+
+                  getModels();
+
+                  setState(() {
+
+                  });
+                },
+                items: categories.map<DropdownMenuItem<String>>((String value) {
+                  return DropdownMenuItem<String>(
+                    value: value,
+                    child: Text(value),
+                  );
+                }).toList(),
+              ),
+            ),
+          ),
+        )
+            : Container(),
+
+        categorySelected ? Center(
+          child: Scrollbar(
+            controller: controller2,
+            child: SingleChildScrollView(
+              controller: controller2,
+              scrollDirection: Axis.horizontal,
+              child: SizedBox(
+                width: getWindowWidth(context) - 20,
+                child: DataTable(
+                  columns: const [
+                    DataColumn(label: Text("Brand"),),
+                    DataColumn(label: Text("Description"),),
+                    DataColumn(label: Text("Department"),),
+                    DataColumn(label: Text("Category"),),
+                    DataColumn(label: Text("Qty"),),
+                    DataColumn(label: Text('Year'),),
+                  ],
+                  rows: rows,
+                ),
+              ),
+            ),
+          ),
+        ) :
+        Container(),
+      ],
     );
   }
 }

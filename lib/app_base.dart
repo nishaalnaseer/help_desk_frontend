@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:help_desk_frontend/create_ticket.dart';
 import 'package:help_desk_frontend/devices_screen.dart';
 import 'package:help_desk_frontend/models_screen.dart';
 
@@ -43,7 +44,9 @@ class _AppBaseState extends State<AppBase> {
   ];
 
   void createTicket() {
-
+    window = CreateTicket(domain: widget.domain, protocol: widget.protocol);
+    setState(() {
+    });
   }
 
   void devices() {
