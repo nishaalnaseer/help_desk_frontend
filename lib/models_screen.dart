@@ -26,23 +26,29 @@ class _ModelsScreenState extends State<ModelsScreen> {
 
   DataTable childrenModels = DataTable(
     columns: const [
+      DataColumn(label: Text('ID')),
       DataColumn(label: Text('Brand')),
-      DataColumn(label: Text('Description')),
+      DataColumn(label: Wrap(children: [Text('Description')])),
       DataColumn(label: Text('Department')),
       DataColumn(label: Text('Category')),
-      DataColumn(label: Text('Qty')),
-      DataColumn(label: Text('Year')),
+      DataColumn(label: Text('Qty'), numeric: true),
+      DataColumn(label: Text('Year'), numeric: true),
     ],
     rows: [],
   );
 
   Future<void> getModels() async {
-    String contents = await getApiData("models?department=IT&category=TV");
+    String contents = await supporting.getApiData(
+      "models?department=IT&category=TV",
+      widget.domain,
+      widget.protocol
+    );
     List<dynamic> coded = jsonDecode(contents);
     List<DataRow> rows = [];
 
     childrenModels = DataTable(
       columns: const [
+        DataColumn(label: Text('ID')),
         DataColumn(label: Text('Brand')),
         DataColumn(label: Text('Description')),
         DataColumn(label: Text('Department')),
@@ -59,6 +65,7 @@ class _ModelsScreenState extends State<ModelsScreen> {
       rows.add(
         DataRow(
           cells: [
+            DataCell(Text('${model.uId}'),),
             DataCell(Text(model.brand),),
             DataCell(Text(model.description)),
             DataCell(Text(model.department)),
@@ -74,7 +81,11 @@ class _ModelsScreenState extends State<ModelsScreen> {
   }
 
   Future<List<String>> getDepartments() async {
-    String contents = await getApiData("departments");
+    String contents = await supporting.getApiData(
+      "departments",
+      widget.domain,
+      widget.protocol
+    );
     List<dynamic> coded = await jsonDecode(contents);
     List<String> departments = [];
     for(var x in coded) {
@@ -89,17 +100,12 @@ class _ModelsScreenState extends State<ModelsScreen> {
     });
   }
 
-  Future<String> getApiData(String path) async {
-    String domain = widget.domain;
-    String protocol = widget.protocol;
-
-    var uri = Uri.parse('$protocol://$domain/$path');
-    var response = await http.get(uri);
-    return response.body;
-  }
-
   Future<void> getCategories() async {
-    String contents = await getApiData("categories?department=$selectedDepartment");
+    String contents = await supporting.getApiData(
+      "categories?department=$selectedDepartment",
+      widget.domain,
+      widget.protocol
+    );
     categories = [];
     List<dynamic> coded = jsonDecode(contents);
     for(var x in coded) {
@@ -122,10 +128,8 @@ class _ModelsScreenState extends State<ModelsScreen> {
   Widget build(BuildContext context) {
     return Center(
       child: SizedBox(
-        height: 500,
-        width: 1500,
         child: Center(
-          child: Column(
+          child: ListView(
             children: [
               Padding(
                 padding: const EdgeInsets.all(10),
@@ -179,22 +183,19 @@ class _ModelsScreenState extends State<ModelsScreen> {
                 ),
               )
               : Container(),
-              categorySelected ? SingleChildScrollView(
-                child: Padding(
+              categorySelected ? Container(
                   padding: const EdgeInsets.all(10),
                   child: Container(
-                      width: 1500,
-                      decoration: BoxDecoration(
-                        border: Border.all(
-                          color: Colors.black,
-                          width: 1.0,
-                        ),
-                        borderRadius: BorderRadius.circular(8.0),
+                    decoration: BoxDecoration(
+                      border: Border.all(
+                        color: Colors.black,
+                        width: 1.0,
                       ),
-                      child: childrenModels
+                      borderRadius: BorderRadius.circular(8.0),
+                    ),
+                    child: childrenModels,
                   ),
-                ),
-              )
+                )
               : Container(),
             ],
           ),

@@ -154,7 +154,7 @@ class _AppBaseState extends State<AppBase> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               const Text(
-                "Hospital",
+                "Ticketing",
                 style: TextStyle(
                   color: Colors.white,
                   fontWeight:
