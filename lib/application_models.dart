@@ -72,7 +72,6 @@ class Device {
   });
 
   factory Device.fromJson(Map<String, dynamic> json) {
-    print(json);
     return Device(
         uId: json["u_id"],
         location: json["location"],
@@ -87,6 +86,68 @@ class Device {
         lastServiced: json["last_serviced"],
         totalServiced: int.parse(json["total_serviced"]),
         model: Model.fromJson(json["model"]),
+    );
+  }
+}
+
+class User {
+  String name;
+  String department;
+  List<Device> devices = [];
+
+  User({
+    required this.name,
+    required this.department,
+    List<Device>? devices
+  });
+
+  factory User.fromJson(Map<String, dynamic> json) {
+    return User(
+      name: json["submitted_by"],
+      department: json["name_ticket"],
+      devices: json["devices"] != null ?
+        List.generate(json["devices"].lenght,
+                (index) => Device.fromJson(json["devices"][index])
+        ) :
+        null,
+    );
+  }
+}
+
+class Ticket {
+  final User submittedBy;
+  final String nameTicket;
+  final String emailTicket;
+  final String numberTicket;
+  final String deptTicket;
+  final String location;
+  final String subject;
+  final String message;
+  late Device device;
+
+  Ticket({
+    required this.submittedBy,
+    required this.nameTicket,
+    required this.emailTicket,
+    required this.numberTicket,
+    required this.deptTicket,
+    required this.location,
+    required this.subject,
+    required this.message,
+    Device? device,
+  });
+
+  factory Ticket.fromJson(Map<String, dynamic> json) {
+    return Ticket(
+      submittedBy: json["submitted_by"],
+      nameTicket: json["name_ticket"],
+      emailTicket: json["email_ticket"],
+      numberTicket: json["number_ticket"],
+      deptTicket: json["dept_ticket"],
+      location: json["location"],
+      subject: json["subject"],
+      message: json["message"],
+      device: json["device"] != null ? Device.fromJson(json["device"]) : null,
     );
   }
 }

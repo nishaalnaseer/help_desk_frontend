@@ -1,6 +1,8 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 
+import 'package:flutter/material.dart';
+
 Map<String, dynamic> convertDynamicToMap(dynamic object) {
   if (object is Map<String, dynamic>) {
     return object;
@@ -17,4 +19,16 @@ Future<String> getApiData(String path, String domain, String protocol) async {
   var uri = Uri.parse('$protocol://$domain/$path');
   var response = await http.get(uri);
   return response.body;
+}
+
+double getWindowHeight(BuildContext context) {
+  return MediaQuery.of(context).size.height;
+}
+
+double getWindowWidth(BuildContext context) {
+  return MediaQuery.of(context).size.width;
+}
+
+class NavigatorService {
+  static final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 }

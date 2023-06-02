@@ -1,4 +1,3 @@
-
 import 'dart:convert';
 import 'dart:io';
 
@@ -24,7 +23,7 @@ class MyApp extends StatelessWidget {
         // colorScheme: ColorScheme.fromSeed(seedColor: Colors.purple),
         primarySwatch: Colors.purple,
         useMaterial3: true,
-      ),
+      ),// Set the navigatorKey
 
       home: Scaffold (
         appBar: AppBar(

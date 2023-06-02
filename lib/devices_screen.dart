@@ -112,6 +112,10 @@ class _DevicesScreenState extends State<DevicesScreen> {
     return MediaQuery.of(context).size.width;
   }
 
+  double getWindowHeight(BuildContext context) {
+    return MediaQuery.of(context).size.height;
+  }
+
   @override
   Widget build(BuildContext context) {
     return ListView(

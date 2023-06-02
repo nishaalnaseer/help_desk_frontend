@@ -1,14 +1,8 @@
-import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:help_desk_frontend/create_ticket.dart';
 import 'package:help_desk_frontend/devices_screen.dart';
 import 'package:help_desk_frontend/models_screen.dart';
 
-import 'dart:io';
-import 'package:http/http.dart' as http;
-
-import 'application_models.dart';
 import 'dummy.dart';
 
 class AppBase extends StatefulWidget {
@@ -50,8 +44,8 @@ class _AppBaseState extends State<AppBase> {
   }
 
   void devices() {
-    window = DevicesScreen(domain: widget.domain, protocol: widget.protocol);
     setState(() {
+      window = DevicesScreen(domain: widget.domain, protocol: widget.protocol);
     });
   }
 
@@ -82,7 +76,7 @@ class _AppBaseState extends State<AppBase> {
       case "IT":
         modules = {
           "Create Ticket": createTicket,
-          "View Ticket": viewTickets,
+          "View Tickets": viewTickets,
           "Devices": devices,
           "Models": modelsScreen,
           "Reports": reports,
