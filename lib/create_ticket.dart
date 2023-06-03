@@ -25,6 +25,12 @@ class _CreateTicketState extends State<CreateTicket> {
   TextEditingController messageController = TextEditingController();
   String message = "";
   String username = "";
+  bool isThisDevice = true;
+
+  List<String> ticketForDepartments = ["IT"];
+  List<String> ticketingDepartments = [];
+  bool departmentSelected = false;
+  String selectedDepartment = "";
 
   @override
   Widget build(BuildContext context) {
@@ -33,10 +39,10 @@ class _CreateTicketState extends State<CreateTicket> {
         Center(
           child: Padding(
             padding: EdgeInsets.fromLTRB(
-              10,
-              supporting.getWindowHeight(context) * 0.05,
-              10,
-              10
+                10,
+                supporting.getWindowHeight(context) * 0.05,
+                10,
+                20
             ),
             child: SizedBox(
               width: 250,
@@ -49,6 +55,46 @@ class _CreateTicketState extends State<CreateTicket> {
             ),
           ),
         ),
+        Row(
+          children: [
+            const Expanded(
+              flex: 20,
+              child: Padding(
+                padding: EdgeInsets.all(10),
+                child: Text(
+                  "Send Ticket to: ",
+                  textAlign: TextAlign.right,
+                ),
+              ),
+            ),
+            Expanded(
+              flex: 80,
+              child: SizedBox(
+                width: 150,
+                child: DropdownButton<String>(
+                  hint: departmentSelected ? Text(selectedDepartment) : const Text('Select a Department'),
+                  elevation: 16,
+                  dropdownColor: Colors.purple[100],
+                  onChanged: (String? newValue) {
+                    if(newValue == null) {
+                      return;
+                    }
+                    selectedDepartment = newValue;
+                    departmentSelected = true;
+                    setState(() {
+                    });
+                  },
+                  items: ticketForDepartments.map<DropdownMenuItem<String>>((String value) {
+                    return DropdownMenuItem<String>(
+                      value: value,
+                      child: Text(value),
+                    );
+                  }).toList(),
+                ),
+              ),
+            )
+          ],
+        ),
         Padding(
           padding: const EdgeInsets.all(10),
           child: TextField(
@@ -56,7 +102,7 @@ class _CreateTicketState extends State<CreateTicket> {
             onChanged: (value) => username = value,
             decoration: const InputDecoration(
               border: OutlineInputBorder(),
-              labelText: 'User Name',
+              labelText: 'Name',
             ),
           ),
         ),
@@ -115,9 +161,29 @@ class _CreateTicketState extends State<CreateTicket> {
             ),
           ),
         ),
+        Row(
+          children: [
+            const Padding(
+              padding: EdgeInsets.fromLTRB(15, 10, 0, 10),
+              child: Text("Is this the device having issues?"),
+            ),
+            Container(
+              alignment: Alignment.bottomLeft,
+              child: Checkbox(
+                value: isThisDevice, // Pass the boolean variable to the value property
+                onChanged: (bool? value) {
+                  setState(() {
+                    isThisDevice = value ?? false; // Update the checkbox state when it's toggled
+                  });
+                },
+              ),
+            ),
+          ],
+        ),
         Padding(
           padding: const EdgeInsets.all(10),
           child: TextField(
+            maxLines: 15,
             controller: messageController,
             onChanged: (value) => message = value,
             keyboardType: TextInputType.multiline,

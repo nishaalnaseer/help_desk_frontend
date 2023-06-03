@@ -28,7 +28,3 @@ double getWindowHeight(BuildContext context) {
 double getWindowWidth(BuildContext context) {
   return MediaQuery.of(context).size.width;
 }
-
-class NavigatorService {
-  static final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
-}

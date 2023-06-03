@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:help_desk_frontend/create_ticket.dart';
 import 'package:help_desk_frontend/devices_screen.dart';
 import 'package:help_desk_frontend/models_screen.dart';
+import 'package:help_desk_frontend/view_tickets.dart';
 
 import 'dummy.dart';
 
@@ -50,7 +51,9 @@ class _AppBaseState extends State<AppBase> {
   }
 
   void viewTickets() {
-
+    window = ViewTickets(domain: widget.domain, protocol: widget.protocol);
+    setState(() {
+    });
   }
 
   void reports() {
@@ -204,7 +207,6 @@ class _AppBaseState extends State<AppBase> {
         .toList(),
   );
 }
-
 
 final List<String> _menuItems = <String>[
   'About',
