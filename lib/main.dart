@@ -21,14 +21,14 @@ class MyApp extends StatelessWidget {
       // primaryColour:
       theme: ThemeData(
         // colorScheme: ColorScheme.fromSeed(seedColor: Colors.purple),
-        primarySwatch: Colors.purple,
+        primarySwatch: Colors.red,
         useMaterial3: true,
       ),// Set the navigatorKey
 
       home: Scaffold (
         appBar: AppBar(
           title: const Text(_title),
-          backgroundColor: Colors.purple[400],
+          backgroundColor: Colors.red[400],
         ),
         body: const MyStatefulWidget(),
       ),

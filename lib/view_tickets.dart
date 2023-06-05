@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'application_models.dart';
 import 'supporting.dart' as supporting;
@@ -42,10 +43,19 @@ class _ViewTicketsState extends State<ViewTickets> {
       Ticket ticket = Ticket.fromJson(x);
 
       rows.add(
-          DataRow(
-              cells: [
-              ]
-          )
+        DataRow(
+          cells: [
+            DataCell(Wrap(children: [Text('${ticket.tId}')])),
+            DataCell(Wrap(children: [Text('${ticket.submittedBy}')])),
+            DataCell(Wrap(children: [Text(ticket.nameTicket)])),
+            DataCell(Wrap(children: [Text(ticket.emailTicket)])),
+            DataCell(Wrap(children: [Text(ticket.numberTicket)])),
+            DataCell(Wrap(children: [Text(ticket.deptTicket)])),
+            DataCell(Wrap(children: [Text(ticket.location)])),
+            DataCell(Wrap(children: [Text(ticket.subject)])),
+            DataCell(Wrap(children: [Text(ticket.message)])),
+          ]
+        )
       );
     }
     setState(() {
@@ -132,30 +142,28 @@ class _ViewTicketsState extends State<ViewTickets> {
             child: SingleChildScrollView(
               controller: controller2,
               scrollDirection: Axis.horizontal,
-              child: DataTable(
-                columns: const [
-                  DataColumn(label: Text('Brand'),),
-                  DataColumn(label: Text('Description'),),
-                  DataColumn(label: Text('Location'),),
-                  DataColumn(label: Text('Year'),),
-                  DataColumn(label: Text('Serial Number'),),
-                  DataColumn(label: Text('Static IP?'),),
-                  DataColumn(label: Text('Last Known IP'),),
-                  DataColumn(label: Text('MAC'),),
-                  DataColumn(label: Text('Remarks'),),
-                  DataColumn(label: Text('Supplies'),),
-                  DataColumn(label: Text('Obtained'),),
-                  DataColumn(label: Text('Obtained From'),),
-                  DataColumn(label: Text('Last Serviced'),),
-                  DataColumn(label: Text('Total Serviced'),),
-                ],
-                rows: rows,
+              child: SizedBox(
+                width: 1920,
+                child: DataTable(
+                  columns: const [
+                    DataColumn(label: Text('id'),),
+                    DataColumn(label: Text('Raised By'),),
+                    DataColumn(label: Text('Name'),),
+                    DataColumn(label: Text('Email'),),
+                    DataColumn(label: Text('Contact'),),
+                    DataColumn(label: Text('Department'),),
+                    DataColumn(label: Text('Location'),),
+                    DataColumn(label: Text('Subject'),),
+                    DataColumn(label: Text('Message'),),
+                  ],
+                  rows: rows,
+                ),
               ),
             ),
           ),
         ) :
         Container(),
       ],
-    );
+      );
   }
 }

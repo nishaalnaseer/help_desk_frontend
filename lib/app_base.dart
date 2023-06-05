@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:help_desk_frontend/create_ticket.dart';
 import 'package:help_desk_frontend/devices_screen.dart';
 import 'package:help_desk_frontend/models_screen.dart';
+import 'package:help_desk_frontend/reports.dart';
 import 'package:help_desk_frontend/view_tickets.dart';
 
 import 'dummy.dart';
@@ -57,7 +58,9 @@ class _AppBaseState extends State<AppBase> {
   }
 
   void reports() {
-
+    window = ViewReports(domain: widget.domain, protocol: widget.protocol);
+    setState(() {
+    });
   }
 
   void modelsScreen() {
@@ -101,10 +104,10 @@ class _AppBaseState extends State<AppBase> {
       Widget child = Padding(
         padding: const EdgeInsets.all(3),
         child: ListTile(
-          selectedColor: Colors.purple[300],
-          tileColor: Colors.purple[100],
-          splashColor: Colors.purple[300],
-          hoverColor: Colors.purple[200],
+          selectedColor: Colors.red[300],
+          tileColor: Colors.red[100],
+          splashColor: Colors.red[300],
+          hoverColor: Colors.red[200],
           textColor: Colors.black,
 
           title: Center(child:
@@ -138,7 +141,7 @@ class _AppBaseState extends State<AppBase> {
       key: widget._scaffoldKey,
       appBar: AppBar(
         // automaticallyImplyLeading: false, // remove back button
-        backgroundColor: Colors.purple[400],
+        backgroundColor: Colors.red[400],
         leading: IconButton(
           icon: const Icon(Icons.menu),
           tooltip: 'Menu',

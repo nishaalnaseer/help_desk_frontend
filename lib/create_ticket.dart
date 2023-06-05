@@ -39,17 +39,17 @@ class _CreateTicketState extends State<CreateTicket> {
         Center(
           child: Padding(
             padding: EdgeInsets.fromLTRB(
-                10,
-                supporting.getWindowHeight(context) * 0.05,
-                10,
-                20
+              10,
+              supporting.getWindowHeight(context) * 0.05,
+              10,
+              20
             ),
             child: SizedBox(
               width: 250,
               child: ElevatedButton(
                 onPressed: () {  },
                 child: const Text(
-                    "Autofill with your details!"
+                  "Autofill with your details!"
                 ),
               ),
             ),
@@ -170,6 +170,7 @@ class _CreateTicketState extends State<CreateTicket> {
             Container(
               alignment: Alignment.bottomLeft,
               child: Checkbox(
+
                 value: isThisDevice, // Pass the boolean variable to the value property
                 onChanged: (bool? value) {
                   setState(() {

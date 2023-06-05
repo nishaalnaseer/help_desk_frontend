@@ -115,7 +115,8 @@ class User {
 }
 
 class Ticket {
-  final User submittedBy;
+  final int tId;
+  final int submittedBy;
   final String nameTicket;
   final String emailTicket;
   final String numberTicket;
@@ -126,6 +127,7 @@ class Ticket {
   late Device device;
 
   Ticket({
+    required this.tId,
     required this.submittedBy,
     required this.nameTicket,
     required this.emailTicket,
@@ -139,15 +141,17 @@ class Ticket {
 
   factory Ticket.fromJson(Map<String, dynamic> json) {
     return Ticket(
+      tId: json["t_id"],
       submittedBy: json["submitted_by"],
-      nameTicket: json["name_ticket"],
-      emailTicket: json["email_ticket"],
-      numberTicket: json["number_ticket"],
-      deptTicket: json["dept_ticket"],
+      nameTicket: json["name"],
+      emailTicket: json["email"],
+      numberTicket: json["contact_num"],
+      deptTicket: json["department"],
       location: json["location"],
       subject: json["subject"],
       message: json["message"],
       device: json["device"] != null ? Device.fromJson(json["device"]) : null,
+      // devices?
     );
   }
 }
