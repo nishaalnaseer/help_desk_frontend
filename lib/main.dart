@@ -1,9 +1,14 @@
 import 'dart:convert';
 import 'dart:io';
 
+
+// import 'dart:html' as html;
+import 'package:flutter/foundation.dart' show kIsWeb;
+
 import 'package:flutter/material.dart';
 
 import 'app_base.dart';
+import 'application_models.dart';
 
 Future<void> main() async {
   runApp(const MyApp());
@@ -27,8 +32,13 @@ class MyApp extends StatelessWidget {
 
       home: Scaffold (
         appBar: AppBar(
-          title: const Text(_title),
-          backgroundColor: Colors.red[400],
+          title: const Text(
+            _title,
+            style: TextStyle(
+              color: Colors.white
+            ),
+          ),
+          backgroundColor: Colors.red[900],
         ),
         body: const MyStatefulWidget(),
       ),
@@ -59,37 +69,50 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
       passwordController.clear();  // clear
       nameController.clear();  // clear
       warning = "";  // clear
+      User user = User(id: 1, name: "Nishaal", department: "Not IT", email: 'dawk', number: '123', location: 'here');
       Navigator.of(context).push(MaterialPageRoute(
-          builder: (BuildContext context){
-            return AppBase(
-              protocol: protocol,
-              domain: domain
-            );
-          }),
+        builder: (BuildContext context){
+          return AppBase(
+            protocol: protocol,
+            domain: domain,
+            user: user,
+          );
+        }),
       );
     });
   }
 
   Future<void> readConfig() async {
-    File file = File("assets/config.json");
+    late Future<String> contents;
 
-    Future<String> contents = file.readAsString();
-    var coded = jsonDecode( await contents);
-    domain = coded["domain"];
-    protocol = coded["protocol"];
+    if (kIsWeb) {
+      // html.HttpRequest.getString('assets/data.json').then((String jsonString) {
+      //   final coded = jsonDecode(jsonString);
+      //   domain = coded["domain"];
+      //   protocol = coded["protocol"];
+      // }).catchError((error) {
+      //    print("erroe");
+      // });
+
+    } else {
+      File file = File("assets/config.json");
+      contents = file.readAsString();
+      var coded = jsonDecode( await contents);
+      domain = coded["domain"];
+      protocol = coded["protocol"];
+    }
   }
 
   @override
   void initState() {
     super.initState();
-
     readConfig();
   }
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      color: Colors.purple[50],
+      color: Colors.black87,
       child: Padding(
         padding: const EdgeInsets.all(10),
         child: Center(
@@ -98,45 +121,87 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
             child: ListView(
               children: <Widget>[
                 Container(
-                    alignment: Alignment.center,
-                    padding: const EdgeInsets.fromLTRB(10, 100, 10, 10),
-                    child: const Text(
-                      'Ticketing System',
-                      style: TextStyle(
-                          color: Colors.blue,
-                          fontWeight: FontWeight.w500,
-                          fontSize: 30
-                      ),
-                    )
+                  alignment: Alignment.center,
+                  padding: const EdgeInsets.fromLTRB(10, 100, 10, 10),
+                  child: const Text(
+                    'Ticketing System',
+                    style: TextStyle(
+                      color: Colors.redAccent,
+                      fontWeight: FontWeight.w500,
+                      fontSize: 30
+                    ),
+                  )
                 ),
                 Container(
-                    alignment: Alignment.center,
-                    padding: const EdgeInsets.all(10),
-                    child: const Text(
-                      'Sign in',
-                      style: TextStyle(fontSize: 20),
-                    )
+                  alignment: Alignment.center,
+                  padding: const EdgeInsets.all(10),
+                  child: const Text(
+                    'Sign in',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 20
+                    ),
+                  )
                 ),
                 Container(
                   padding: const EdgeInsets.fromLTRB(10, 30, 10, 10),
                   child: TextField(
+                    cursorColor: Colors.red,
                     controller: nameController,
                     onChanged: (value) => username = value,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 18
+                    ),
                     decoration: const InputDecoration(
                       border: OutlineInputBorder(),
-                      labelText: 'User Name',
+                      focusedBorder: OutlineInputBorder(
+                        borderSide: BorderSide(color: Colors.red), // Change the color here
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderSide: BorderSide(color: Colors.red), // Change the color here
+                      ),
+                      errorBorder: OutlineInputBorder(
+                        borderSide: BorderSide(color: Colors.red), // Change the color here
+                      ),
+                      label: Text(
+                          "Email",
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 17
+                        ),
+                      ),
                     ),
                   ),
                 ),
                 Container(
                   padding: const EdgeInsets.all(10),
                   child: TextField(
+                    cursorColor: Colors.red,
                     controller: passwordController,
                     obscureText: true,
+                    style: const TextStyle(
+                      color: Colors.white
+                    ),
                     onChanged: (value) => password = value,
                     decoration: const InputDecoration(
+                      label: Text(
+                        "Password",
+                        style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 17
+                        ),
+                      ),
                       border: OutlineInputBorder(),
-                      labelText: 'Password',
+                      focusedBorder: OutlineInputBorder(
+                        borderSide: BorderSide(color: Colors.red), // Change the color here
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderSide: BorderSide(color: Colors.red), // Change the color here
+                      ),
+                      errorBorder: OutlineInputBorder(
+                        borderSide: BorderSide(color: Colors.red), // Change the color here
+                      ),
                     ),
                   ),
                 ),
@@ -146,6 +211,11 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
                     onPressed: () { login(); },
                     child: const Text(
                       "Login",
+                      style: TextStyle(
+                        color: Colors.red,
+                        fontSize: 17,
+                        fontWeight: FontWeight.w500,
+                      ),
                     ),
                   ),
                 ),
@@ -153,7 +223,14 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
                   onPressed: () {
                     //forgot password screen
                   },
-                  child: const Text('Forgot Password',),
+                  child: const Text(
+                    'Forgot Password',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 17,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
                 ),
               ],
             ),

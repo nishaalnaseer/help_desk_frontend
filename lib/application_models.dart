@@ -91,25 +91,37 @@ class Device {
 }
 
 class User {
+  final int id;
   String name;
+  String email;
+  String number;
+  String location;
   String department;
   List<Device> devices = [];
 
   User({
+    required this.id,
     required this.name,
     required this.department,
+    required this.email,
+    required this.number,
+    required this.location,
     List<Device>? devices
   });
 
   factory User.fromJson(Map<String, dynamic> json) {
     return User(
+      id: json["u_id"],
       name: json["submitted_by"],
       department: json["name_ticket"],
+      email: json["email"],
+      number: json["number"],
+      location: json["location"],
       devices: json["devices"] != null ?
         List.generate(json["devices"].lenght,
                 (index) => Device.fromJson(json["devices"][index])
         ) :
-        null,
+        [],
     );
   }
 }
@@ -117,6 +129,7 @@ class User {
 class Ticket {
   final int tId;
   final int submittedBy;
+  final String ticketTo;
   final String nameTicket;
   final String emailTicket;
   final String numberTicket;
@@ -124,11 +137,12 @@ class Ticket {
   final String location;
   final String subject;
   final String message;
-  late Device device;
+  List<int>? devices = [];
 
   Ticket({
     required this.tId,
     required this.submittedBy,
+    required this.ticketTo,
     required this.nameTicket,
     required this.emailTicket,
     required this.numberTicket,
@@ -136,13 +150,14 @@ class Ticket {
     required this.location,
     required this.subject,
     required this.message,
-    Device? device,
+    this.devices
   });
 
   factory Ticket.fromJson(Map<String, dynamic> json) {
     return Ticket(
       tId: json["t_id"],
       submittedBy: json["submitted_by"],
+      ticketTo: json["ticket_to"],
       nameTicket: json["name"],
       emailTicket: json["email"],
       numberTicket: json["contact_num"],
@@ -150,8 +165,24 @@ class Ticket {
       location: json["location"],
       subject: json["subject"],
       message: json["message"],
-      device: json["device"] != null ? Device.fromJson(json["device"]) : null,
+      devices: json["devices"] ?? [],
       // devices?
     );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      "t_id": tId,
+      "submitted_by": submittedBy,
+      "ticket_to": ticketTo,
+      "name": nameTicket,
+      "email": emailTicket,
+      "contact_num": numberTicket,
+      "department": deptTicket,
+      "location": location,
+      "subject": subject,
+      "message": message,
+      "devices": devices
+    };
   }
 }

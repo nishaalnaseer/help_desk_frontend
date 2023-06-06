@@ -28,3 +28,8 @@ double getWindowHeight(BuildContext context) {
 double getWindowWidth(BuildContext context) {
   return MediaQuery.of(context).size.width;
 }
+
+Color hexToColor(String hexString) {
+  final hexCode = hexString.replaceAll('#', '');
+  return Color(int.parse('FF$hexCode', radix: 16));
+}

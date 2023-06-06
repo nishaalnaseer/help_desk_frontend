@@ -1,16 +1,22 @@
 import 'package:flutter/material.dart';
+
 import 'package:help_desk_frontend/create_ticket.dart';
 import 'package:help_desk_frontend/devices_screen.dart';
 import 'package:help_desk_frontend/models_screen.dart';
 import 'package:help_desk_frontend/reports.dart';
 import 'package:help_desk_frontend/view_tickets.dart';
+import 'application_models.dart';
+import 'supporting.dart' as supporting;
 
 import 'dummy.dart';
 
 class AppBase extends StatefulWidget {
   final String protocol;
   final String domain;
-  AppBase({Key? key, required this.protocol, required this.domain}) : super(key: key);
+  final User user;
+  AppBase({
+    Key? key, required this.protocol, required this.domain, required this.user
+  }) : super(key: key);
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
   @override
@@ -32,7 +38,7 @@ class _AppBaseState extends State<AppBase> {
         // fit: BoxFit.cover,
         // ),
         borderRadius: BorderRadius.circular(10),
-        color: Colors.deepPurpleAccent,
+        color: Colors.white,
       ),
       padding: const EdgeInsets.all(10),
       child: const Text("IT"),
@@ -40,7 +46,11 @@ class _AppBaseState extends State<AppBase> {
   ];
 
   void createTicket() {
-    window = CreateTicket(domain: widget.domain, protocol: widget.protocol);
+    window = CreateTicket(
+      domain: widget.domain,
+      protocol: widget.protocol,
+      user: widget.user,
+    );
     setState(() {
     });
   }
@@ -104,23 +114,18 @@ class _AppBaseState extends State<AppBase> {
       Widget child = Padding(
         padding: const EdgeInsets.all(3),
         child: ListTile(
-          selectedColor: Colors.red[300],
-          tileColor: Colors.red[100],
-          splashColor: Colors.red[300],
-          hoverColor: Colors.red[200],
-          textColor: Colors.black,
-
-          title: Center(child:
-            Text(
-                name,
-                style: const TextStyle(
-                  color: Colors.black
-                ),
+          // tileColor: Colors.red[100], // Change the background color here
+          title: Center(
+            child: Text(
+              name,
+              style: const TextStyle(
+                color: Colors.white, // Change the text color here
+                fontSize: 17,
+              ),
             ),
           ),
           onTap: () {
             widget._scaffoldKey.currentState?.openEndDrawer();
-            // window.key?.currentState?.dispose();
             function();
           },
         ),
@@ -141,9 +146,12 @@ class _AppBaseState extends State<AppBase> {
       key: widget._scaffoldKey,
       appBar: AppBar(
         // automaticallyImplyLeading: false, // remove back button
-        backgroundColor: Colors.red[400],
+        backgroundColor: Colors.red[900],
         leading: IconButton(
-          icon: const Icon(Icons.menu),
+          icon: const Icon(
+            Icons.menu,
+            color: Colors.white,
+          ),
           tooltip: 'Menu',
           onPressed: () {
             widget._scaffoldKey.currentState?.openDrawer();
@@ -160,8 +168,7 @@ class _AppBaseState extends State<AppBase> {
                 "Ticketing",
                 style: TextStyle(
                   color: Colors.white,
-                  fontWeight:
-                  FontWeight.bold
+                  // fontWeight: FontWeight.bold
                 )
               ),
               if (isLargeScreen) Expanded(child: _navBarItems())
@@ -175,17 +182,17 @@ class _AppBaseState extends State<AppBase> {
           )
         ],
       ),
-      backgroundColor: Colors.purple[50],
+      backgroundColor: supporting.hexToColor("#222222"),
       body: Container(
         child: window,
       ),
       drawer: Drawer(
-        // surfaceTintColor: Colors.black,
-        // shadowColor: Colors.black,
-        backgroundColor: Colors.purple[50],
+        // surfaceTintColor: Colors.white,
+        // shadowColor: Colors.white,
+        backgroundColor: supporting.hexToColor("#222222"),
         child: ListView(
           children: childrenDrawer,
-        )
+        ),
       ),
     );
   }
@@ -226,29 +233,29 @@ class _ProfileIcon extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return PopupMenuButton<Menu>(
-        icon: const Icon(Icons.person),
-        offset: const Offset(0, 40),
-        onSelected: (Menu item) {},
-        surfaceTintColor: Colors.blue,
-        // color: Colors.lightBlueAccent,
+      icon: const Icon(Icons.person),
+      offset: const Offset(0, 40),
+      onSelected: (Menu item) {},
+      surfaceTintColor: Colors.blue,
+      // color: Colors.lightBlueAccent,
 
-        itemBuilder: (BuildContext context) => <PopupMenuEntry<Menu>>[
-          const PopupMenuItem<Menu>(
-            value: Menu.itemOne,
-            child: Text('Account'),
+      itemBuilder: (BuildContext context) => <PopupMenuEntry<Menu>>[
+        const PopupMenuItem<Menu>(
+          value: Menu.itemOne,
+          child: Text('Account'),
 
-          ),
-          const PopupMenuItem<Menu>(
-            value: Menu.itemTwo,
-            child: Text('Settings'),
-          ),
-          PopupMenuItem<Menu>(
-            value: Menu.itemThree,
-            child: const Text('Sign Out'),
-            onTap: () {
-              Navigator.pop(previousContext);
-            },
-          ),
-        ]);
+        ),
+        const PopupMenuItem<Menu>(
+          value: Menu.itemTwo,
+          child: Text('Settings'),
+        ),
+        PopupMenuItem<Menu>(
+          value: Menu.itemThree,
+          child: const Text('Sign Out'),
+          onTap: () {
+            Navigator.pop(previousContext);
+          },
+        ),
+      ]);
   }
 }
