@@ -69,7 +69,7 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
       passwordController.clear();  // clear
       nameController.clear();  // clear
       warning = "";  // clear
-      User user = User(id: 1, name: "Nishaal", department: "Not IT", email: 'dawk', number: '123', location: 'here');
+      User user = User(id: 1, name: "Nishaal", department: "Not IT", email: 'dawk@dork.com', number: '123', location: 'here');
       Navigator.of(context).push(MaterialPageRoute(
         builder: (BuildContext context){
           return AppBase(

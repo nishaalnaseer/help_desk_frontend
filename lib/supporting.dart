@@ -1,5 +1,9 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'package:sn_progress_dialog/sn_progress_dialog.dart';
+
+import 'package:help_desk_frontend/supporting.dart' as supporting;
+
 
 import 'package:flutter/material.dart';
 
@@ -32,4 +36,31 @@ double getWindowWidth(BuildContext context) {
 Color hexToColor(String hexString) {
   final hexCode = hexString.replaceAll('#', '');
   return Color(int.parse('FF$hexCode', radix: 16));
+}
+
+Future<int> postRequest(
+    var data, String protocol, String domain, String path, dynamic context,
+    {var headers = const {'Content-Type': 'application/json'}}
+    ) async {
+
+  ProgressDialog pd = ProgressDialog(context: context);
+
+  String jsonBody = jsonEncode(data);
+  String url = '$protocol://$domain/$path';
+
+  pd.show(
+      msg: 'Loading',
+      progressType: ProgressType.valuable,
+      backgroundColor: supporting.hexToColor("#222222"),
+      progressValueColor: supporting.hexToColor("#222222"),
+      progressBgColor: Colors.red,
+      msgColor: Colors.white,
+      valueColor: Colors.white
+  );
+  http.Response response = await http.post(
+      Uri.parse(url), headers: headers, body: jsonBody
+  );
+  pd.close(delay: 1000);
+
+  return response.statusCode;
 }

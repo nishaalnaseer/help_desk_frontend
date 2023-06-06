@@ -205,8 +205,8 @@ class _CreateTicketState extends State<CreateTicket> {
           ),
         ),
         inputField(
-            messageController, message, "Message",
-            maximumLines: 50, minimumLines: 1
+          messageController, message, "Message",
+          maximumLines: 50, minimumLines: 1
         ),
         Center(
           child: Padding(
@@ -229,28 +229,22 @@ class _CreateTicketState extends State<CreateTicket> {
                     devices: [1]
                   );
 
-                  // Convert the object to a JSON string
-                  String jsonBody = jsonEncode(ticket.toJson());
-                  print(jsonBody);
+                  int response = await supporting.postRequest(
+                    ticket.toJson(), widget.protocol, widget.domain,
+                    "ticket", context
+                  );
 
-                  // Set the request headers and body
-                  Map<String, String> headers = {'Content-Type': 'application/json'};
-                  String url = 'http://127.0.0.1:8000/ticket';
-
-                  // Make the POST request
-                  http.Response response = await http.post(Uri.parse(url), headers: headers, body: jsonBody);
-
-                  // Check the response
-                  if (response.statusCode == 200) {
-                    // Request successful
-                    print('Object sent successfully');
-                  } else {
-                    // Request failed
-                    print('Failed to send object');
+                  if (response == 200) {
                   }
+
                 },
                 child: const Text(
-                  "Submit!"
+                  "Submit!",
+                  style: TextStyle(
+                    fontWeight: FontWeight.w500,
+                    color: Colors.red,
+                    fontSize: 17
+                  ),
                 ),
               ),
             ),
