@@ -31,18 +31,18 @@ class _AppBaseState extends State<AppBase> {
 
   late Map<String, Function> modules;
   List<Widget> childrenDrawer = [
-    DrawerHeader(
-      decoration: BoxDecoration(
-        // image: DecorationImage(
-        // image: FileImage(File('lib/img/datacenter.jpeg')),
-        // fit: BoxFit.cover,
-        // ),
-        borderRadius: BorderRadius.circular(10),
-        color: Colors.white,
-      ),
-      padding: const EdgeInsets.all(10),
-      child: const Text("IT"),
-    ),
+    // DrawerHeader(
+    //   decoration: BoxDecoration(
+    //     // image: DecorationImage(
+    //     // image: FileImage(File('lib/img/datacenter.jpeg')),
+    //     // fit: BoxFit.cover,
+    //     // ),
+    //     borderRadius: BorderRadius.circular(10),
+    //     color: Colors.white,
+    //   ),
+    //   padding: const EdgeInsets.all(10),
+    //   child: const Text("IT"),
+    // ),
   ];
 
   void createTicket() {
@@ -57,24 +57,37 @@ class _AppBaseState extends State<AppBase> {
 
   void devices() {
     setState(() {
-      window = DevicesScreen(domain: widget.domain, protocol: widget.protocol);
+      window = DevicesScreen(
+          domain: widget.domain,
+          protocol:
+          widget.protocol
+      );
     });
   }
 
   void viewTickets() {
-    window = ViewTickets(domain: widget.domain, protocol: widget.protocol);
+    window = ViewTickets(
+      domain: widget.domain,
+      protocol: widget.protocol,
+      window: window,
+    );
     setState(() {
     });
   }
 
   void reports() {
-    window = ViewReports(domain: widget.domain, protocol: widget.protocol);
+    window = ViewReports(
+        domain: widget.domain,
+        protocol: widget.protocol);
     setState(() {
     });
   }
 
   void modelsScreen() {
-    window = ModelsScreen(domain: widget.domain, protocol: widget.protocol);
+    window = ModelsScreen(
+        domain: widget.domain,
+        protocol: widget.protocol
+    );
     setState(() {
 
     });

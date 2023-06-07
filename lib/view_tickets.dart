@@ -1,17 +1,26 @@
 import 'dart:convert';
 
-import 'package:flutter/gestures.dart';
+import 'package:flutter_improved_scrolling/flutter_improved_scrolling.dart';
+
 import 'package:flutter/material.dart';
+import 'package:help_desk_frontend/view_ticket.dart';
 import 'application_models.dart';
 import 'supporting.dart' as supporting;
 
 // todo implement the loading popup when going to the view tickets
+//  since some data is retried from api
 // todo view_ticket page
 
 class ViewTickets extends StatefulWidget {
   final String domain;
   final String protocol;
-  const ViewTickets({Key? key, required this.domain, required this.protocol}) : super(key: key);
+  StatefulWidget window;
+  ViewTickets({
+    Key? key,
+    required this.domain,
+    required this.protocol,
+    required this.window
+  }) : super(key: key);
 
   @override
   State<ViewTickets> createState() => _ViewTicketsState();
@@ -65,15 +74,31 @@ class _ViewTicketsState extends State<ViewTickets> {
             DataCell(
               SizedBox(
                 width: 200,
-                child: ElevatedButton(onPressed: () {},
-                    child: const Text(
-                      "Check Details",
-                      style: TextStyle(
-                          color: Colors.red,
-                          fontSize: 18,
-                          fontWeight: FontWeight.w500
+                child: ElevatedButton(onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (BuildContext context) => ViewTicket(
+                          protocol: widget.protocol,
+                          domain: widget.domain,
+                          ticketId: ticket.tId
                       ),
-                    )
+                    ),
+                  );
+                  widget.window = ViewTicket(
+                    protocol: widget.protocol,
+                    domain: widget.domain,
+                    ticketId: ticket.tId
+                  );
+                },
+                  child: const Text(
+                    "Check Details",
+                    style: TextStyle(
+                      color: Colors.red,
+                      fontSize: 18,
+                      fontWeight: FontWeight.w500
+                    ),
+                  )
                 ),
               ),
             )
@@ -94,7 +119,7 @@ class _ViewTicketsState extends State<ViewTickets> {
             text,
             style: style,
             softWrap: true,
-            overflow: TextOverflow.clip,
+            overflow: TextOverflow.ellipsis,
           )
         ],
       )
@@ -109,7 +134,7 @@ class _ViewTicketsState extends State<ViewTickets> {
             text,
             style: style,
             softWrap: true,
-            overflow: TextOverflow.clip,
+            overflow: TextOverflow.ellipsis,
           )
         ]
       )
@@ -199,9 +224,9 @@ class _ViewTicketsState extends State<ViewTickets> {
             ) : const Text(
               'Select a Status',
               style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 18,
-                  fontWeight: FontWeight.w500
+                color: Colors.white,
+                fontSize: 18,
+                fontWeight: FontWeight.w500
               ),
             ),
             elevation: 16,
@@ -237,7 +262,7 @@ class _ViewTicketsState extends State<ViewTickets> {
             }).toList(),
           ),
         ),
-        allSelected ? Padding(
+        allSelected ?  Padding(
           padding: const EdgeInsets.all(10),
           child: Center(
             child: Scrollbar(

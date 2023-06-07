@@ -183,3 +183,121 @@ Future<void> postRequest(
     showPopUp(context, "Error $code!", details);
   }
 }
+
+class DrawerNavigation extends StatelessWidget {
+  final List<String> modules;
+  DrawerNavigation({super.key, required this.modules});
+  TextStyle style = const TextStyle(
+    color: Colors.white,
+    fontWeight: FontWeight.w500,
+    fontSize: 18
+  );
+
+
+  @override
+  Widget build(BuildContext context) {
+    return Drawer(
+      backgroundColor: supporting.hexToColor("#222222"),
+      child: Column(
+        children: [
+          Expanded(
+            flex: 80,
+            child: ListView(
+              children: [
+                Container()
+              ],
+            ),
+          ),
+          Expanded(
+            flex: 25,
+            child: Padding(
+              padding: const EdgeInsets.all(10),
+              child: SingleChildScrollView(
+                child: Column(
+                  children: [
+                    ListTile(
+                      leading: const Icon(
+                        Icons.settings,
+                        color: Colors.red,
+                      ),
+                      title: Text(
+                        'Settings',
+                        style: style,
+                      ),
+                      onTap: () {
+                        Navigator.pushReplacementNamed(
+                            context, '/settings'
+                        );
+                      },
+                    ),
+                    ListTile(
+                      leading: const Icon(
+                        Icons.person,
+                        color: Colors.red,
+                      ),
+                      title: Text(
+                        'Profile',
+                        style: style,
+                      ),
+                      onTap: () {
+                        Navigator.pushReplacementNamed(context, '/profile');
+                      },
+                    ),
+                    ListTile(
+                      leading: const Icon(
+                        Icons.logout,
+                        color: Colors.red,
+                      ),
+                      title: Text(
+                        'Log Out',
+                        style: style,
+                      ),
+                      onTap: () {
+                        Navigator.pushReplacementNamed(
+                            context, '/login'
+                        );
+                      },
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+Scaffold getScaffold(Widget thingy, List<String> modules, {bool appBar = true}) {
+  final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
+  return Scaffold(
+    appBar: appBar ? AppBar(
+      key: scaffoldKey,
+      backgroundColor: Colors.red[900],
+      // leading: IconButton(
+      //   icon: const Icon(
+      //     Icons.menu,
+      //     color: Colors.white,
+      //   ),
+      //   tooltip: 'Menu',
+      //   onPressed: () {
+      //     scaffoldKey.currentState?.openDrawer();
+      //   },
+      // ),
+      elevation: 0,
+      titleSpacing: 0,
+      title: const Text(
+          "Ticketing",
+          style: TextStyle(
+              color: Colors.white,
+              fontWeight: FontWeight.w500
+          )
+      ),
+    ) : null,
+
+    drawer: DrawerNavigation(modules: modules,),
+    body: thingy,
+  );
+
+}
