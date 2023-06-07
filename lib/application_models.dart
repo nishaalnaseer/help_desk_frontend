@@ -137,7 +137,7 @@ class Ticket {
   final String location;
   final String subject;
   final String message;
-  List<int>? devices = [];
+  List<dynamic>? devices = [];
 
   Ticket({
     required this.tId,

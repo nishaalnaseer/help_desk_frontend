@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 
 import 'package:http/http.dart' as http;
+import 'package:window_manager/window_manager.dart';
 
 import 'supporting.dart' as supporting;
 import 'application_models.dart';
@@ -165,7 +166,8 @@ class _CreateTicketState extends State<CreateTicket> {
                   value,
                   style: const TextStyle(
                     color: Colors.white,
-                    fontWeight: FontWeight.w500
+                    fontWeight: FontWeight.w500,
+                    fontSize: 18
                   ),
                 ),
               );
@@ -229,14 +231,10 @@ class _CreateTicketState extends State<CreateTicket> {
                     devices: [1]
                   );
 
-                  int response = await supporting.postRequest(
+                  await supporting.postRequest(
                     ticket.toJson(), widget.protocol, widget.domain,
                     "ticket", context
                   );
-
-                  if (response == 200) {
-                  }
-
                 },
                 child: const Text(
                   "Submit!",

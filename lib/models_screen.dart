@@ -32,7 +32,8 @@ class _ModelsScreenState extends State<ModelsScreen> {
     String contents = await supporting.getApiData(
       "models?department=IT&category=TV",
       widget.domain,
-      widget.protocol
+      widget.protocol,
+      context
     );
     List<dynamic> coded = jsonDecode(contents);
     rows = [];
@@ -61,7 +62,8 @@ class _ModelsScreenState extends State<ModelsScreen> {
     String contents = await supporting.getApiData(
       "departments",
       widget.domain,
-      widget.protocol
+      widget.protocol,
+      context
     );
     List<dynamic> coded = await jsonDecode(contents);
     List<String> departments = [];
@@ -81,7 +83,8 @@ class _ModelsScreenState extends State<ModelsScreen> {
     String contents = await supporting.getApiData(
       "categories?department=$selectedDepartment",
       widget.domain,
-      widget.protocol
+      widget.protocol,
+      context
     );
     categories = [];
     List<dynamic> coded = jsonDecode(contents);

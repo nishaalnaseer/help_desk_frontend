@@ -4,6 +4,7 @@ import 'dart:io';
 
 // import 'dart:html' as html;
 import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:window_manager/window_manager.dart';
 
 import 'package:flutter/material.dart';
 
@@ -11,6 +12,7 @@ import 'app_base.dart';
 import 'application_models.dart';
 
 Future<void> main() async {
+
   runApp(const MyApp());
 }
 
@@ -28,6 +30,13 @@ class MyApp extends StatelessWidget {
         // colorScheme: ColorScheme.fromSeed(seedColor: Colors.purple),
         primarySwatch: Colors.red,
         useMaterial3: true,
+        scrollbarTheme: ScrollbarThemeData(
+          thumbColor: MaterialStateProperty.all<Color>(Colors.red),
+          trackColor: MaterialStateProperty.all<Color>(Colors.red.withOpacity(0.3)),
+          crossAxisMargin: 8,
+          mainAxisMargin: 8,
+          minThumbLength: 48,
+        ),
       ),// Set the navigatorKey
 
       home: Scaffold (
@@ -69,7 +78,10 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
       passwordController.clear();  // clear
       nameController.clear();  // clear
       warning = "";  // clear
-      User user = User(id: 1, name: "Nishaal", department: "Not IT", email: 'dawk@dork.com', number: '123', location: 'here');
+      User user = User(
+          id: 1, name: "Nishaal", department: "Not IT",
+          email: 'dawk@dork.com', number: '123', location: 'here'
+      );
       Navigator.of(context).push(MaterialPageRoute(
         builder: (BuildContext context){
           return AppBase(

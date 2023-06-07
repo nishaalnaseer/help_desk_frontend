@@ -5,6 +5,9 @@ import 'package:flutter/material.dart';
 import 'application_models.dart';
 import 'supporting.dart' as supporting;
 
+// todo implement the loading popup when going to the view tickets
+// todo view_ticket page
+
 class ViewTickets extends StatefulWidget {
   final String domain;
   final String protocol;
@@ -18,6 +21,11 @@ class _ViewTicketsState extends State<ViewTickets> {
   String selectedDepartment = "";
   bool departmentSelected = false;
   List<String> departments = ["IT"];
+  TextStyle style = const TextStyle(
+      color: Colors.white,
+      fontWeight: FontWeight.w500,
+      fontSize: 18
+  );
 
   String selectedStatus = "";
   bool statusSelected = false;
@@ -35,6 +43,7 @@ class _ViewTicketsState extends State<ViewTickets> {
       "tickets?department=$selectedDepartment&status=$selectedStatus",
       widget.domain,
       widget.protocol,
+      context
     );
 
     rows = [];
@@ -45,15 +54,29 @@ class _ViewTicketsState extends State<ViewTickets> {
       rows.add(
         DataRow(
           cells: [
-            DataCell(Wrap(children: [Text('${ticket.tId}')])),
-            DataCell(Wrap(children: [Text('${ticket.submittedBy}')])),
-            DataCell(Wrap(children: [Text(ticket.nameTicket)])),
-            DataCell(Wrap(children: [Text(ticket.emailTicket)])),
-            DataCell(Wrap(children: [Text(ticket.numberTicket)])),
-            DataCell(Wrap(children: [Text(ticket.deptTicket)])),
-            DataCell(Wrap(children: [Text(ticket.location)])),
-            DataCell(Wrap(children: [Text(ticket.subject)])),
-            DataCell(Wrap(children: [Text(ticket.message)])),
+            getDataCell('${ticket.tId}'),
+            getDataCell('${ticket.submittedBy}'),
+            getDataCell(ticket.nameTicket),
+            getDataCell(ticket.emailTicket),
+            getDataCell(ticket.numberTicket),
+            getDataCell(ticket.deptTicket),
+            getDataCell(ticket.location),
+            getDataCell(ticket.subject),
+            DataCell(
+              SizedBox(
+                width: 200,
+                child: ElevatedButton(onPressed: () {},
+                    child: const Text(
+                      "Check Details",
+                      style: TextStyle(
+                          color: Colors.red,
+                          fontSize: 18,
+                          fontWeight: FontWeight.w500
+                      ),
+                    )
+                ),
+              ),
+            )
           ]
         )
       );
@@ -61,7 +84,36 @@ class _ViewTicketsState extends State<ViewTickets> {
     setState(() {
 
     });
+  }
 
+  DataColumn getColumn(String text) {
+    return DataColumn(
+      label: Wrap(
+        children: [
+          Text(
+            text,
+            style: style,
+            softWrap: true,
+            overflow: TextOverflow.clip,
+          )
+        ],
+      )
+    );
+  }
+
+  DataCell getDataCell(String text) {
+    return DataCell(
+      Wrap(
+        children: [
+          Text(
+            text,
+            style: style,
+            softWrap: true,
+            overflow: TextOverflow.clip,
+          )
+        ]
+      )
+    );
   }
 
   @override
@@ -73,15 +125,35 @@ class _ViewTicketsState extends State<ViewTickets> {
             padding: EdgeInsets.all(10),
             child: Text(
               "View Tickets",
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 18,
+                fontWeight: FontWeight.w500
+              ),
             ),
           ),
         ),
         Padding(
           padding: const EdgeInsets.all(10),
           child: DropdownButton<String>(
-            hint: departmentSelected ? Text(selectedDepartment) : const Text('Select a Department'),
+            focusColor: Colors.transparent,
+            dropdownColor: Colors.red[800],
+            hint: departmentSelected ? Text(
+              selectedDepartment,
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 18,
+                fontWeight: FontWeight.w500
+              ),
+            ) : const Text(
+              'Select a Department',
+              style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 18,
+                  fontWeight: FontWeight.w500
+              ),
+            ),
             elevation: 16,
-            dropdownColor: Colors.purple[100],
             onChanged: (String? newValue) {
               if(newValue == null) {
                 return;
@@ -100,7 +172,14 @@ class _ViewTicketsState extends State<ViewTickets> {
             items: departments.map<DropdownMenuItem<String>>((String value) {
               return DropdownMenuItem<String>(
                 value: value,
-                child: Text(value),
+                child: Text(
+                  value,
+                  style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 18,
+                      fontWeight: FontWeight.w500
+                  ),
+                ),
               );
             }).toList(),
           ),
@@ -108,9 +187,24 @@ class _ViewTicketsState extends State<ViewTickets> {
         Padding(
           padding: const EdgeInsets.all(10),
           child: DropdownButton<String>(
-            hint: statusSelected ? Text(selectedStatus) : const Text('Select a Status'),
+            focusColor: Colors.transparent,
+            dropdownColor: Colors.red[800],
+            hint: statusSelected ? Text(
+              selectedStatus,
+              style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 18,
+                  fontWeight: FontWeight.w500
+              ),
+            ) : const Text(
+              'Select a Status',
+              style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 18,
+                  fontWeight: FontWeight.w500
+              ),
+            ),
             elevation: 16,
-            dropdownColor: Colors.purple[100],
             onChanged: (String? newValue) {
               if(newValue == null) {
                 return;
@@ -131,33 +225,67 @@ class _ViewTicketsState extends State<ViewTickets> {
             items: statuses.map<DropdownMenuItem<String>>((String value) {
               return DropdownMenuItem<String>(
                 value: value,
-                child: Text(value),
+                child: Text(
+                  value,
+                  style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 18,
+                      fontWeight: FontWeight.w500
+                  ),
+                ),
               );
             }).toList(),
           ),
         ),
-        allSelected ? Center(
-          child: Scrollbar(
-            controller: controller2,
-            child: SingleChildScrollView(
+        allSelected ? Padding(
+          padding: const EdgeInsets.all(10),
+          child: Center(
+            child: Scrollbar(
+              thumbVisibility: true,
               controller: controller2,
-              scrollDirection: Axis.horizontal,
-              child: SizedBox(
-                width: 1920,
-                child: DataTable(
-                  columns: const [
-                    DataColumn(label: Text('id'),),
-                    DataColumn(label: Text('Raised By'),),
-                    DataColumn(label: Text('Name'),),
-                    DataColumn(label: Text('Email'),),
-                    DataColumn(label: Text('Contact'),),
-                    DataColumn(label: Text('Department'),),
-                    DataColumn(label: Text('Location'),),
-                    DataColumn(label: Text('Subject'),),
-                    DataColumn(label: Text('Message'),),
-                  ],
-                  rows: rows,
+              child: SingleChildScrollView(
+                controller: controller2,
+                scrollDirection: Axis.horizontal,
+                child: Container(
+                  constraints: BoxConstraints(
+                    minWidth: supporting.getWindowWidth(context) - 20, // Set the minimum width here
+                  ),
+                  child: SizedBox(
+                    // width: supporting.getWindowWidth(context),
+                    child: DataTable(
+                      columns: [
+                        getColumn("ID"),
+                        getColumn("Raised By"),
+                        getColumn("Name"),
+                        getColumn("Email"),
+                        getColumn("Contact"),
+                        getColumn("Department"),
+                        getColumn("Location"),
+                        getColumn("Subject"),
+                        getColumn("")
+                      ],
+                      rows: rows,
+                    ),
+                  ),
                 ),
+                // child: SizedBox(
+                //   // width: supporting.getWindowWidth(context),
+                //   child: DataTable(
+                //     dataRowMaxHeight: 100,
+                //     columns: [
+                //       getColumn("ID"),
+                //       getColumn("Raised By"),
+                //       getColumn("Name"),
+                //       getColumn("Email"),
+                //       getColumn("Contact"),
+                //       getColumn("Department"),
+                //       getColumn("Location"),
+                //       getColumn("Subject"),
+                //       getColumn("")
+                //     ],
+                //     rows: rows,
+                //   ),
+                // ),
               ),
             ),
           ),

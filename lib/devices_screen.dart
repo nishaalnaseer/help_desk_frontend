@@ -33,6 +33,7 @@ class _DevicesScreenState extends State<DevicesScreen> {
       "departments",
       widget.domain,
       widget.protocol,
+      context
     );
     List<dynamic> coded = await jsonDecode(contents);
     List<String> departments = [];
@@ -53,6 +54,7 @@ class _DevicesScreenState extends State<DevicesScreen> {
       "categories?department=$selectedDepartment",
       widget.domain,
       widget.protocol,
+      context
     );
     categories = [];
     List<dynamic> coded = jsonDecode(contents);
@@ -70,6 +72,7 @@ class _DevicesScreenState extends State<DevicesScreen> {
       "devices?department=$selectedDepartment&category=$selectedCategory",
       widget.domain,
       widget.protocol,
+      context
     );
     rows = [];
     List<dynamic> coded = jsonDecode(contents);
