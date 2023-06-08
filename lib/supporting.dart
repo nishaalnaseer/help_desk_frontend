@@ -3,9 +3,20 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:sn_progress_dialog/sn_progress_dialog.dart';
 
-import 'package:help_desk_frontend/supporting.dart' as supporting;
+// import 'package:help_desk_frontend/supporting.dart' as supporting;
 
 import 'package:flutter/material.dart';
+
+import 'application_models.dart';
+
+const Map<String, String> map = {
+  "Create Ticket": '/create_ticket',
+  "View Tickets": '/view_tickets',
+  // "Devices": devices,
+  // "Models": modelsScreen,
+  // "Reports": reports,
+};
+
 
 Map<String, dynamic> convertDynamicToMap(dynamic object) {
   if (object is Map<String, dynamic>) {
@@ -24,8 +35,8 @@ Future<String> getApiData(String path, String domain, String protocol, dynamic c
   pd.show(
       msg: 'Loading',
       progressType: ProgressType.valuable,
-      backgroundColor: supporting.hexToColor("#222222"),
-      progressValueColor: supporting.hexToColor("#222222"),
+      backgroundColor: hexToColor("#222222"),
+      progressValueColor: hexToColor("#222222"),
       progressBgColor: Colors.red,
       msgColor: Colors.white,
       valueColor: Colors.white
@@ -90,7 +101,7 @@ void showPopUp(BuildContext context, String title, String message) {
                 fontSize: 18
             ),
           ),
-          backgroundColor: supporting.hexToColor("#222222"),
+          backgroundColor: hexToColor("#222222"),
           actions: [
             ElevatedButton(
               onPressed: () {
@@ -108,6 +119,13 @@ void showPopUp(BuildContext context, String title, String message) {
         );
       }
   );
+}
+
+class Arguments {
+  User user;
+  List<String> modules;
+
+  Arguments(this.user, this.modules);
 }
 
 class CustomRequest {
@@ -138,8 +156,8 @@ Future<void> postRequest(
   pd.show(
       msg: 'Loading',
       progressType: ProgressType.valuable,
-      backgroundColor: supporting.hexToColor("#222222"),
-      progressValueColor: supporting.hexToColor("#222222"),
+      backgroundColor: hexToColor("#222222"),
+      progressValueColor: hexToColor("#222222"),
       progressBgColor: Colors.red,
       msgColor: Colors.white,
       valueColor: Colors.white
@@ -184,32 +202,64 @@ Future<void> postRequest(
   }
 }
 
+List<Widget> getDrawerKids(Map<String, dynamic> args, BuildContext context) {
+  List<Widget> children = [];
+  for(String name in args["modules"]) {
+    String? route = map[name];
+    if (route == null) {
+      continue;
+    }
+
+    Widget child = Padding(
+      padding: const EdgeInsets.all(3),
+      child: ListTile(
+        // tileColor: Colors.red[100], // Change the background color here
+        title: Center(
+          child: Text(
+            name,
+            style: const TextStyle(
+              color: Colors.white, // Change the text color here
+              fontSize: 21,
+              fontWeight: FontWeight.w500
+            ),
+          ),
+        ),
+        onTap: () {
+          Navigator.pushNamed(
+              context, route, arguments: args
+          );
+        },
+      ),
+    );
+    children.add(child);
+  }
+
+  return children;
+}
+
 class DrawerNavigation extends StatelessWidget {
-  final List<String> modules;
-  DrawerNavigation({super.key, required this.modules});
-  TextStyle style = const TextStyle(
+  final Map<String, dynamic> args;
+  const DrawerNavigation({super.key, required this.args});
+  final TextStyle style = const TextStyle(
     color: Colors.white,
     fontWeight: FontWeight.w500,
     fontSize: 18
   );
 
-
   @override
   Widget build(BuildContext context) {
     return Drawer(
-      backgroundColor: supporting.hexToColor("#222222"),
+      backgroundColor: hexToColor("#222222"),
       child: Column(
         children: [
           Expanded(
             flex: 80,
             child: ListView(
-              children: [
-                Container()
-              ],
+              children: getDrawerKids(args, context),
             ),
           ),
           Expanded(
-            flex: 25,
+            flex: 20,
             child: Padding(
               padding: const EdgeInsets.all(10),
               child: SingleChildScrollView(
@@ -253,6 +303,10 @@ class DrawerNavigation extends StatelessWidget {
                         style: style,
                       ),
                       onTap: () {
+                        User? user = args["user"];
+                        if(user != null) {
+                          user = null;
+                        }
                         Navigator.pushReplacementNamed(
                             context, '/login'
                         );
@@ -269,8 +323,11 @@ class DrawerNavigation extends StatelessWidget {
   }
 }
 
-Scaffold getScaffold(Widget thingy, List<String> modules, {bool appBar = true}) {
+Scaffold getScaffold(
+    Widget thingy, Map<String, dynamic> args, {bool appBar = true})
+  {
   final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
+
   return Scaffold(
     appBar: appBar ? AppBar(
       key: scaffoldKey,
@@ -282,7 +339,7 @@ Scaffold getScaffold(Widget thingy, List<String> modules, {bool appBar = true}) 
       //   ),
       //   tooltip: 'Menu',
       //   onPressed: () {
-      //     scaffoldKey.currentState?.openDrawer();
+      //     Scaffold.of(context).openDrawer();
       //   },
       // ),
       elevation: 0,
@@ -296,7 +353,8 @@ Scaffold getScaffold(Widget thingy, List<String> modules, {bool appBar = true}) 
       ),
     ) : null,
 
-    drawer: DrawerNavigation(modules: modules,),
+    drawer: DrawerNavigation(args: args),
+    backgroundColor: hexToColor("#222222"),
     body: thingy,
   );
 

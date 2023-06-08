@@ -126,6 +126,26 @@ class User {
   }
 }
 
+class Message {
+  final String time;
+  final String personFrom;
+  final String message;
+
+  Message({
+    required this.time,
+    required this.personFrom,
+    required this.message,
+  });
+
+  factory Message.fromJson(Map<String, dynamic> json) {
+    return Message(
+      time: json["time"],
+      message: json["message"],
+      personFrom: json["person_from"],
+    );
+  }
+}
+
 class Ticket {
   final int tId;
   final int submittedBy;
@@ -137,6 +157,9 @@ class Ticket {
   final String location;
   final String subject;
   final String message;
+  List<Message> messages = [];
+
+  String submittedOn = "";
   List<dynamic>? devices = [];
 
   Ticket({
@@ -150,7 +173,8 @@ class Ticket {
     required this.location,
     required this.subject,
     required this.message,
-    this.devices
+    required this.devices,
+    required this.messages
   });
 
   factory Ticket.fromJson(Map<String, dynamic> json) {
@@ -166,7 +190,8 @@ class Ticket {
       subject: json["subject"],
       message: json["message"],
       devices: json["devices"] ?? [],
-      // devices?
+      messages: List.generate(json["messages"].length, (index)
+        => Message.fromJson(json["messages"][index])),
     );
   }
 

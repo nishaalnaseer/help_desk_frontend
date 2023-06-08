@@ -14,12 +14,12 @@ import 'supporting.dart' as supporting;
 class ViewTickets extends StatefulWidget {
   final String domain;
   final String protocol;
-  StatefulWidget window;
-  ViewTickets({
+  final Map<String, dynamic> args;
+  const ViewTickets({
     Key? key,
     required this.domain,
     required this.protocol,
-    required this.window
+    required this.args,
   }) : super(key: key);
 
   @override
@@ -75,24 +75,14 @@ class _ViewTicketsState extends State<ViewTickets> {
               SizedBox(
                 width: 200,
                 child: ElevatedButton(onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (BuildContext context) => ViewTicket(
-                          protocol: widget.protocol,
-                          domain: widget.domain,
-                          ticketId: ticket.tId
-                      ),
-                    ),
-                  );
-                  widget.window = ViewTicket(
-                    protocol: widget.protocol,
-                    domain: widget.domain,
-                    ticketId: ticket.tId
+                  widget.args.putIfAbsent("tID", () => ticket.tId);
+                  widget.args.update("tID", (value) => ticket.tId);
+                  Navigator.pushNamed(
+                      context, "/view_ticket", arguments: widget.args
                   );
                 },
                   child: const Text(
-                    "Check Details",
+                    "Inspect/Edit",
                     style: TextStyle(
                       color: Colors.red,
                       fontSize: 18,
@@ -143,180 +133,183 @@ class _ViewTicketsState extends State<ViewTickets> {
 
   @override
   Widget build(BuildContext context) {
-    return ListView(
-      children: [
-        const Center(
-          child: Padding(
-            padding: EdgeInsets.all(10),
-            child: Text(
-              "View Tickets",
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 18,
-                fontWeight: FontWeight.w500
-              ),
-            ),
-          ),
-        ),
-        Padding(
-          padding: const EdgeInsets.all(10),
-          child: DropdownButton<String>(
-            focusColor: Colors.transparent,
-            dropdownColor: Colors.red[800],
-            hint: departmentSelected ? Text(
-              selectedDepartment,
-              style: const TextStyle(
-                color: Colors.white,
-                fontSize: 18,
-                fontWeight: FontWeight.w500
-              ),
-            ) : const Text(
-              'Select a Department',
-              style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 18,
-                  fontWeight: FontWeight.w500
-              ),
-            ),
-            elevation: 16,
-            onChanged: (String? newValue) {
-              if(newValue == null) {
-                return;
-              }
-
-              selectedDepartment = newValue;
-              departmentSelected = true;
-              allSelected = statusSelected && departmentSelected;
-              if (allSelected) {
-                getTickets();
-              }
-
-              setState(() {
-              });
-            },
-            items: departments.map<DropdownMenuItem<String>>((String value) {
-              return DropdownMenuItem<String>(
-                value: value,
+    return supporting.getScaffold(
+        ListView(
+          children: [
+            const Center(
+              child: Padding(
+                padding: EdgeInsets.all(10),
                 child: Text(
-                  value,
-                  style: const TextStyle(
+                  "View Tickets",
+                  style: TextStyle(
                       color: Colors.white,
                       fontSize: 18,
                       fontWeight: FontWeight.w500
                   ),
                 ),
-              );
-            }).toList(),
-          ),
-        ),
-        Padding(
-          padding: const EdgeInsets.all(10),
-          child: DropdownButton<String>(
-            focusColor: Colors.transparent,
-            dropdownColor: Colors.red[800],
-            hint: statusSelected ? Text(
-              selectedStatus,
-              style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 18,
-                  fontWeight: FontWeight.w500
-              ),
-            ) : const Text(
-              'Select a Status',
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 18,
-                fontWeight: FontWeight.w500
               ),
             ),
-            elevation: 16,
-            onChanged: (String? newValue) {
-              if(newValue == null) {
-                return;
-              }
-
-              selectedStatus = newValue;
-              statusSelected = true;
-
-              allSelected = statusSelected && departmentSelected;
-              if (allSelected) {
-                getTickets();
-              }
-              getTickets();
-
-              setState(() {
-              });
-            },
-            items: statuses.map<DropdownMenuItem<String>>((String value) {
-              return DropdownMenuItem<String>(
-                value: value,
-                child: Text(
-                  value,
+            Padding(
+              padding: const EdgeInsets.all(10),
+              child: DropdownButton<String>(
+                focusColor: Colors.transparent,
+                dropdownColor: Colors.red[800],
+                hint: departmentSelected ? Text(
+                  selectedDepartment,
                   style: const TextStyle(
                       color: Colors.white,
                       fontSize: 18,
                       fontWeight: FontWeight.w500
                   ),
-                ),
-              );
-            }).toList(),
-          ),
-        ),
-        allSelected ?  Padding(
-          padding: const EdgeInsets.all(10),
-          child: Center(
-            child: Scrollbar(
-              thumbVisibility: true,
-              controller: controller2,
-              child: SingleChildScrollView(
-                controller: controller2,
-                scrollDirection: Axis.horizontal,
-                child: Container(
-                  constraints: BoxConstraints(
-                    minWidth: supporting.getWindowWidth(context) - 20, // Set the minimum width here
+                ) : const Text(
+                  'Select a Department',
+                  style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 18,
+                      fontWeight: FontWeight.w500
                   ),
-                  child: SizedBox(
-                    // width: supporting.getWindowWidth(context),
-                    child: DataTable(
-                      columns: [
-                        getColumn("ID"),
-                        getColumn("Raised By"),
-                        getColumn("Name"),
-                        getColumn("Email"),
-                        getColumn("Contact"),
-                        getColumn("Department"),
-                        getColumn("Location"),
-                        getColumn("Subject"),
-                        getColumn("")
-                      ],
-                      rows: rows,
+                ),
+                elevation: 16,
+                onChanged: (String? newValue) {
+                  if(newValue == null) {
+                    return;
+                  }
+
+                  selectedDepartment = newValue;
+                  departmentSelected = true;
+                  allSelected = statusSelected && departmentSelected;
+                  if (allSelected) {
+                    getTickets();
+                  }
+
+                  setState(() {
+                  });
+                },
+                items: departments.map<DropdownMenuItem<String>>((String value) {
+                  return DropdownMenuItem<String>(
+                    value: value,
+                    child: Text(
+                      value,
+                      style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 18,
+                          fontWeight: FontWeight.w500
+                      ),
                     ),
-                  ),
-                ),
-                // child: SizedBox(
-                //   // width: supporting.getWindowWidth(context),
-                //   child: DataTable(
-                //     dataRowMaxHeight: 100,
-                //     columns: [
-                //       getColumn("ID"),
-                //       getColumn("Raised By"),
-                //       getColumn("Name"),
-                //       getColumn("Email"),
-                //       getColumn("Contact"),
-                //       getColumn("Department"),
-                //       getColumn("Location"),
-                //       getColumn("Subject"),
-                //       getColumn("")
-                //     ],
-                //     rows: rows,
-                //   ),
-                // ),
+                  );
+                }).toList(),
               ),
             ),
-          ),
-        ) :
-        Container(),
-      ],
-      );
+            Padding(
+              padding: const EdgeInsets.all(10),
+              child: DropdownButton<String>(
+                focusColor: Colors.transparent,
+                dropdownColor: Colors.red[800],
+                hint: statusSelected ? Text(
+                  selectedStatus,
+                  style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 18,
+                      fontWeight: FontWeight.w500
+                  ),
+                ) : const Text(
+                  'Select a Status',
+                  style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 18,
+                      fontWeight: FontWeight.w500
+                  ),
+                ),
+                elevation: 16,
+                onChanged: (String? newValue) {
+                  if(newValue == null) {
+                    return;
+                  }
+
+                  selectedStatus = newValue;
+                  statusSelected = true;
+
+                  allSelected = statusSelected && departmentSelected;
+                  if (allSelected) {
+                    getTickets();
+                  }
+                  getTickets();
+
+                  setState(() {
+                  });
+                },
+                items: statuses.map<DropdownMenuItem<String>>((String value) {
+                  return DropdownMenuItem<String>(
+                    value: value,
+                    child: Text(
+                      value,
+                      style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 18,
+                          fontWeight: FontWeight.w500
+                      ),
+                    ),
+                  );
+                }).toList(),
+              ),
+            ),
+            allSelected ?  Padding(
+              padding: const EdgeInsets.all(10),
+              child: Center(
+                child: Scrollbar(
+                  thumbVisibility: true,
+                  controller: controller2,
+                  child: SingleChildScrollView(
+                    controller: controller2,
+                    scrollDirection: Axis.horizontal,
+                    child: Container(
+                      constraints: BoxConstraints(
+                        minWidth: supporting.getWindowWidth(context) - 20, // Set the minimum width here
+                      ),
+                      child: SizedBox(
+                        // width: supporting.getWindowWidth(context),
+                        child: DataTable(
+                          columns: [
+                            getColumn("ID"),
+                            getColumn("Raised By"),
+                            getColumn("Name"),
+                            getColumn("Email"),
+                            getColumn("Contact"),
+                            getColumn("Department"),
+                            getColumn("Location"),
+                            getColumn("Subject"),
+                            getColumn("")
+                          ],
+                          rows: rows,
+                        ),
+                      ),
+                    ),
+                    // child: SizedBox(
+                    //   // width: supporting.getWindowWidth(context),
+                    //   child: DataTable(
+                    //     dataRowMaxHeight: 100,
+                    //     columns: [
+                    //       getColumn("ID"),
+                    //       getColumn("Raised By"),
+                    //       getColumn("Name"),
+                    //       getColumn("Email"),
+                    //       getColumn("Contact"),
+                    //       getColumn("Department"),
+                    //       getColumn("Location"),
+                    //       getColumn("Subject"),
+                    //       getColumn("")
+                    //     ],
+                    //     rows: rows,
+                    //   ),
+                    // ),
+                  ),
+                ),
+              ),
+            ) :
+            Container(),
+          ],
+        ),
+        widget.args
+    );
   }
 }
