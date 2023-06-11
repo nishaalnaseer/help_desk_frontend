@@ -14,12 +14,12 @@ import 'supporting.dart' as supporting;
 class ViewTickets extends StatefulWidget {
   final String domain;
   final String protocol;
-  final Map<String, dynamic> args;
+  final User user;
   const ViewTickets({
     Key? key,
     required this.domain,
     required this.protocol,
-    required this.args,
+    required this.user,
   }) : super(key: key);
 
   @override
@@ -29,7 +29,10 @@ class ViewTickets extends StatefulWidget {
 class _ViewTicketsState extends State<ViewTickets> {
   String selectedDepartment = "";
   bool departmentSelected = false;
-  List<String> departments = ["IT"];
+
+  String selectedDepartmentFrom = "";
+  bool departmentSelectedFrom = false;
+  List<String> departmentsFrom = [];
   TextStyle style = const TextStyle(
       color: Colors.white,
       fontWeight: FontWeight.w500,
@@ -47,24 +50,41 @@ class _ViewTicketsState extends State<ViewTickets> {
   final ScrollController controller2 = ScrollController();
   List<DataRow> rows = [];
 
+  @override
+  void initState() {
+    for(String dep in widget.user.accessibleTickets) {
+      departmentsFrom.add(dep);
+    }
+    setState(() {
+
+    });
+    super.initState();
+  }
+
   Future<void> getTickets() async {
     String contents = await supporting.getApiData(
-      "tickets?department=$selectedDepartment&status=$selectedStatus",
+      "tickets?tickets_from=$selectedDepartmentFrom&"
+          "department=$selectedDepartment&ticket_status=$selectedStatus",
       widget.domain,
       widget.protocol,
-      context
+      context,
+      headers: widget.user.getAuth()
     );
 
     rows = [];
-    List<dynamic> coded = jsonDecode(contents);
+    late List<dynamic> coded;
+    try {
+      coded = jsonDecode(contents);
+    } on TypeError catch (e) {
+      return;
+    }
+
     for(var x in coded) {
       Ticket ticket = Ticket.fromJson(x);
 
       rows.add(
         DataRow(
           cells: [
-            getDataCell('${ticket.tId}'),
-            getDataCell('${ticket.submittedBy}'),
             getDataCell(ticket.nameTicket),
             getDataCell(ticket.emailTicket),
             getDataCell(ticket.numberTicket),
@@ -74,11 +94,23 @@ class _ViewTicketsState extends State<ViewTickets> {
             DataCell(
               SizedBox(
                 width: 200,
-                child: ElevatedButton(onPressed: () {
-                  widget.args.putIfAbsent("tID", () => ticket.tId);
-                  widget.args.update("tID", (value) => ticket.tId);
+                child: ElevatedButton(onPressed: () async {
+                  var json = await supporting.getApiData(
+                      "ticket?ticket_id=${ticket.tId}",
+                      widget.domain,
+                      widget.protocol,
+                      context,
+                      headers: widget.user.getAuth()
+                  );
+                  Ticket bigTicket = Ticket.fromJson(jsonDecode(json));
+
+                  var args = {
+                    "user": widget.user,
+                    "ticket": bigTicket
+                  };
+
                   Navigator.pushNamed(
-                      context, "/view_ticket", arguments: widget.args
+                      context, "/view_ticket", arguments: args
                   );
                 },
                   child: const Text(
@@ -154,15 +186,68 @@ class _ViewTicketsState extends State<ViewTickets> {
               child: DropdownButton<String>(
                 focusColor: Colors.transparent,
                 dropdownColor: Colors.red[800],
-                hint: departmentSelected ? Text(
-                  selectedDepartment,
+                hint: departmentSelectedFrom ? Text(
+                  'From: $selectedDepartmentFrom',
                   style: const TextStyle(
                       color: Colors.white,
                       fontSize: 18,
                       fontWeight: FontWeight.w500
                   ),
                 ) : const Text(
-                  'Select a Department',
+                  'From: ',
+                  style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 18,
+                      fontWeight: FontWeight.w500
+                  ),
+                ),
+                elevation: 16,
+                onChanged: (String? newValue) {
+                  if(newValue == null) {
+                    return;
+                  }
+
+                  selectedDepartmentFrom = newValue;
+                  departmentSelectedFrom = true;
+                  allSelected = statusSelected && departmentSelected
+                      && departmentSelectedFrom;
+                  if (allSelected) {
+                    getTickets();
+                  }
+
+                  setState(() {
+                  });
+                },
+                items: widget.user.ticketsFrom.map
+                <DropdownMenuItem<String>>((String value) {
+                  return DropdownMenuItem<String>(
+                    value: value,
+                    child: Text(
+                      value,
+                      style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 18,
+                          fontWeight: FontWeight.w500
+                      ),
+                    ),
+                  );
+                }).toList(),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.all(10),
+              child: DropdownButton<String>(
+                focusColor: Colors.transparent,
+                dropdownColor: Colors.red[800],
+                hint: departmentSelected ? Text(
+                  'To: $selectedDepartment',
+                  style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 18,
+                      fontWeight: FontWeight.w500
+                  ),
+                ) : const Text(
+                  'To: ',
                   style: TextStyle(
                       color: Colors.white,
                       fontSize: 18,
@@ -177,7 +262,8 @@ class _ViewTicketsState extends State<ViewTickets> {
 
                   selectedDepartment = newValue;
                   departmentSelected = true;
-                  allSelected = statusSelected && departmentSelected;
+                  allSelected = statusSelected && departmentSelected
+                      && departmentSelectedFrom;
                   if (allSelected) {
                     getTickets();
                   }
@@ -185,7 +271,8 @@ class _ViewTicketsState extends State<ViewTickets> {
                   setState(() {
                   });
                 },
-                items: departments.map<DropdownMenuItem<String>>((String value) {
+                items: widget.user.ticketableDepartments.map
+                <DropdownMenuItem<String>>((String value) {
                   return DropdownMenuItem<String>(
                     value: value,
                     child: Text(
@@ -229,11 +316,11 @@ class _ViewTicketsState extends State<ViewTickets> {
                   selectedStatus = newValue;
                   statusSelected = true;
 
-                  allSelected = statusSelected && departmentSelected;
+                  allSelected = statusSelected && departmentSelected
+                      && departmentSelectedFrom;
                   if (allSelected) {
                     getTickets();
                   }
-                  getTickets();
 
                   setState(() {
                   });
@@ -257,7 +344,7 @@ class _ViewTicketsState extends State<ViewTickets> {
               padding: const EdgeInsets.all(10),
               child: Center(
                 child: Scrollbar(
-                  thumbVisibility: true,
+                  // thumbVisibility: true,
                   controller: controller2,
                   child: SingleChildScrollView(
                     controller: controller2,
@@ -270,8 +357,6 @@ class _ViewTicketsState extends State<ViewTickets> {
                         // width: supporting.getWindowWidth(context),
                         child: DataTable(
                           columns: [
-                            getColumn("ID"),
-                            getColumn("Raised By"),
                             getColumn("Name"),
                             getColumn("Email"),
                             getColumn("Contact"),
@@ -284,24 +369,6 @@ class _ViewTicketsState extends State<ViewTickets> {
                         ),
                       ),
                     ),
-                    // child: SizedBox(
-                    //   // width: supporting.getWindowWidth(context),
-                    //   child: DataTable(
-                    //     dataRowMaxHeight: 100,
-                    //     columns: [
-                    //       getColumn("ID"),
-                    //       getColumn("Raised By"),
-                    //       getColumn("Name"),
-                    //       getColumn("Email"),
-                    //       getColumn("Contact"),
-                    //       getColumn("Department"),
-                    //       getColumn("Location"),
-                    //       getColumn("Subject"),
-                    //       getColumn("")
-                    //     ],
-                    //     rows: rows,
-                    //   ),
-                    // ),
                   ),
                 ),
               ),
@@ -309,7 +376,7 @@ class _ViewTicketsState extends State<ViewTickets> {
             Container(),
           ],
         ),
-        widget.args
+        widget.user
     );
   }
 }

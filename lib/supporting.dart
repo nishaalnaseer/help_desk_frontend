@@ -17,7 +17,6 @@ const Map<String, String> map = {
   // "Reports": reports,
 };
 
-
 Map<String, dynamic> convertDynamicToMap(dynamic object) {
   if (object is Map<String, dynamic>) {
     return object;
@@ -30,7 +29,11 @@ Map<String, dynamic> convertDynamicToMap(dynamic object) {
   throw Exception('Failed to convert dynamic to Map<String, dynamic>.');
 }
 
-Future<String> getApiData(String path, String domain, String protocol, dynamic context) async {
+Future<String> getApiData(String path, String domain,
+    String protocol, dynamic context, {
+      var headers = const {'Content-Type': 'application/json'},
+      int delay = 0
+  }) async {
   ProgressDialog pd = ProgressDialog(context: context);
   pd.show(
       msg: 'Loading',
@@ -42,9 +45,9 @@ Future<String> getApiData(String path, String domain, String protocol, dynamic c
       valueColor: Colors.white
   );
   var uri = Uri.parse('$protocol://$domain/$path');
-  var response = await http.get(uri);
+  var response = await http.get(uri, headers: headers);
 
-  pd.close(delay: 1000);
+  pd.close(delay: delay);
   await Future.delayed(const Duration(seconds: 1));
   int code = response.statusCode;
   if(code != 200) {
@@ -55,11 +58,23 @@ Future<String> getApiData(String path, String domain, String protocol, dynamic c
     if (json == null) {
       showPopUp(context, "Error $code!", "Contact admin");
     } else {
-      for(var x in json) {
-        String type = x["type"];
-        String msg = x["msg"];
 
-        details += "Type: $type, $msg\n";
+      try {
+        for(var x in json) {
+          String type = x["type"];
+          String msg = x["msg"];
+
+          details += "Type: $type, $msg\n";
+        }
+      } on TypeError catch (e) {
+        details = json;
+        showPopUp(context, "Error $code!", details);
+        return jsonEncode({});
+      } catch (e) {
+        // Catch other types of exceptions
+        details = 'An unexpected exception occurred: $e';
+        showPopUp(context, "Error $code!", details);
+        return jsonEncode({[]});
       }
     }
 
@@ -137,6 +152,7 @@ class CustomRequest {
     String jsonBody = jsonEncode(json);
     request.headers.addAll(headers);
     request.body = jsonBody;
+    print("before sending = $jsonBody");
   }
 
   Future<http.StreamedResponse> send(BuildContext context) async {
@@ -145,8 +161,9 @@ class CustomRequest {
   }
 }
 
-Future<void> postRequest(
-    var data, String protocol, String domain, String path, dynamic context,
+Future<http.StreamedResponse> postRequest(
+    var data, String protocol, String domain, String path,
+    dynamic context,
     {var headers = const {'Content-Type': 'application/json'}}
     ) async {
 
@@ -169,42 +186,131 @@ Future<void> postRequest(
   try {
     response = await req.send(context);
   } on Exception catch (e) {
-    pd.close(delay: 1000);
+    pd.close(delay: 0);
     await Future.delayed(const Duration(seconds: 1));
     showPopUp(context, "Error", "Something went wrong: $e");
-    return;
+    return response;
   }
 
-  pd.close(delay: 1000);
+  pd.close(delay: 0);
 
   await Future.delayed(const Duration(seconds: 1));
 
   int code = response.statusCode;
   if(code == 200) {
     showPopUp(context, "Nice!", "Ticket Submitted");
+    return response;
   } else {
     String details = "Details:\n";
 
-    String body = await response.stream.transform(utf8.decoder).join();
+    String body = await response.stream.transform(utf8.decoder).
+    join();
     var json = jsonDecode(body)["detail"];
     if (json == null) {
       showPopUp(context, "Error $code!", "Contact admin");
     } else {
-      for(var x in json) {
-        String type = x["type"];
-        String msg = x["msg"];
 
-        details += "Type: $type, $msg\n";
+      try {
+        for(var x in json) {
+          String type = x["type"];
+          String msg = x["msg"];
+
+          details += "Type: $type, $msg\n";
+        }
+      } on TypeError catch (e) {
+        details = json;
+      } catch (e) {
+        // Catch other types of exceptions
+        details = 'An unexpected exception occurred: $e';
       }
     }
 
     showPopUp(context, "Error $code!", details);
+    return response;
   }
 }
 
-List<Widget> getDrawerKids(Map<String, dynamic> args, BuildContext context) {
+Future<http.Response> postRequest2(
+    var data, String protocol, String domain, String path,
+    dynamic context,
+    {
+      var headers = const {'Content-Type': 'application/json'},
+      bool showPrompt = false, String promptTitle = "",
+      String promptMessage = ""
+    }
+    ) async {
+
+  ProgressDialog pd = ProgressDialog(context: context);
+  Uri url = Uri.parse('$protocol://$domain/$path');
+
+  pd.show(
+      msg: 'Loading',
+      progressType: ProgressType.valuable,
+      backgroundColor: hexToColor("#222222"),
+      progressValueColor: hexToColor("#222222"),
+      progressBgColor: Colors.red,
+      msgColor: Colors.white,
+      valueColor: Colors.white
+  );
+
+  late http.Response response;
+
+  try {
+    response = await http.post(
+        url, headers: headers, body: data
+    );
+  } on Exception catch (e) {
+    pd.close(delay: 0);
+    await Future.delayed(const Duration(seconds: 1));
+    showPopUp(context, "Error", "Something went wrong: $e");
+    throw Exception("Something went wrong: $e");
+  }
+
+  pd.close(delay: 0);
+
+  await Future.delayed(const Duration(seconds: 1));
+
+  int code = response.statusCode;
+  if(code == 200) {
+    if(showPrompt) {
+      showPopUp(context, promptTitle, promptMessage);
+    }
+    return response;
+  } else if (code > 499) {
+    showPopUp(context, "Error", "Details: code $code");
+    return response;
+  } else {
+    String details = "Details:\n";
+
+    String body = response.body;
+    var json = jsonDecode(body)["detail"];
+    if (json == null) {
+      showPopUp(context, "Error $code!", "Contact admin");
+    } else {
+      try {
+        for(var x in json) {
+          String field = x["loc"][1];
+          String type = x["type"];
+          String msg = x["msg"];
+
+          details += "Type: $type, $msg: $field\n";
+        }
+      } on TypeError catch (e) {
+        details = json;
+      } catch (e) {
+        // Catch other types of exceptions
+        details = 'An unexpected exception occurred: $e';
+      }
+    }
+
+    showPopUp(context, "Error $code!", details);
+    return response;
+  }
+}
+
+List<Widget> getDrawerKids(User user, BuildContext context) {
   List<Widget> children = [];
-  for(String name in args["modules"]) {
+  for(String name in user.modules) {
     String? route = map[name];
     if (route == null) {
       continue;
@@ -226,7 +332,7 @@ List<Widget> getDrawerKids(Map<String, dynamic> args, BuildContext context) {
         ),
         onTap: () {
           Navigator.pushNamed(
-              context, route, arguments: args
+              context, route, arguments: user
           );
         },
       ),
@@ -238,8 +344,8 @@ List<Widget> getDrawerKids(Map<String, dynamic> args, BuildContext context) {
 }
 
 class DrawerNavigation extends StatelessWidget {
-  final Map<String, dynamic> args;
-  const DrawerNavigation({super.key, required this.args});
+  final User user;
+  const DrawerNavigation({super.key, required this.user});
   final TextStyle style = const TextStyle(
     color: Colors.white,
     fontWeight: FontWeight.w500,
@@ -255,7 +361,7 @@ class DrawerNavigation extends StatelessWidget {
           Expanded(
             flex: 80,
             child: ListView(
-              children: getDrawerKids(args, context),
+              children: getDrawerKids(user, context),
             ),
           ),
           Expanded(
@@ -303,10 +409,6 @@ class DrawerNavigation extends StatelessWidget {
                         style: style,
                       ),
                       onTap: () {
-                        User? user = args["user"];
-                        if(user != null) {
-                          user = null;
-                        }
                         Navigator.pushReplacementNamed(
                             context, '/login'
                         );
@@ -324,7 +426,7 @@ class DrawerNavigation extends StatelessWidget {
 }
 
 Scaffold getScaffold(
-    Widget thingy, Map<String, dynamic> args, {bool appBar = true})
+    Widget thingy, User user, {bool appBar = true})
   {
   final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
 
@@ -353,7 +455,7 @@ Scaffold getScaffold(
       ),
     ) : null,
 
-    drawer: DrawerNavigation(args: args),
+    drawer: DrawerNavigation(user: user),
     backgroundColor: hexToColor("#222222"),
     body: thingy,
   );

@@ -1,3 +1,14 @@
+List<String> generateList(json, String key) {
+  List<String> list =  json[key] != null ?
+      List.generate(
+      json[key].length, (index) =>
+      json[key][index]
+    ) : [];
+  list.sort();
+
+  return list;
+}
+
 class Model {
   /*
    Model of electronic equipment
@@ -97,7 +108,16 @@ class User {
   String number;
   String location;
   String department;
+  String defaultView;
+  List<String> modules;
+  List<String> accessibleReports;
+  List<String> ticketsFrom;
+  List<String> accessibleTickets;
+  List<String> ticketableDepartments;
   List<Device> devices = [];
+
+
+  Map<String, String> _auth = {};
 
   User({
     required this.id,
@@ -106,28 +126,51 @@ class User {
     required this.email,
     required this.number,
     required this.location,
+    required this.accessibleReports,
+    required this.ticketsFrom,
+    required this.accessibleTickets,
+    required this.modules,
+    required this.defaultView,
+    required this.ticketableDepartments,
     List<Device>? devices
   });
 
   factory User.fromJson(Map<String, dynamic> json) {
     return User(
       id: json["u_id"],
-      name: json["submitted_by"],
-      department: json["name_ticket"],
-      email: json["email"],
+      name: json["name"],
+      department: json["department"],
+      email: json["username"],
       number: json["number"],
       location: json["location"],
+      defaultView: json["default_view"],
+
+      ticketsFrom: generateList(json, "tickets_from"),
+      ticketableDepartments: generateList(json, "ticketable_departments"),
+      modules: generateList(json, "modules"),
+      accessibleTickets: generateList(json, "accessible_tickets"),
+      accessibleReports: generateList(json, "accessible_reports"),
+
       devices: json["devices"] != null ?
-        List.generate(json["devices"].lenght,
-                (index) => Device.fromJson(json["devices"][index])
+        List.generate(json["devices"].length, (index) => 
+          Device.fromJson(json["devices"][index])
         ) :
         [],
+
     );
+  }
+
+  void setAuth(Map<String, String> newHeader) {
+    _auth = newHeader;
+  }
+
+  Map<String, String> getAuth() {
+    return _auth;
   }
 }
 
 class Message {
-  final String time;
+  final int time;
   final String personFrom;
   final String message;
 
@@ -148,7 +191,7 @@ class Message {
 
 class Ticket {
   final int tId;
-  final int submittedBy;
+  final String submittedBy;
   final String ticketTo;
   final String nameTicket;
   final String emailTicket;
@@ -159,12 +202,13 @@ class Ticket {
   final String message;
   List<Message> messages = [];
 
-  String submittedOn = "";
+  final int submittedOn;
   List<dynamic>? devices = [];
 
   Ticket({
     required this.tId,
     required this.submittedBy,
+    required this.submittedOn,
     required this.ticketTo,
     required this.nameTicket,
     required this.emailTicket,
@@ -177,9 +221,12 @@ class Ticket {
     required this.messages
   });
 
+
+
   factory Ticket.fromJson(Map<String, dynamic> json) {
     return Ticket(
       tId: json["t_id"],
+      submittedOn: json["submitted_on"],
       submittedBy: json["submitted_by"],
       ticketTo: json["ticket_to"],
       nameTicket: json["name"],
@@ -206,8 +253,7 @@ class Ticket {
       "department": deptTicket,
       "location": location,
       "subject": subject,
-      "message": message,
-      "devices": devices
+      "message": message
     };
   }
 }

@@ -1,7 +1,6 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
-import 'package:help_desk_frontend/main2.dart';
 
 import 'package:http/http.dart' as http;
 import 'package:window_manager/window_manager.dart';
@@ -117,7 +116,6 @@ class _CreateTicketState extends State<CreateTicket> {
                   numController.text = widget.user.number;
                   deptController.text = widget.user.department;
                   locationController.text = widget.user.location;
-                  print(user);
                   setState(() {
 
                   });
@@ -164,7 +162,8 @@ class _CreateTicketState extends State<CreateTicket> {
               setState(() {
               });
             },
-            items: ticketForDepartments.map<DropdownMenuItem<String>>((String value) {
+            items: widget.user.ticketableDepartments.map
+              <DropdownMenuItem<String>>((String value) {
               return DropdownMenuItem<String>(
                 value: value,
                 child: Text(
@@ -224,7 +223,8 @@ class _CreateTicketState extends State<CreateTicket> {
 
                   Ticket ticket = Ticket(
                       tId: 0,
-                      submittedBy: widget.user.id,
+                      submittedOn: 0,
+                      submittedBy: widget.user.email,
                       ticketTo: selectedDepartment,
                       nameTicket: nameController.text,
                       emailTicket: emailController.text,
@@ -233,13 +233,20 @@ class _CreateTicketState extends State<CreateTicket> {
                       location: locationController.text,
                       subject: subjectController.text,
                       message: messageController.text,
-                      devices: [1],
-                      messages: []
+                      devices: [],
+                      messages: [],
                   );
-
-                  await supporting.postRequest(
-                      ticket.toJson(), widget.protocol, widget.domain,
-                      "ticket", context
+                  var ticketInfo = ticket.toJson();
+                  var response = await supporting.postRequest2(
+                    jsonEncode(ticketInfo),
+                    widget.protocol,
+                    widget.domain,
+                    "ticket",
+                    context,
+                    headers: widget.user.getAuth(),
+                    showPrompt: true,
+                    promptTitle: "Nice!",
+                    promptMessage: "Ticket Submitted"
                   );
                 },
                 child: const Text(
@@ -256,10 +263,7 @@ class _CreateTicketState extends State<CreateTicket> {
         ),
       ],
       ),
-      {
-        "user": user,
-        "modules": modules
-      }
+      widget.user
     );
   }
 }

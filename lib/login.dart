@@ -1,6 +1,9 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
-import 'package:help_desk_frontend/main2.dart';
+import 'package:http/http.dart' as http;
 import 'application_models.dart';
+
 import 'supporting.dart' as supporting;
 
 class LoginPage extends StatefulWidget {
@@ -19,39 +22,87 @@ class LoginPage extends StatefulWidget {
 class _LoginPageState extends State<LoginPage> {
   TextEditingController nameController = TextEditingController();
   TextEditingController passwordController = TextEditingController();
-
-  String warning = '';
-
-  late String username = "";
-  late String password = "";
-
-  late String domain;
-  late String protocol;
+  String username = "";
+  String password = "";
 
   Future<void> login() async {
-    List<String> modules = [];
+    nameController.text = "nishawl.naseer@outlook.com";
+    passwordController.text = "\$2b\$12\$E6WQteQYd.kIY01.kfPa3u1Kg3r5s0VrpxmGG2mjnFo7z84fwy.Q2";
+
+    String email = nameController.text;
+    String password = passwordController.text;
+
     passwordController.clear();  // clear
     nameController.clear();  // clear
-    warning = "";  // clear
-    User user = User(
-        id: 1, name: "Nishaal", department: "Not IT",
-        email: 'dawk@dork.com', number: '123', location: 'here'
-    );
-    setState(() {
-
-    });
-    modules.add("Create Ticket");
-    modules.add("View Tickets");
-    modules.add("Devices");
-    modules.add("Models");
-    modules.add("Reports");
-    var args = {
-      "modules": modules,
-      "user": user
+    var headers = {
+      'Accept': 'application/json, text/plain, */*',
+      'Accept-Language': 'en-US,en',
+      'Authorization': 'Basic Og==',
+      'Connection': 'keep-alive',
+      'Origin': 'http://127.0.0.1:8000',
+      'Referer': 'http://127.0.0.1:8000/docs',
+      'Sec-Fetch-Dest': 'empty',
+      'Sec-Fetch-Mode': 'cors',
+      'Sec-Fetch-Site': 'same-origin',
+      'Sec-GPC': '1',
+      'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36',
+      'X-Requested-With': 'XMLHttpRequest',
+      'sec-ch-ua': '"Not.A/Brand";v="8", "Chromium";v="114", "Brave";v="114"',
+      'sec-ch-ua-mobile': '?0',
+      'sec-ch-ua-platform': '"Windows"',
     };
-    Navigator.pushNamed(
-      context, "/logged_in", arguments: args
+
+    var data = {
+      'grant_type': 'password',
+      'username': email,
+      'password': password,
+    };
+
+    late http.Response response;
+
+    try {
+      response = await supporting.postRequest2(
+          data,
+          widget.protocol,
+          widget.domain,
+          "token",
+          headers: headers,
+          context,
+          showPrompt: false
+      );
+    } on Exception catch (e) {
+      return;
+    }
+
+    if (response.statusCode != 200) {
+      return;
+    }
+    var token = jsonDecode(response.body);
+
+    headers.update("Authorization", (value) =>
+      "${token["token_type"]} ${token["access_token"]}");
+    headers.putIfAbsent('Content-Type', () => 'application/json');
+
+    String jsonRaw = await supporting.getApiData(
+        "users/me/",
+        widget.domain,
+        widget.protocol,
+        context,
+        headers: headers,
+        delay: 500
     );
+    var json = jsonDecode(jsonRaw);
+    User user = User.fromJson(json);
+    user.setAuth(headers);
+
+    String? defaultView = supporting.map[user.defaultView];
+
+    if(defaultView == null) {
+      Navigator.pushNamed(context, "/logged_in", arguments: user);
+      return;
+    }
+
+    Navigator.pushNamed(context, defaultView, arguments: user);
   }
 
   @override
@@ -183,7 +234,19 @@ class _LoginPageState extends State<LoginPage> {
           ),
         ),
       ),
-      {},
+      User(
+        id: -1,
+        name: "name",
+        department: "department",
+        email: "email",
+        number: "number",
+        location: "location",
+        accessibleReports: [],
+        accessibleTickets: [],
+        modules: [],
+        defaultView: "",
+        ticketableDepartments: [], ticketsFrom: []
+      ),
       appBar: false
     );
   }

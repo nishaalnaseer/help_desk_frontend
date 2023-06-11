@@ -1,23 +1,30 @@
 import 'package:flutter/material.dart';
-import 'package:help_desk_frontend/create_ticket.dart';
-import 'package:help_desk_frontend/login.dart';
+
+import 'login.dart';
+import 'create_ticket.dart';
+import 'view_tickets.dart';
+import 'view_ticket.dart';
+import 'application_models.dart';
+import 'supporting.dart' as supporting;
 
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'dart:convert';
 import 'dart:io';
 
-import 'application_models.dart';
-
 late String protocol;
 late String domain;
+List<String> modules = [];
+late User user;
+
 void main() async {
+
   if (kIsWeb) {
     // html.HttpRequest.getString('assets/data.json').then((String jsonString) {
     //   final coded = jsonDecode(jsonString);
     //   domain = coded["domain"];
     //   protocol = coded["protocol"];
     // }).catchError((error) {
-    //    print("erroe");
+    //    print("error");
     // });
 
   } else {
@@ -28,130 +35,44 @@ void main() async {
     protocol = coded["protocol"];
   }
 
-  runApp(const MyApp());
+  runApp(const DrawerNavigationApp());
 }
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return TicketingSystem();
+Text? assignUserData(dynamic args,) {
+  // dynamic arguments = ModalRoute.of(context)?.settings.arguments;
+  Map<String, dynamic> argumentsMap = Map<String, dynamic>.from(args);
+  if(argumentsMap["modules"] == null) {
+    return const Text("Error no module");
+  } else {
+    modules = argumentsMap["modules"];
   }
+  if(argumentsMap["user"] == null) {
+    return const Text("Error no user");
+  } else {
+    user = argumentsMap["user"];
+  }
+  return null;
 }
 
-class TicketingSystem extends StatefulWidget {
-  TicketingSystem({super.key});
-  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
-
-  @override
-  State<TicketingSystem> createState() => _TicketingSystemState();
-}
-
-class _TicketingSystemState extends State<TicketingSystem> {
-  static const String _title = 'Ticketing';
-  Map<String, dynamic> options = {};
-  String department = "IT";
-  late Map<String, Function> modules;
-  List<Widget> childrenDrawer = [
-    // DrawerHeader(
-    //   decoration: BoxDecoration(
-    //     // image: DecorationImage(
-    //     // image: FileImage(File('lib/img/datacenter.jpeg')),
-    //     // fit: BoxFit.cover,
-    //     // ),
-    //     borderRadius: BorderRadius.circular(10),
-    //     color: Colors.white,
-    //   ),
-    //   padding: const EdgeInsets.all(10),
-    //   child: const Text("IT"),
-    // ),
-  ];
-  bool loggedIn = false;
-  User user = User(
-    id: 0,
-    name: "",
-    department: "",
-    email: "",
-    number: "",
-    location: ""
-  );
-
-  void signOut() {
-    user = User(
-        id: 0,
-        name: "",
-        department: "",
-        email: "",
-        number: "",
-        location: ""
+Text? assignUserData2(dynamic args,) {
+  // dynamic arguments = ModalRoute.of(context)?.settings.arguments;
+  try {
+    user = args;
+  } on Exception catch (e) {
+    return Text(
+      e.toString(),
     );
-    loggedIn = false;
-    // Navigator.pop(context);
-    Navigator.pop(context);
   }
+  return null;
+}
 
-  Route<dynamic>? generateRoute(RouteSettings settings) {
-    String? name = settings.name;
-    print(name);
-
-    if (name == "/") {
-      loggedIn = false;
-      user = User(
-        id: 0,
-        name: "",
-        department: "",
-        email: "",
-        number: "",
-        location: "",
-      );
-      return MaterialPageRoute(
-        builder: (context) => LoginPage(
-          protocol: protocol,
-          domain: domain,
-          user: user,
-        ),
-      );
-    } else if (name == "/create_ticket") {
-      loggedIn = true;
-      setState(() {});
-      return MaterialPageRoute(
-        builder: (context) => CreateTicket(
-          protocol: protocol,
-          domain: domain,
-          user: user,
-        ),
-      );
-    } else if (name == "/sign_out") {
-      loggedIn = false;
-      user = User(
-        id: 0,
-        name: "",
-        department: "",
-        email: "",
-        number: "",
-        location: "",
-      );
-      setState(() {});
-      return MaterialPageRoute(
-        builder: (context) => LoginPage(
-          protocol: protocol,
-          domain: domain,
-          user: user,
-        ),
-      );
-    }
-
-    return null;
-  }
+class DrawerNavigationApp extends StatelessWidget {
+  const DrawerNavigationApp({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final width = MediaQuery.of(context).size.width;
-    final bool isLargeScreen = width > 800;
-
     return MaterialApp(
-      title: _title,
+      title: 'Drawer Navigation App',
       theme: ThemeData(
         primarySwatch: Colors.red,
         useMaterial3: true,
@@ -163,126 +84,167 @@ class _TicketingSystemState extends State<TicketingSystem> {
           minThumbLength: 48,
         ),
       ),
-      initialRoute: "/",
-      onGenerateRoute: generateRoute,
-      home: Builder(
-        builder: (BuildContext context) {
-          return Scaffold(
-            appBar: AppBar(
-              backgroundColor: Colors.red[900],
-              leading: loggedIn ? IconButton(
-                  icon: const Icon(
-                    Icons.menu,
-                    color: Colors.white,
-                  ),
-                  tooltip: 'Menu',
-                  onPressed: () {
-                    widget._scaffoldKey.currentState?.openDrawer();
-                  }
-              ) : null,
-              elevation: 0,
-              titleSpacing: 0,
-              title: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const Text(
-                        _title,
-                        style: TextStyle(
-                            color: Colors.white,
-                            fontWeight: FontWeight.w500
-                        )
-                    ),
-                    if (isLargeScreen && loggedIn) Expanded(child: _navBarItems())
-                  ],
-                ),
-              ),
-              actions: [
-                loggedIn ? Padding(
-                  padding: const EdgeInsets.only(right: 16.0),
-                  child: CircleAvatar(
-                      child: PopupMenuButton<Menu>(
-                          icon: const Icon(Icons.person),
-                          offset: const Offset(0, 40),
-                          onSelected: (Menu item) {},
-                          surfaceTintColor: Colors.blue,
-                          // color: Colors.lightBlueAccent,
+      home: LoginPage(
+          domain: domain,
+          protocol: protocol,
+      ),
+      routes: {
+        '/settings': (context) => SettingsPage(
+            args: {
+              "user": user,
+              "modules": modules
+            }),
 
-                          itemBuilder: (BuildContext context2) => <PopupMenuEntry<Menu>>[
-                            const PopupMenuItem<Menu>(
-                              value: Menu.itemOne,
-                              child: Text('Account'),
+        '/profile': (context) => ProfilePage(
+            args: {
+              "user": user,
+              "modules": modules
+            }),
 
-                            ),
-                            const PopupMenuItem<Menu>(
-                              value: Menu.itemTwo,
-                              child: Text('Settings'),
-                            ),
-                            PopupMenuItem<Menu>(
-                              value: Menu.itemThree,
-                              child: const Text('Sign Out'),
-                              onTap: () async {
-                                Navigator.pushReplacementNamed(context, "/");
-                                // signOut();
-                              },
-                            ),
-                          ]
-                      )
-                  ),
-                )
-                    : Container()
-              ],
-            ),
-            body: Navigator(
-                onGenerateRoute: generateRoute
-            ),
+        '/login': (context) {
+          User(
+              id: -1,
+              name: "name",
+              department: "department",
+              email: "email",
+              number: "number",
+              location: "location",
+              accessibleReports: [],
+              accessibleTickets: [],
+              modules: [],
+              defaultView: "",
+              ticketableDepartments: [], ticketsFrom: []
+          );
+
+          return LoginPage(
+            domain: domain,
+            protocol: protocol,
           );
         },
+
+        '/logged_in': (context) {
+          Text? error = assignUserData2(
+              ModalRoute.of(context)?.settings.arguments
+          );
+          if(error != null) {
+            return error;
+          }
+
+          return CreateTicket(
+              user: user,
+              modules: modules,
+              domain: domain,
+              protocol: protocol
+          );
+        },
+
+        '/create_ticket': (context) {
+          Text? error = assignUserData2(
+              ModalRoute.of(context)?.settings.arguments
+          );
+          if(error != null) {
+            return error;
+          }
+
+          return CreateTicket(
+              user: user,
+              modules: modules,
+              domain: domain,
+              protocol: protocol
+          );
+        },
+
+        '/view_tickets': (context) {
+          Text? error = assignUserData2(
+              ModalRoute.of(context)?.settings.arguments
+          );
+          if(error != null) {
+            return error;
+          }
+
+          return ViewTickets(
+              user: user,
+              domain: domain,
+              protocol: protocol
+          );
+        },
+
+        '/view_ticket': (context) {
+          dynamic args = ModalRoute.of(context)?.settings.arguments;
+          Ticket ticket = args["ticket"];
+          user = args["user"];
+          return ViewTicket(
+              user: user,
+              ticket: ticket,
+              domain: domain,
+              protocol: protocol
+          );
+        },
+      },
+    );
+  }
+}
+
+class MainPage extends StatelessWidget {
+  final Map<String, dynamic> args;
+  const MainPage({super.key, required this.args});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Home'),
+      ),
+      drawer: supporting.DrawerNavigation(user: user,),
+      body: const Center(
+        child: Text(
+          'Home Page',
+          style: TextStyle(fontSize: 24),
+        ),
       ),
     );
   }
-
-  Widget _navBarItems() => Row(
-    mainAxisAlignment: MainAxisAlignment.end,
-    crossAxisAlignment: CrossAxisAlignment.center,
-    children: _menuItems
-        .map(
-          (item) => InkWell(
-        onTap: () {},
-        child: Padding(
-          padding: const EdgeInsets.symmetric(
-            vertical: 24.0,
-            horizontal: 16
-          ),
-          child: Text(
-            item,
-            style: const TextStyle(
-              fontSize: 18,
-              color: Colors.white
-            ),
-          ),
-        ),
-      ),
-    ).toList(),
-  );
 }
 
-// body: Navigator(
-//   onGenerateRoute: (settings) {
-//     if (settings.name == '/') {
-//       return MaterialPageRoute(builder: (context) => Text("First"));
-//     } else if (settings.name == '/second') {
-//       return MaterialPageRoute(builder: (context) => Text("First2"));
-//     }
-//     return null;
-//   },
-// ),
+class SettingsPage extends StatelessWidget {
+  final Map<String, dynamic> args;
+  const SettingsPage({super.key, required this.args});
 
-final List<String> _menuItems = <String>[
-  'About',
-  'Contact',
-  'something else'
-];
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Settings'),
+      ),
+      drawer: supporting.DrawerNavigation(user: user,),
+      body: const Center(
+        child: Text(
+          'Settings Page',
+          style: TextStyle(fontSize: 24),
+        ),
+      ),
+    );
+  }
+}
 
-enum Menu { itemOne, itemTwo, itemThree }
+class ProfilePage extends StatelessWidget {
+  final Map<String, dynamic> args;
+  const ProfilePage({super.key, required this.args});
+
+  @override
+  Widget build(BuildContext context) {
+
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Profile'),
+      ),
+      drawer: supporting.DrawerNavigation(user: user),
+      body: const Center(
+        child: Text(
+          'Profile Page',
+          style: TextStyle(fontSize: 24),
+        ),
+      ),
+    );
+  }
+}

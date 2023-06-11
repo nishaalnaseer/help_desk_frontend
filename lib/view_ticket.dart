@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 
 import 'application_models.dart';
 import 'supporting.dart' as supporting;
@@ -6,11 +7,11 @@ import 'supporting.dart' as supporting;
 class ViewTicket extends StatefulWidget {
   final String protocol;
   final String domain;
-  final int ticketId;
-  final Map<String, dynamic> args;
+  final Ticket ticket;
+  final User user;
   const ViewTicket({
     super.key, required this.protocol, required this.domain,
-    required this.ticketId, required this.args
+    required this.ticket, required this.user
   });
 
   @override
@@ -32,26 +33,7 @@ class _ViewTicketState extends State<ViewTicket> {
 
   List<Widget> messages = [];
   bool messagesHidden = false;
-
-  Message m = Message(time: "time", personFrom: "Nishaal", message: "message");
-
-  Ticket ticket = Ticket(
-    tId: 1,
-    submittedBy: 1,
-    ticketTo: 'daw',
-    nameTicket: 'adw',
-    emailTicket: 'wad',
-    numberTicket: 'wad',
-    deptTicket: 'wad',
-    location: 'adw',
-    subject: 'dwa',
-    message: 'awdawwwwwwwwwwawdddddddddddddddddddddddddddddddddddddddddddddd'
-        'ddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd'
-        'ddddddddwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwd',
-    devices: [],
-    messages: []
-
-  );
+  bool hideButtons = false;
 
   Padding getText(String text) {
     return Padding(
@@ -63,8 +45,18 @@ class _ViewTicketState extends State<ViewTicket> {
     );
   }
 
+  String formatDate(int time) {
+    // Convert timestamp to DateTime
+    DateTime dateTime = DateTime.fromMillisecondsSinceEpoch(time * 1000);
+
+    // Format DateTime as "Monday 11-May-23"
+    String formattedDate = DateFormat("EEEE d-MMM-yy HH:MM").format(dateTime);
+
+    return formattedDate; // Output: Monday 11-May-23
+  }
+
   void getMessages() {
-    for(Message message in ticket.messages) {
+    for(Message message in widget.ticket.messages) {
       Widget child = Padding(
         padding: const EdgeInsets.all(10),
         child: Container(
@@ -87,7 +79,7 @@ class _ViewTicketState extends State<ViewTicket> {
                     child: Align(
                       alignment: Alignment.topLeft,
                       child: Text(
-                        "Time: ${message.time}",
+                        "Time: ${formatDate(message.time)}",
                         textAlign: TextAlign.left,
                         style: const TextStyle(
                             color: Colors.white,
@@ -140,10 +132,10 @@ class _ViewTicketState extends State<ViewTicket> {
   void initState() {
     // TODO: implement initState
     super.initState();
-    ticket.messages = [
-      m, m, m
-    ];
     getMessages();
+
+    hideButtons = messagesHidden &&
+        widget.ticket.messages.length > 2;
   }
 
   @override
@@ -233,26 +225,30 @@ class _ViewTicketState extends State<ViewTicket> {
               ],
             ),
           ),
-          getText('Ticket ID: ${ticket.tId}'),
-          getText('Submitted On: ${ticket.submittedOn}'),
-          getText('Submitted By: ${ticket.submittedBy}'),
-          getText('Ticket To: ${ticket.ticketTo}'),
-          getText('Name on Ticket: ${ticket.nameTicket}'),
-          getText('Email on Ticket: ${ticket.emailTicket}'),
-          getText('Contact Number on Ticket: ${ticket.numberTicket}'),
-          getText('Department on Ticket: ${ticket.deptTicket}'),
-          getText('Location on Ticket: ${ticket.location}'),
-          getText('Ticket Subject: ${ticket.subject}'),
-          getText('Ticket Initial Message: ${ticket.message}'),
+          getText('Ticket ID: ${formatDate(widget.ticket.submittedOn)}'),
+          getText('Submitted On: ${widget.ticket.submittedOn}'),
+          getText('Submitted By: ${widget.ticket.submittedBy}'),
+          getText('Ticket To: ${widget.ticket.ticketTo}'),
+          getText('Name on Ticket: ${widget.ticket.nameTicket}'),
+          getText('Email on Ticket: ${widget.ticket.emailTicket}'),
+          getText('Contact Number on Ticket: ${widget.ticket.numberTicket}'),
+          getText('Department on Ticket: ${widget.ticket.deptTicket}'),
+          getText('Location on Ticket: ${widget.ticket.location}'),
+          getText('Ticket Subject: ${widget.ticket.subject}'),
+          getText('Ticket Initial Message: ${widget.ticket.message}'),
 
-          messagesHidden && messages.length > 2
-          ? Container()
-          : Align(
+          hideButtons
+          ? Align(
             alignment: Alignment.topLeft,
             child: Padding(
               padding: const EdgeInsets.fromLTRB(10,20,10,10),
               child: ElevatedButton(
                   onPressed: () {
+                    messagesHidden != messagesHidden;
+
+                    hideButtons = messagesHidden &&
+                        widget.ticket.messages.length > 2;
+
                     setState(() {
                       messagesHidden = true;
                     });
@@ -267,16 +263,17 @@ class _ViewTicketState extends State<ViewTicket> {
                   )
               ),
             ),
-          ),
+          )
+          : Container(),
 
-          messagesHidden ? Container() :
+          messagesHidden ?
+          Container() :
           Column(
             children: messages,
           ),
 
-          messagesHidden && messages.length > 2
-          ? Container()
-          : Align(
+          hideButtons
+          ? Align(
             alignment: Alignment.topLeft,
             child: Padding(
               padding: const EdgeInsets.fromLTRB(10,20,10,10),
@@ -296,7 +293,8 @@ class _ViewTicketState extends State<ViewTicket> {
                   )
               ),
             ),
-          ),
+          )
+          : Container(),
 
           messagesHidden ?
           Center(
@@ -411,8 +409,7 @@ class _ViewTicketState extends State<ViewTicket> {
           )
           : Container()
         ],
-      ),
-      widget.args
+      ), widget.user
     );
   }
 }
