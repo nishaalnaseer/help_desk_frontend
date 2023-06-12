@@ -187,6 +187,35 @@ class Message {
       personFrom: json["person_from"],
     );
   }
+
+  Map<String, dynamic> toJson() {
+    return {
+      "time": time,
+      "person_from": personFrom,
+      "message": message
+    };
+  }
+
+}
+
+class TicketUpdate {
+  final String newStatus;
+  final double time;
+  final String updatedBy;
+
+  TicketUpdate({
+    required this.newStatus,
+    required this.time,
+    required this.updatedBy,
+  });
+
+  factory TicketUpdate.fromJson(Map<String, dynamic> json) {
+    return TicketUpdate(
+        newStatus: json["new_status"],
+        time: json["time"],
+        updatedBy: json["user"],
+    );
+  }
 }
 
 class Ticket {
@@ -200,7 +229,9 @@ class Ticket {
   final String location;
   final String subject;
   final String message;
+  final String status;
   List<Message> messages = [];
+  List<TicketUpdate> updates = [];
 
   final int submittedOn;
   List<dynamic>? devices = [];
@@ -218,9 +249,10 @@ class Ticket {
     required this.subject,
     required this.message,
     required this.devices,
-    required this.messages
+    required this.messages,
+    required this.status,
+    required this.updates
   });
-
 
 
   factory Ticket.fromJson(Map<String, dynamic> json) {
@@ -236,9 +268,12 @@ class Ticket {
       location: json["location"],
       subject: json["subject"],
       message: json["message"],
+      status: json["status"],
       devices: json["devices"] ?? [],
       messages: List.generate(json["messages"].length, (index)
         => Message.fromJson(json["messages"][index])),
+      updates: List.generate(json["updates"].length, (index)
+      => TicketUpdate.fromJson(json["updates"][index])),
     );
   }
 
@@ -255,5 +290,27 @@ class Ticket {
       "subject": subject,
       "message": message
     };
+  }
+}
+
+class UpdateBox {
+  final String type;
+  final String time;
+  final String from;
+  final String message;
+
+  late final String displayTime;
+  late final String displayFrom;
+  late final String displayMessage;
+
+  UpdateBox(this.type, this.time, this.from, this.message,) {
+    displayTime = "Time: $time";
+    if(type == "message") {
+      displayFrom = "From: $from";
+      displayMessage = "Message: $message";
+    } else {
+      displayFrom = "Updated By: $from";
+      displayMessage = "Changed Status To: $message";
+    }
   }
 }

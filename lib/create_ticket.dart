@@ -76,7 +76,6 @@ class _CreateTicketState extends State<CreateTicket> {
     );
   }
 
-  List<String> ticketForDepartments = ["IT"];
   List<String> ticketingDepartments = [];
   bool departmentSelected = false;
   String selectedDepartment = "";
@@ -140,16 +139,16 @@ class _CreateTicketState extends State<CreateTicket> {
             hint: departmentSelected ? Text(
               'Send Ticket to: $selectedDepartment',
               style: const TextStyle(
-                  fontSize: 17,
-                  fontWeight: FontWeight.w500,
-                  color: Colors.white
+                fontSize: 17,
+                fontWeight: FontWeight.w500,
+                color: Colors.white
               ),
             ) : const Text(
               'Send Ticket to: ',
               style: TextStyle(
-                  fontSize: 17,
-                  fontWeight: FontWeight.w500,
-                  color: Colors.white
+                fontSize: 17,
+                fontWeight: FontWeight.w500,
+                color: Colors.white
               ),
             ),
             elevation: 16,
@@ -169,9 +168,9 @@ class _CreateTicketState extends State<CreateTicket> {
                 child: Text(
                   value,
                   style: const TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.w500,
-                      fontSize: 18
+                    color: Colors.white,
+                    fontWeight: FontWeight.w500,
+                    fontSize: 18
                   ),
                 ),
               );
@@ -192,8 +191,8 @@ class _CreateTicketState extends State<CreateTicket> {
               title: const Text(
                 "Is this the device having issues?",
                 style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 17
+                  color: Colors.white,
+                  fontSize: 17
                 ),
               ),
               // activeColor: Colors.white,
@@ -211,8 +210,8 @@ class _CreateTicketState extends State<CreateTicket> {
           ),
         ),
         inputField(
-            messageController, message, "Message",
-            maximumLines: 50, minimumLines: 1
+          messageController, message, "Message",
+          maximumLines: 50, minimumLines: 1
         ),
         Center(
           child: Padding(
@@ -233,8 +232,10 @@ class _CreateTicketState extends State<CreateTicket> {
                       location: locationController.text,
                       subject: subjectController.text,
                       message: messageController.text,
+                      status: "RAISED",
                       devices: [],
                       messages: [],
+                      updates: []
                   );
                   var ticketInfo = ticket.toJson();
                   var response = await supporting.postRequest2(
@@ -252,9 +253,9 @@ class _CreateTicketState extends State<CreateTicket> {
                 child: const Text(
                   "Submit!",
                   style: TextStyle(
-                      fontWeight: FontWeight.w500,
-                      color: Colors.red,
-                      fontSize: 17
+                    fontWeight: FontWeight.w500,
+                    color: Colors.red,
+                    fontSize: 17
                   ),
                 ),
               ),
