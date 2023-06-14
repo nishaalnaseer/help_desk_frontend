@@ -1,9 +1,12 @@
 import 'dart:convert';
 
+import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter/material.dart';
 
 import 'package:http/http.dart' as http;
+import 'package:platform/platform.dart';
 import 'package:window_manager/window_manager.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 
 import 'supporting.dart' as supporting;
 import 'application_models.dart';
@@ -219,23 +222,56 @@ class _CreateTicketState extends State<CreateTicket> {
             child: SizedBox(
               child: ElevatedButton(
                 onPressed: () async {
+                  Platform platform = const LocalPlatform();
+                  String host;
+                  String username;
+                  DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
+                  if (kIsWeb) {
+                    WebBrowserInfo webBrowserInfo = await deviceInfo.webBrowserInfo;
+                    host = webBrowserInfo.browserName.name;
+                    username = "";
+                  } else if (platform.isWindows) {
+                    WindowsDeviceInfo windowsInfo = await deviceInfo.windowsInfo;
+                    host = windowsInfo.computerName;
+                    username = windowsInfo.userName;
+                  } else if (platform.isLinux) {
+                    LinuxDeviceInfo linuxInfo = await deviceInfo.linuxInfo;
+                    host = linuxInfo.machineId ?? "";
+                    username = linuxInfo.name;
+                  } else if (platform.isAndroid) {
+                    AndroidDeviceInfo android = await deviceInfo.androidInfo;
+                    host = android.host;
+                    username = "";
+                  } else if (platform.isIOS) {
+                    IosDeviceInfo ios = await deviceInfo.iosInfo;
+                    host = ios.name;
+                    username = "";
+                  } else {
+                    host = "unknown";
+                    username = "unknown";
+                  }
 
                   Ticket ticket = Ticket(
-                      tId: 0,
-                      submittedOn: 0,
-                      submittedBy: widget.user.email,
-                      ticketTo: selectedDepartment,
-                      nameTicket: nameController.text,
-                      emailTicket: emailController.text,
-                      numberTicket: numController.text,
-                      deptTicket: deptController.text,
-                      location: locationController.text,
-                      subject: subjectController.text,
-                      message: messageController.text,
-                      status: "RAISED",
-                      devices: [],
-                      messages: [],
-                      updates: []
+                    tId: 0,
+                    submittedOn: 0,
+                    submittedBy: widget.user.email,
+                    ticketTo: selectedDepartment,
+                    nameTicket: nameController.text,
+                    emailTicket: emailController.text,
+                    numberTicket: numController.text,
+                    deptTicket: deptController.text,
+                    location: locationController.text,
+                    subject: subjectController.text,
+                    message: messageController.text,
+                    ip: "",
+                    host: host,
+                    username: username,
+                    hostIssue: isThisDevice,
+                    platform: platform.operatingSystem,
+                    status: "RAISED",
+                    devices: [],
+                    messages: [],
+                    updates: []
                   );
                   var ticketInfo = ticket.toJson();
                   var response = await supporting.postRequest2(

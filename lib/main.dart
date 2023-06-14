@@ -26,6 +26,8 @@ void main() async {
     // }).catchError((error) {
     //    print("error");
     // });
+    domain = "127.0.0.1:8000";
+    protocol = "http";
 
   } else {
     File file = File("assets/config.json");
@@ -72,7 +74,7 @@ class DrawerNavigationApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Drawer Navigation App',
+      title: 'Ticketing',
       theme: ThemeData(
         primarySwatch: Colors.red,
         useMaterial3: true,
@@ -90,30 +92,30 @@ class DrawerNavigationApp extends StatelessWidget {
       ),
       routes: {
         '/settings': (context) => SettingsPage(
-            args: {
-              "user": user,
-              "modules": modules
-            }),
+          args: {
+            "user": user,
+            "modules": modules
+          }),
 
         '/profile': (context) => ProfilePage(
-            args: {
-              "user": user,
-              "modules": modules
-            }),
+          args: {
+            "user": user,
+            "modules": modules
+          }),
 
         '/login': (context) {
           User(
-              id: -1,
-              name: "name",
-              department: "department",
-              email: "email",
-              number: "number",
-              location: "location",
-              accessibleReports: [],
-              accessibleTickets: [],
-              modules: [],
-              defaultView: "",
-              ticketableDepartments: [], ticketsFrom: []
+            id: -1,
+            name: "name",
+            department: "department",
+            email: "email",
+            number: "number",
+            location: "location",
+            accessibleReports: [],
+            accessibleTickets: [],
+            modules: [],
+            defaultView: "",
+            ticketableDepartments: [], ticketsFrom: []
           );
 
           return LoginPage(
@@ -131,53 +133,74 @@ class DrawerNavigationApp extends StatelessWidget {
           }
 
           return CreateTicket(
-              user: user,
-              modules: modules,
-              domain: domain,
-              protocol: protocol
+            user: user,
+            modules: modules,
+            domain: domain,
+            protocol: protocol
           );
         },
 
         '/create_ticket': (context) {
           Text? error = assignUserData2(
-              ModalRoute.of(context)?.settings.arguments
+            ModalRoute.of(context)?.settings.arguments
           );
           if(error != null) {
             return error;
           }
 
           return CreateTicket(
-              user: user,
-              modules: modules,
-              domain: domain,
-              protocol: protocol
+            user: user,
+            modules: modules,
+            domain: domain,
+            protocol: protocol
+          );
+        },
+
+        '/ticket_to_ticket': (context) {
+          dynamic argsOld = ModalRoute.of(context)?.settings.arguments;
+          Map<String, String> args = Map<String, String>.from(argsOld);
+
+          return ViewTickets(
+            user: user,
+            domain: domain,
+            protocol: protocol,
+            previousArgs: args
           );
         },
 
         '/view_tickets': (context) {
           Text? error = assignUserData2(
-              ModalRoute.of(context)?.settings.arguments
+            ModalRoute.of(context)?.settings.arguments
           );
           if(error != null) {
             return error;
           }
 
           return ViewTickets(
-              user: user,
-              domain: domain,
-              protocol: protocol
+            user: user,
+            domain: domain,
+            protocol: protocol,
+            previousArgs: const {},
           );
         },
 
         '/view_ticket': (context) {
           dynamic args = ModalRoute.of(context)?.settings.arguments;
+
+          Map<String, String> currentArgs = {
+            "from": args["from"],
+            "to": args["to"],
+            "status": args["status"],
+          };
+
           Ticket ticket = args["ticket"];
           user = args["user"];
           return ViewTicket(
-              user: user,
-              ticket: ticket,
-              domain: domain,
-              protocol: protocol
+            user: user,
+            ticket: ticket,
+            domain: domain,
+            protocol: protocol,
+            previousArgs: currentArgs
           );
         },
       },

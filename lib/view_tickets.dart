@@ -7,19 +7,17 @@ import 'package:help_desk_frontend/view_ticket.dart';
 import 'application_models.dart';
 import 'supporting.dart' as supporting;
 
-// todo implement the loading popup when going to the view tickets
-//  since some data is retried from api
-// todo view_ticket page
-
 class ViewTickets extends StatefulWidget {
   final String domain;
   final String protocol;
   final User user;
+  final Map<String, String> previousArgs;
   const ViewTickets({
     Key? key,
     required this.domain,
     required this.protocol,
     required this.user,
+    required this.previousArgs,
   }) : super(key: key);
 
   @override
@@ -29,6 +27,7 @@ class ViewTickets extends StatefulWidget {
 class _ViewTicketsState extends State<ViewTickets> {
   String selectedDepartment = "";
   bool departmentSelected = false;
+  bool init =  false;
 
   String selectedDepartmentFrom = "";
   bool departmentSelectedFrom = false;
@@ -48,6 +47,7 @@ class _ViewTicketsState extends State<ViewTickets> {
   bool allSelected = false;
   final ScrollController controller = ScrollController();
   final ScrollController controller2 = ScrollController();
+  TextEditingController searchController = TextEditingController();
   List<DataRow> rows = [];
 
   @override
@@ -55,13 +55,43 @@ class _ViewTicketsState extends State<ViewTickets> {
     for(String dep in widget.user.accessibleTickets) {
       departmentsFrom.add(dep);
     }
-    setState(() {
-
-    });
+    initPreviousState();
     super.initState();
   }
 
-  Future<void> getTickets() async {
+  @override
+  void didUpdateWidget(covariant ViewTickets oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    setState(() {
+
+    });
+  }
+
+  void initPreviousState() {
+    String? to = widget.previousArgs["to"];
+    String? from = widget.previousArgs["from"];
+    String? status = widget.previousArgs["status"];
+
+    if(to != null) {
+      departmentSelected = true;
+      selectedDepartment = to;
+    }
+
+    if(from != null) {
+      departmentSelectedFrom = true;
+      selectedDepartmentFrom = from;
+    }
+
+    if(status != null) {
+      statusSelected = true;
+      selectedStatus = status;
+    }
+
+    allSelected = statusSelected && departmentSelected
+        && departmentSelectedFrom;
+  }
+
+  Future<List<DataRow>> getAsyncTickets() async {
     String contents = await supporting.getApiData(
       "tickets?tickets_from=$selectedDepartmentFrom&"
           "department=$selectedDepartment&ticket_status=$selectedStatus",
@@ -71,12 +101,12 @@ class _ViewTicketsState extends State<ViewTickets> {
       headers: widget.user.getAuth()
     );
 
-    rows = [];
+    List<DataRow> rows = [];
     late List<dynamic> coded;
     try {
       coded = jsonDecode(contents);
     } on TypeError catch (e) {
-      return;
+      return [];
     }
 
     for(var x in coded) {
@@ -84,50 +114,64 @@ class _ViewTicketsState extends State<ViewTickets> {
 
       rows.add(
         DataRow(
-          cells: [
-            getDataCell(ticket.nameTicket),
-            getDataCell(ticket.emailTicket),
-            getDataCell(ticket.numberTicket),
-            getDataCell(ticket.deptTicket),
-            getDataCell(ticket.location),
-            getDataCell(ticket.subject),
-            DataCell(
-              SizedBox(
-                width: 200,
-                child: ElevatedButton(onPressed: () async {
-                  var json = await supporting.getApiData(
-                      "ticket?ticket_id=${ticket.tId}",
-                      widget.domain,
-                      widget.protocol,
-                      context,
-                      headers: widget.user.getAuth()
-                  );
-                  Ticket bigTicket = Ticket.fromJson(jsonDecode(json));
+              cells: [
+                getDataCell('${ticket.tId}'),
+                getDataCell(ticket.nameTicket),
+                getDataCell(ticket.status),
+                getDataCell(ticket.numberTicket),
+                getDataCell(ticket.deptTicket),
+                getDataCell(ticket.location),
+                getDataCell(ticket.subject),
+                DataCell(
+                  SizedBox(
+                    width: 200,
+                    child: ElevatedButton(onPressed: () async {
+                      var json = await supporting.getApiData(
+                          "ticket?ticket_id=${ticket.tId}",
+                          widget.domain,
+                          widget.protocol,
+                          context,
+                          headers: widget.user.getAuth()
+                      );
+                      Ticket bigTicket = Ticket.fromJson(jsonDecode(json));
 
-                  var args = {
-                    "user": widget.user,
-                    "ticket": bigTicket
-                  };
+                      var args = {
+                        "user": widget.user,
+                        "ticket": bigTicket,
+                        "from": selectedDepartmentFrom,
+                        "to": selectedDepartment,
+                        "status": selectedStatus
+                      };
 
-                  Navigator.pushNamed(
-                      context, "/view_ticket", arguments: args
-                  );
-                },
-                  child: const Text(
-                    "Inspect/Edit",
-                    style: TextStyle(
-                      color: Colors.red,
-                      fontSize: 18,
-                      fontWeight: FontWeight.w500
+                      Navigator.pushNamed(
+                          context, "/view_ticket", arguments: args
+                      );
+                    },
+                        child: const Text(
+                          "Inspect/Edit",
+                          style: TextStyle(
+                              color: Colors.red,
+                              fontSize: 18,
+                              fontWeight: FontWeight.w500
+                          ),
+                        )
                     ),
-                  )
-                ),
-              ),
-            )
-          ]
-        )
+                  ),
+                )
+              ]
+          )
       );
     }
+    return rows;
+  }
+
+  void getTickets() async {
+    List<DataRow> stuff = await getAsyncTickets();
+    rows = stuff;
+  }
+
+  Future<void> getTicketsUpdate() async {
+    rows = await getAsyncTickets();
     setState(() {
 
     });
@@ -181,6 +225,91 @@ class _ViewTicketsState extends State<ViewTickets> {
                 ),
               ),
             ),
+
+            Center(
+              child: Row(
+                children: [
+                  SizedBox(
+                    width: 200,
+                    height: 50,
+                    child: Padding(
+                      padding: const EdgeInsets.all(10),
+                      child: SearchBar(
+                        onTap: () {
+                          searchController.clear();
+                        },
+                        controller: searchController,
+                        hintText: "Search By ID",
+                        hintStyle: MaterialStateProperty.all<TextStyle>(
+                          const TextStyle(
+                            color: Colors.red,
+                            fontSize: 18,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ),
+                    ),
+
+                  ),
+                  SizedBox(
+                    width: 200,
+                    height: 50,
+                    child: Padding(
+                      padding: const EdgeInsets.all(10),
+                      child: ElevatedButton(
+                        onPressed: () async {
+                          int ticketId;
+                          try {
+                            ticketId = int.parse(searchController.text);
+                          } catch (e) {
+                            return;
+                          }
+
+                          String json;
+                          try {
+                            json = await supporting.getApiData(
+                                "ticket?ticket_id=$ticketId",
+                                widget.domain,
+                                widget.protocol,
+                                context,
+                                headers: widget.user.getAuth()
+                            );
+                          } catch (e) {
+                            return;
+                          }
+
+                          Map<String, dynamic> map = jsonDecode(json);
+
+                          Ticket bigTicket = Ticket.fromJson(map);
+
+                          var args = {
+                            "user": widget.user,
+                            "ticket": bigTicket,
+                            "from": selectedDepartmentFrom,
+                            "to": selectedDepartment,
+                            "status": selectedStatus
+                          };
+
+                          Navigator.pushNamed(
+                              context, "/view_ticket", arguments: args
+                          );
+
+                        },
+                        child: const Text(
+                          "Search",
+                          style: TextStyle(
+                            color: Colors.red,
+                            fontSize: 18,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ),
+                    ),
+                  )
+                ]
+              ),
+            ),
+
             Padding(
               padding: const EdgeInsets.all(10),
               child: DropdownButton<String>(
@@ -212,7 +341,7 @@ class _ViewTicketsState extends State<ViewTickets> {
                   allSelected = statusSelected && departmentSelected
                       && departmentSelectedFrom;
                   if (allSelected) {
-                    getTickets();
+                    getTicketsUpdate();
                   }
 
                   setState(() {
@@ -265,7 +394,7 @@ class _ViewTicketsState extends State<ViewTickets> {
                   allSelected = statusSelected && departmentSelected
                       && departmentSelectedFrom;
                   if (allSelected) {
-                    getTickets();
+                    getTicketsUpdate();
                   }
 
                   setState(() {
@@ -293,7 +422,7 @@ class _ViewTicketsState extends State<ViewTickets> {
                 focusColor: Colors.transparent,
                 dropdownColor: Colors.red[800],
                 hint: statusSelected ? Text(
-                  selectedStatus,
+                  'Selected Status: $selectedStatus',
                   style: const TextStyle(
                       color: Colors.white,
                       fontSize: 18,
@@ -319,7 +448,7 @@ class _ViewTicketsState extends State<ViewTickets> {
                   allSelected = statusSelected && departmentSelected
                       && departmentSelectedFrom;
                   if (allSelected) {
-                    getTickets();
+                    getTicketsUpdate();
                   }
 
                   setState(() {
@@ -357,8 +486,9 @@ class _ViewTicketsState extends State<ViewTickets> {
                         // width: supporting.getWindowWidth(context),
                         child: DataTable(
                           columns: [
+                            getColumn("ID"),
                             getColumn("Name"),
-                            getColumn("Email"),
+                            getColumn("Status"),
                             getColumn("Contact"),
                             getColumn("Department"),
                             getColumn("Location"),

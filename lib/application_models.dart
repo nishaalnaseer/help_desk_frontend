@@ -229,7 +229,12 @@ class Ticket {
   final String location;
   final String subject;
   final String message;
-  final String status;
+  String status;
+  final String ip;
+  final String host;
+  final String username;
+  final bool hostIssue;
+  final String platform;
   List<Message> messages = [];
   List<TicketUpdate> updates = [];
 
@@ -251,7 +256,12 @@ class Ticket {
     required this.devices,
     required this.messages,
     required this.status,
-    required this.updates
+    required this.username,
+    required this.ip,
+    required this.host,
+    required this.hostIssue,
+    required this.updates,
+    required this.platform
   });
 
 
@@ -269,6 +279,11 @@ class Ticket {
       subject: json["subject"],
       message: json["message"],
       status: json["status"],
+      ip: json["ip"],
+      host: json["host"],
+      username: json["username"] ?? "",
+      hostIssue: json["host_issue"],
+      platform: json["platform"],
       devices: json["devices"] ?? [],
       messages: List.generate(json["messages"].length, (index)
         => Message.fromJson(json["messages"][index])),
@@ -288,7 +303,11 @@ class Ticket {
       "department": deptTicket,
       "location": location,
       "subject": subject,
-      "message": message
+      "host": host,
+      "username": username,
+      "host_issue": hostIssue,
+      "message": message,
+      "platform": platform
     };
   }
 }

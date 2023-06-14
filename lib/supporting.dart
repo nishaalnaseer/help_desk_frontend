@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:io';
 import 'package:http/http.dart' as http;
 import 'package:sn_progress_dialog/sn_progress_dialog.dart';
 
@@ -69,7 +70,7 @@ Future<String> getApiData(String path, String domain,
       } on TypeError catch (e) {
         details = json;
         showPopUp(context, "Error $code!", details);
-        return jsonEncode({});
+        throw HttpException("Code $code");
       } catch (e) {
         // Catch other types of exceptions
         details = 'An unexpected exception occurred: $e';
@@ -136,13 +137,6 @@ void showPopUp(BuildContext context, String title, String message) {
   );
 }
 
-class Arguments {
-  User user;
-  List<String> modules;
-
-  Arguments(this.user, this.modules);
-}
-
 class CustomRequest {
   final http.Client client = http.Client();
   late final http.Request request;
@@ -152,7 +146,6 @@ class CustomRequest {
     String jsonBody = jsonEncode(json);
     request.headers.addAll(headers);
     request.body = jsonBody;
-    print("before sending = $jsonBody");
   }
 
   Future<http.StreamedResponse> send(BuildContext context) async {

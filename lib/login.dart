@@ -36,6 +36,7 @@ class _LoginPageState extends State<LoginPage> {
     nameController.clear();  // clear
     var headers = {
       'Accept': 'application/json, text/plain, */*',
+      "Access-Control-Allow-Origin": "*",
       'Accept-Language': 'en-US,en',
       'Authorization': 'Basic Og==',
       'Connection': 'keep-alive',
