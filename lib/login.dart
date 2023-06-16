@@ -41,18 +41,6 @@ class _LoginPageState extends State<LoginPage> {
       'Accept-Language': 'en-US,en',
       'Authorization': 'Basic Og==',
       'Connection': 'keep-alive',
-      'Origin': 'http://127.0.0.1:8000',
-      'Referer': 'http://127.0.0.1:8000/docs',
-      'Sec-Fetch-Dest': 'empty',
-      'Sec-Fetch-Mode': 'cors',
-      'Sec-Fetch-Site': 'same-origin',
-      'Sec-GPC': '1',
-      'User-Agent':
-          'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36',
-      'X-Requested-With': 'XMLHttpRequest',
-      'sec-ch-ua': '"Not.A/Brand";v="8", "Chromium";v="114", "Brave";v="114"',
-      'sec-ch-ua-mobile': '?0',
-      'sec-ch-ua-platform': '"Windows"',
     };
 
     var data = {

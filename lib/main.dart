@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import 'departments_view.dart';
 import 'login.dart';
 import 'create_ticket.dart';
 import 'view_tickets.dart';
@@ -147,7 +148,7 @@ class DrawerNavigationApp extends StatelessWidget {
               user: user,
               domain: domain,
               protocol: protocol,
-              previousArgs: args);
+            );
         },
         '/view_tickets': (context) {
           Text? error =
@@ -160,7 +161,6 @@ class DrawerNavigationApp extends StatelessWidget {
             user: user,
             domain: domain,
             protocol: protocol,
-            previousArgs: const {},
           );
         },
         '/view_ticket': (context) {
@@ -179,7 +179,7 @@ class DrawerNavigationApp extends StatelessWidget {
               ticket: ticket,
               domain: domain,
               protocol: protocol,
-              previousArgs: currentArgs);
+            );
         },
 
         '/users': (context) {
@@ -190,6 +190,20 @@ class DrawerNavigationApp extends StatelessWidget {
           }
 
           return ViewUsers(
+            user: user,
+            domain: domain,
+            protocol: protocol,
+          );
+        },
+
+        '/departments': (context) {
+          Text? error =
+          assignUserData2(ModalRoute.of(context)?.settings.arguments);
+          if (error != null) {
+            return error;
+          }
+
+          return DepartmentsView(
             user: user,
             domain: domain,
             protocol: protocol,

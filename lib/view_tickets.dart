@@ -11,13 +11,11 @@ class ViewTickets extends StatefulWidget {
   final String domain;
   final String protocol;
   final User user;
-  final Map<String, String> previousArgs;
   const ViewTickets({
     Key? key,
     required this.domain,
     required this.protocol,
     required this.user,
-    required this.previousArgs,
   }) : super(key: key);
 
   @override
@@ -33,7 +31,10 @@ class _ViewTicketsState extends State<ViewTickets> {
   bool departmentSelectedFrom = false;
   List<String> departmentsFrom = ["Your Tickets"];
   TextStyle style = const TextStyle(
-      color: Colors.white, fontWeight: FontWeight.w500, fontSize: 18);
+      color: Colors.white,
+      fontWeight: FontWeight.w500,
+      fontSize: 18
+  );
 
   String selectedStatus = "";
   bool statusSelected = false;
@@ -57,7 +58,6 @@ class _ViewTicketsState extends State<ViewTickets> {
     for (String dep in widget.user.accessibleTickets) {
       departmentsFrom.add(dep);
     }
-    initPreviousState();
     super.initState();
   }
 
@@ -65,30 +65,6 @@ class _ViewTicketsState extends State<ViewTickets> {
   void didUpdateWidget(covariant ViewTickets oldWidget) {
     super.didUpdateWidget(oldWidget);
     setState(() {});
-  }
-
-  void initPreviousState() {
-    String? to = widget.previousArgs["to"];
-    String? from = widget.previousArgs["from"];
-    String? status = widget.previousArgs["status"];
-
-    if (to != null) {
-      departmentSelected = true;
-      selectedDepartment = to;
-    }
-
-    if (from != null) {
-      departmentSelectedFrom = true;
-      selectedDepartmentFrom = from;
-    }
-
-    if (status != null) {
-      statusSelected = true;
-      selectedStatus = status;
-    }
-
-    allSelected =
-        statusSelected && departmentSelected && departmentSelectedFrom;
   }
 
   Future<List<DataRow>> getAsyncTickets() async {
@@ -123,32 +99,36 @@ class _ViewTicketsState extends State<ViewTickets> {
           SizedBox(
             width: 200,
             child: ElevatedButton(
-                onPressed: () async {
-                  var json = await supporting.getApiData(
-                      "ticket?ticket_id=${ticket.tId}",
-                      widget.domain,
-                      widget.protocol,
-                      context,
-                      headers: widget.user.getAuth());
-                  Ticket bigTicket = Ticket.fromJson(jsonDecode(json));
+              onPressed: () async {
+                var json = await supporting.getApiData(
+                  "ticket?ticket_id=${ticket.tId}",
+                  widget.domain,
+                  widget.protocol,
+                  context,
+                  headers: widget.user.getAuth());
+                Ticket bigTicket = Ticket.fromJson(jsonDecode(json));
 
-                  var args = {
-                    "user": widget.user,
-                    "ticket": bigTicket,
-                    "from": selectedDepartmentFrom,
-                    "to": selectedDepartment,
-                    "status": selectedStatus
-                  };
-
-                  Navigator.pushNamed(context, "/view_ticket", arguments: args);
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => ViewTicket(
+                        protocol: widget.protocol,
+                        domain: widget.domain,
+                        user: widget.user,
+                        ticket: ticket,
+                      )
+                    ),
+                  );
                 },
                 child: const Text(
                   "Inspect/Edit",
                   style: TextStyle(
-                      color: Colors.red,
-                      fontSize: 18,
-                      fontWeight: FontWeight.w500),
-                )),
+                    color: Colors.red,
+                    fontSize: 18,
+                    fontWeight: FontWeight.w500
+                  ),
+                )
+            ),
           ),
         )
       ]));

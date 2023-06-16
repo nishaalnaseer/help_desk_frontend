@@ -7,6 +7,53 @@ List<String> generateList(json, String key) {
   return list;
 }
 
+class Department {
+  final int dId;
+  final String name;
+  final String defaultView;
+  final bool ticketable;
+  final List<String> modules;
+  final List<String> accessibleTickets;
+  final List<String> ticketsRaisedFrom;
+  final List<String> reportsFrom;
+
+  Department({
+    required this.dId,
+    required this.name,
+    required this.defaultView,
+    required this.ticketable,
+    required this.modules,
+    required this.accessibleTickets,
+    required this.ticketsRaisedFrom,
+    required this.reportsFrom,
+  });
+
+  factory Department.fromJson(Map<String, dynamic> json) {
+    return Department(
+      dId: json["d_id"],
+      name: json["name"],
+      defaultView: json["default_view"],
+      ticketable: json["ticketable"],
+
+      modules: List.generate(
+          json["modules"].length,
+              (index) => json["modules"][index]),
+
+      accessibleTickets: List.generate(
+          json["accessible_tickets"].length,
+              (index) => json["accessible_tickets"][index]),
+
+      reportsFrom: List.generate(
+          json["reports_from"].length,
+              (index) => json["reports_from"][index]),
+
+      ticketsRaisedFrom: List.generate(
+          json["tickets_raised_from"].length,
+              (index) => json["tickets_raised_from"][index]),
+    );
+  }
+}
+
 class Model {
   /*
    Model of electronic equipment

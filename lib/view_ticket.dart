@@ -11,14 +11,13 @@ class ViewTicket extends StatefulWidget {
   final String domain;
   final Ticket ticket;
   final User user;
-  final Map<String, String> previousArgs;
   const ViewTicket(
       {super.key,
       required this.protocol,
       required this.domain,
       required this.ticket,
       required this.user,
-      required this.previousArgs});
+      });
 
   @override
   State<ViewTicket> createState() => _ViewTicketState();
@@ -189,8 +188,7 @@ class _ViewTicketState extends State<ViewTicket> {
                 alignment: Alignment.topLeft,
                 child: ElevatedButton(
                   onPressed: () {
-                    Navigator.pushNamed(context, "/ticket_to_ticket",
-                      arguments: widget.previousArgs);
+                    Navigator.pop(context);
                   },
                   child: const Text(
                     "Back",
@@ -219,114 +217,117 @@ class _ViewTicketState extends State<ViewTicket> {
          : Padding(
            padding: const EdgeInsets.all(10),
            child: Row(
-                      children: [
-                        SizedBox(
-                          width: 300,
-                          child: DropdownButton<String>(
-                            focusColor: Colors.transparent,
-                            dropdownColor: Colors.red[800],
-                            hint: newStatusSelected
-                                ? Text(
-                                    'Mark Ticket as:  $selectedNewStatus',
-                                    style: const TextStyle(
-                                        fontSize: 17,
-                                        fontWeight: FontWeight.w500,
-                                        color: Colors.white),
-                                  )
-                                : const Text(
-                                    'Mark Ticket as: ',
-                                    style: TextStyle(
-                                        fontSize: 17,
-                                        fontWeight: FontWeight.w500,
-                                        color: Colors.white),
-                                  ),
-                            elevation: 16,
-                            onChanged: (String? newValue) {
-                              if (newValue != null) {
-                                selectedNewStatus = newValue;
-                                newStatusSelected = true;
-                              }
-                              setState(() {});
-                            },
-                            items: [
-                              "Ongoing".toUpperCase(),
-                              "On_hold".toUpperCase(),
-                              "Completed".toUpperCase(),
-                              "Rejected".toUpperCase(),
-                            ].map<DropdownMenuItem<String>>((String value) {
-                              return DropdownMenuItem<String>(
-                                value: value,
-                                child: Text(
-                                  value,
-                                  style: const TextStyle(
-                                      color: Colors.white,
-                                      fontWeight: FontWeight.w500,
-                                      fontSize: 18),
-                                ),
-                              );
-                            }).toList(),
-                          ),
-                        ),
-                        newStatusSelected
-                            ? Padding(
-                                padding: const EdgeInsets.all(10),
-                                child: ElevatedButton(
-                                    onPressed: () async {
-                                      var response =
-                                          await supporting.postRequest2(
-                                              jsonEncode({}),
-                                              widget.protocol,
-                                              widget.domain,
-                                              "status_change?new_status=$selectedNewStatus"
-                                              "&ticket_id=${widget.ticket.tId}",
-                                              context,
-                                              headers: widget.user.getAuth(),
-                                              showPrompt: true,
-                                              promptTitle: "Status Changed!",
-                                              promptMessage:
-                                                  "Status Changed to: $selectedNewStatus");
+             children: [
+               SizedBox(
+                 width: 300,
+                 child: DropdownButton<String>(
+                   focusColor: Colors.transparent,
+                   dropdownColor: Colors.red[800],
+                   hint: newStatusSelected
+                       ? Text(
+                           'Mark Ticket as:  $selectedNewStatus',
+                           style: const TextStyle(
+                               fontSize: 17,
+                               fontWeight: FontWeight.w500,
+                               color: Colors.white),
+                         )
+                       : const Text(
+                           'Mark Ticket as: ',
+                           style: TextStyle(
+                               fontSize: 17,
+                               fontWeight: FontWeight.w500,
+                               color: Colors.white),
+                         ),
+                   elevation: 16,
+                   onChanged: (String? newValue) {
+                     if (newValue != null) {
+                       selectedNewStatus = newValue;
+                       newStatusSelected = true;
+                     }
+                     setState(() {});
+                   },
+                   items: [
+                     "Ongoing".toUpperCase(),
+                     "On_hold".toUpperCase(),
+                     "Completed".toUpperCase(),
+                     "Rejected".toUpperCase(),
+                   ].map<DropdownMenuItem<String>>((String value) {
+                     return DropdownMenuItem<String>(
+                       value: value,
+                       child: Text(
+                         value,
+                         style: const TextStyle(
+                             color: Colors.white,
+                             fontWeight: FontWeight.w500,
+                             fontSize: 18),
+                       ),
+                     );
+                   }).toList(),
+                 ),
+               ),
+               newStatusSelected
+               ? Padding(
+                 padding: const EdgeInsets.all(10),
+                 child: ElevatedButton(
+                   onPressed: () async {
+                     var response =
+                       await supporting.postRequest2(
+                         jsonEncode({}),
+                         widget.protocol,
+                         widget.domain,
+                         "status_change?new_status=$selectedNewStatus"
+                         "&ticket_id=${widget.ticket.tId}",
+                         context,
+                         headers: widget.user.getAuth(),
+                         showPrompt: true,
+                         promptTitle: "Status Changed!",
+                         promptMessage:
+                           "Status Changed to: $selectedNewStatus"
+                       );
 
-                                      if (response.statusCode == 200 ||
-                                          response.statusCode == 201) {
-                                        TicketUpdate update = TicketUpdate(
-                                            newStatus: selectedNewStatus,
-                                            time: (DateTime.now()
-                                                        .millisecondsSinceEpoch ~/
-                                                    1000)
-                                                .toDouble(),
-                                            updatedBy: widget.user.email);
-                                        widget.ticket.updates.add(update);
+                     if (response.statusCode == 200 ||
+                         response.statusCode == 201) {
+                       TicketUpdate update = TicketUpdate(
+                         newStatus: selectedNewStatus,
+                         time: (DateTime.now()
+                                     .millisecondsSinceEpoch ~/
+                                 1000)
+                             .toDouble(),
+                         updatedBy: widget.user.email);
+                       widget.ticket.updates.add(update);
 
-                                        widget.ticket.status =
-                                            selectedNewStatus;
-                                        updates.add(listChild(
-                                            "Just Now",
-                                            widget.user.email,
-                                            "Changed Status to : $selectedNewStatus"));
+                       widget.ticket.status =
+                           selectedNewStatus;
+                       updates.add(listChild(
+                           "Just Now",
+                           widget.user.email,
+                           "Changed Status to : $selectedNewStatus"));
 
-                                        canAddMessages = (widget
-                                                    .ticket.status !=
-                                                "COMPLETED" &&
-                                            widget.ticket.status != "REJECTED");
-                                        showChangeStatus =
-                                            (widget.ticket.ticketTo ==
-                                                    widget.user.department) &&
-                                                canAddMessages;
+                       canAddMessages = (widget
+                                   .ticket.status !=
+                               "COMPLETED" &&
+                           widget.ticket.status != "REJECTED");
+                       showChangeStatus =
+                           (widget.ticket.ticketTo ==
+                                   widget.user.department) &&
+                               canAddMessages;
 
-                                        setState(() {});
-                                      }
-                                    },
-                                    child: const Text(
-                                      "Set Status",
-                                      style: TextStyle(
-                                          fontSize: 18,
-                                          fontWeight: FontWeight.w500,
-                                          color: Colors.red),
-                                    )),
-                              )
-                            : Container()
-                      ],
-                    ),
+                       setState(() {});
+                       }
+                     },
+                   child: const Text(
+                     "Set Status",
+                     style: TextStyle(
+                       fontSize: 18,
+                       fontWeight: FontWeight.w500,
+                       color: Colors.red
+                     ),
+                   )
+                 ),
+               )
+               : Container()
+             ],
+           ),
          ),
          getText('Ticket ID: ${widget.ticket.tId}'),
          getText('Submitted On: ${formatDate(widget.ticket.submittedOn)}'),
@@ -336,12 +337,12 @@ class _ViewTicketState extends State<ViewTicket> {
            child: Text(
              "Status: ${widget.ticket.status}",
              style: TextStyle(
-                 color: widget.ticket.status == "COMPLETED" ||
-                         widget.ticket.status == "REJECTED"
-                     ? Colors.red
-                     : Colors.white,
-                 fontWeight: FontWeight.w700,
-                 fontSize: 18),
+               color: widget.ticket.status == "COMPLETED" ||
+                     widget.ticket.status == "REJECTED"
+                 ? Colors.red
+                 : Colors.white,
+               fontWeight: FontWeight.w700,
+               fontSize: 18),
            ),
          ),
          getText('Ticket To: ${widget.ticket.ticketTo}'),
@@ -359,27 +360,28 @@ class _ViewTicketState extends State<ViewTicket> {
          getText('Platform: ${widget.ticket.platform}'),
          hideButtons
          ? Align(
-             alignment: Alignment.topLeft,
-             child: Padding(
-               padding: const EdgeInsets.fromLTRB(10, 20, 10, 10),
-               child: ElevatedButton(
-                   onPressed: () {
-                     // messagesHidden != messagesHidden;
+           alignment: Alignment.topLeft,
+           child: Padding(
+             padding: const EdgeInsets.fromLTRB(10, 20, 10, 10),
+             child: ElevatedButton(
+               onPressed: () {
+                 // messagesHidden != messagesHidden;
 
-                     hideButtons = false;
+                 hideButtons = false;
 
-                     setState(() {
-                       messagesHidden = true;
-                     });
-                   },
-                   child: const Text(
-                     "Hide Messages",
-                     style: TextStyle(
-                         fontSize: 18,
-                         fontWeight: FontWeight.w500,
-                         color: Colors.red),
-                   )),
+                 setState(() {
+                   messagesHidden = true;
+                 });
+               },
+               child: const Text(
+                 "Hide Messages",
+                 style: TextStyle(
+                   fontSize: 18,
+                   fontWeight: FontWeight.w500,
+                   color: Colors.red),
+               )
              ),
+            ),
            )
          : Container(),
          messagesHidden
@@ -389,54 +391,58 @@ class _ViewTicketState extends State<ViewTicket> {
          ),
          hideButtons
          ? Align(
-             alignment: Alignment.topLeft,
-             child: Padding(
+           alignment: Alignment.topLeft,
+           child: Padding(
                padding: const EdgeInsets.fromLTRB(10, 20, 10, 10),
                child: ElevatedButton(
-                   onPressed: () {
-                     setState(() {
-                       hideButtons = false;
+                 onPressed: () {
+                   setState(() {
+                     hideButtons = false;
 
-                       messagesHidden = true;
-                     });
-                   },
-                   child: const Text(
-                     "Hide Messages",
-                     style: TextStyle(
-                         fontSize: 18,
-                         fontWeight: FontWeight.w500,
-                         color: Colors.red),
-                   )),
+                     messagesHidden = true;
+                   });
+                 },
+                 child: const Text(
+                   "Hide Messages",
+                   style: TextStyle(
+                     fontSize: 18,
+                     fontWeight: FontWeight.w500,
+                     color: Colors.red),
+                 )
+               ),
              ),
            )
          : Container(),
          messagesHidden
          ? Center(
          child: Padding(
-               padding: const EdgeInsets.fromLTRB(10, 20, 10, 10),
-               child: ElevatedButton(
-                   onPressed: () {
-                     WidgetsBinding.instance.addPostFrameCallback((_) {
-                       scroll.animateTo(
-                         scroll.position.maxScrollExtent,
-                         duration: const Duration(milliseconds: 300),
-                         curve: Curves.easeOut,
-                       );
-                     });
+           padding: const EdgeInsets.fromLTRB(10, 20, 10, 10),
+           child: ElevatedButton(
+             onPressed: () {
+               WidgetsBinding.instance.
+                  addPostFrameCallback((_) {
+                 scroll.animateTo(
+                   scroll.position.maxScrollExtent,
+                   duration: const Duration(
+                     milliseconds: 300
+                   ),
+                   curve: Curves.easeOut,
+                 );
+               });
 
-                     setState(() {
-                       messagesHidden = false;
-                       hideButtons = true;
-                     });
-                   },
-                   child: const Text(
-                     "Show Messages",
-                     style: TextStyle(
-                         fontSize: 18,
-                         fontWeight: FontWeight.w500,
-                         color: Colors.red),
-                   )),
-             ),
+               setState(() {
+                 messagesHidden = false;
+                 hideButtons = true;
+               });
+             },
+             child: const Text(
+               "Show Messages",
+               style: TextStyle(
+                 fontSize: 18,
+                 fontWeight: FontWeight.w500,
+                 color: Colors.red),
+             )),
+           ),
          )
          : Container(),
          addingMessage
@@ -466,7 +472,10 @@ class _ViewTicketState extends State<ViewTicket> {
                  ),
                  labelText: "Add a Message",
                  labelStyle:
-                     TextStyle(fontSize: 18, color: Colors.white),
+                   TextStyle(
+                     fontSize: 18,
+                     color: Colors.white
+                   ),
                ),
              ),
            )
@@ -476,84 +485,88 @@ class _ViewTicketState extends State<ViewTicket> {
                  child: Padding(
                    padding: const EdgeInsets.all(10),
                    child: ElevatedButton(
-                       onPressed: () {
-                         _focusOnTextField();
+                   onPressed: () {
+                     _focusOnTextField();
 
-                         setState(() {
-                           addingMessage = true;
-                         });
-                         WidgetsBinding.instance
-                             .addPostFrameCallback((_) {
-                           scroll.animateTo(
-                             scroll.position.maxScrollExtent,
-                             duration: const Duration(milliseconds: 300),
-                             curve: Curves.easeOut,
-                           );
-                         });
-                       },
-                       child: const Text(
-                         "Add a Message",
-                         style: TextStyle(
-                             fontSize: 18,
-                             fontWeight: FontWeight.w500,
-                             color: Colors.red),
-                       )),
+                     setState(() {
+                       addingMessage = true;
+                     });
+                     WidgetsBinding.instance
+                         .addPostFrameCallback((_) {
+                       scroll.animateTo(
+                         scroll.position.maxScrollExtent,
+                         duration: const Duration(
+                             milliseconds: 300
+                         ),
+                         curve: Curves.easeOut,
+                       );
+                     });
+                   },
+                   child: const Text(
+                     "Add a Message",
+                     style: TextStyle(
+                       fontSize: 18,
+                       fontWeight: FontWeight.w500,
+                       color: Colors.red),
+                   )),
                  ),
                ),
             addingMessage
-                ? Center(
-                    child: Padding(
-                      padding: const EdgeInsets.all(10),
-                      child: ElevatedButton(
-                          onPressed: () async {
-                            setState(() {
-                              addingMessage = false;
-                            });
+              ? Center(
+                  child: Padding(
+                    padding: const EdgeInsets.all(10),
+                    child: ElevatedButton(
+                      onPressed: () async {
+                        setState(() {
+                          addingMessage = false;
+                        });
 
-                            String newMessage = controller.text;
-                            Message message = Message(
-                                time: DateTime.now().millisecondsSinceEpoch ~/
-                                    1000,
-                                personFrom: widget.user.email,
-                                message: newMessage);
-                            var response = await supporting.postRequest2(
-                                jsonEncode({}),
-                                widget.protocol,
-                                widget.domain,
-                                "message?message=$newMessage"
-                                "&ticket_id=${widget.ticket.tId}",
-                                context,
-                                headers: widget.user.getAuth(),
-                                showPrompt: false,
-                                promptTitle: "Nice",
-                                promptMessage: "Message Submitted");
+                        String newMessage = controller.text;
+                        Message message = Message(
+                            time: DateTime.now().millisecondsSinceEpoch ~/
+                                1000,
+                            personFrom: widget.user.email,
+                            message: newMessage);
+                        var response = await supporting.postRequest2(
+                            jsonEncode({}),
+                            widget.protocol,
+                            widget.domain,
+                            "message?message=$newMessage"
+                            "&ticket_id=${widget.ticket.tId}",
+                            context,
+                            headers: widget.user.getAuth(),
+                            showPrompt: false,
+                            promptTitle: "Nice",
+                            promptMessage: "Message Submitted");
 
-                            if (response.statusCode == 200 ||
-                                response.statusCode == 201) {
-                              widget.ticket.messages.add(message);
-                              controller.clear();
-                              updates.add(listChild(
-                                  "Just Now", widget.user.email, newMessage));
-                            }
-                            WidgetsBinding.instance.addPostFrameCallback((_) {
-                              scroll.animateTo(
-                                scroll.position.maxScrollExtent,
-                                duration: const Duration(milliseconds: 300),
-                                curve: Curves.easeOut,
-                              );
-                            });
-                            setState(() {});
-                          },
-                          child: const Text(
-                            "Submit Message",
-                            style: TextStyle(
-                                fontSize: 18,
-                                fontWeight: FontWeight.w500,
-                                color: Colors.red),
-                          )),
+                        if (response.statusCode == 200 ||
+                            response.statusCode == 201) {
+                          widget.ticket.messages.add(message);
+                          controller.clear();
+                          updates.add(listChild(
+                              "Just Now", widget.user.email, newMessage));
+                        }
+                        WidgetsBinding.instance.addPostFrameCallback((_) {
+                          scroll.animateTo(
+                            scroll.position.maxScrollExtent,
+                            duration: const Duration(milliseconds: 300),
+                            curve: Curves.easeOut,
+                          );
+                        });
+                        setState(() {});
+                        },
+                      child: const Text(
+                        "Submit Message",
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w500,
+                          color: Colors.red
+                        ),
+                      )
                     ),
-                  )
-                : Container()
+                  ),
+                )
+              : Container()
         ],
       ),
       widget.user);

@@ -13,8 +13,8 @@ import 'application_models.dart';
 const Map<String, String> map = {
   "Create Ticket": '/create_ticket',
   "View Tickets": '/view_tickets',
-  "Users": "/users"
-  // "Devices": devices,
+  "Users": "/users",
+  "Departments": "/departments",
   // "Models": modelsScreen,
   // "Reports": reports,
 };
@@ -205,6 +205,86 @@ Future<http.StreamedResponse> postRequest(
   }
 }
 
+Future<http.Response> getRequest(
+    String protocol, String domain, String path, dynamic context,
+    {var headers = const {'Content-Type': 'application/json'},
+      bool showPrompt = false,
+      String promptTitle = "",
+      String promptMessage = ""}) async {
+  ProgressDialog pd = ProgressDialog(context: context);
+  Uri url = Uri.parse('$protocol://$domain/$path');
+
+  pd.show(
+    msg: 'Loading',
+    progressType: ProgressType.valuable,
+    backgroundColor: hexToColor("#222222"),
+    progressValueColor: hexToColor("#222222"),
+    progressBgColor: Colors.red,
+    msgColor: Colors.white,
+    valueColor: Colors.white
+  );
+
+  late http.Response response;
+
+  try {
+    response = await http.get(
+        url, headers: headers
+    );
+  } on Exception catch (e) {
+    pd.close(delay: 0);
+    await Future.delayed(const Duration(seconds: 1));
+    showPopUp(context, "Error", "Something went wrong: $e");
+    throw Exception("Something went wrong: $e");
+  }
+
+  pd.close(delay: 0);
+
+  await Future.delayed(const Duration(seconds: 1));
+
+  int code = response.statusCode;
+  if (code == 200 || code == 201) {
+    if (showPrompt) {
+      String? message = jsonDecode(response.body)?["content"];
+
+      if(message == null) {
+        showPopUp(context, promptTitle, promptMessage);
+      } else {
+        showPopUp(context, promptTitle, message);
+      }
+    }
+    return response;
+  } else if (code > 499) {
+    showPopUp(context, "Error", "Details: code $code");
+    return response;
+  } else {
+    String details = "Details:\n";
+
+    String body = response.body;
+    var json = jsonDecode(body)["detail"];
+    if (json == null) {
+      showPopUp(context, "Error $code!", "Contact admin");
+    } else {
+      try {
+        for (var x in json) {
+          String field = x["loc"][1];
+          String type = x["type"];
+          String msg = x["msg"];
+
+          details += "Type: $type, $msg: $field\n";
+        }
+      } on TypeError catch (e) {
+        details = json;
+      } catch (e) {
+        // Catch other types of exceptions
+        details = 'An unexpected exception occurred: $e';
+      }
+    }
+
+    showPopUp(context, "Error $code!", details);
+    return response;
+  }
+}
+
 Future<http.Response> postRequest2(
     var data, String protocol, String domain, String path, dynamic context,
     {var headers = const {'Content-Type': 'application/json'},
@@ -226,7 +306,9 @@ Future<http.Response> postRequest2(
   late http.Response response;
 
   try {
-    response = await http.post(url, headers: headers, body: data);
+    response = await http.post(
+        url, headers: headers, body: data
+    );
   } on Exception catch (e) {
     pd.close(delay: 0);
     await Future.delayed(const Duration(seconds: 1));
@@ -239,11 +321,15 @@ Future<http.Response> postRequest2(
   await Future.delayed(const Duration(seconds: 1));
 
   int code = response.statusCode;
-  if (code == 200) {
+  if (code == 200 || code == 201) {
     if (showPrompt) {
-      String? message = jsonEncode(response.body)?
-        ["content"]["id"];
-      showPopUp(context, promptTitle, promptMessage);
+      String? message = jsonDecode(response.body)?["content"];
+
+      if(message == null) {
+        showPopUp(context, promptTitle, promptMessage);
+      } else {
+        showPopUp(context, promptTitle, message);
+      }
     }
     return response;
   } else if (code > 499) {

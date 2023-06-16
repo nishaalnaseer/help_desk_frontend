@@ -49,28 +49,28 @@ class _CreateTicketState extends State<CreateTicket> {
   Padding inputField(
       TextEditingController controller, String holder, String display,
       {int maximumLines = 1, int minimumLines = 1}) {
-    return Padding(
-      padding: const EdgeInsets.all(10),
-      child: TextField(
-        controller: controller,
-        cursorColor: Colors.red,
-        minLines: minimumLines,
-        maxLines: maximumLines,
-        onChanged: (value) => holder = value,
-        style: const TextStyle(fontSize: 18, color: Colors.white),
-        decoration: InputDecoration(
-          border: const OutlineInputBorder(),
-          focusedBorder: const OutlineInputBorder(
-            borderSide: BorderSide(color: Colors.red), // Change the color here
-          ),
-          enabledBorder: const OutlineInputBorder(
-            borderSide: BorderSide(color: Colors.red), // Change the color here
-          ),
-          errorBorder: const OutlineInputBorder(
-            borderSide: BorderSide(color: Colors.red), // Change the color here
-          ),
-          labelText: display,
-          labelStyle: const TextStyle(fontSize: 18, color: Colors.white),
+        return Padding(
+          padding: const EdgeInsets.all(10),
+          child: TextField(
+           controller: controller,
+           cursorColor: Colors.red,
+           minLines: minimumLines,
+           maxLines: maximumLines,
+           onChanged: (value) => holder = value,
+           style: const TextStyle(fontSize: 18, color: Colors.white),
+           decoration: InputDecoration(
+             border: const OutlineInputBorder(),
+             focusedBorder: const OutlineInputBorder(
+               borderSide: BorderSide(color: Colors.red), // Change the color here
+             ),
+             enabledBorder: const OutlineInputBorder(
+               borderSide: BorderSide(color: Colors.red), // Change the color here
+             ),
+             errorBorder: const OutlineInputBorder(
+               borderSide: BorderSide(color: Colors.red), // Change the color here
+             ),
+             labelText: display,
+             labelStyle: const TextStyle(fontSize: 18, color: Colors.white),
         ),
       ),
     );
