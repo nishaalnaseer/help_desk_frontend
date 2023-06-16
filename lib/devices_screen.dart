@@ -8,7 +8,8 @@ import 'application_models.dart';
 class DevicesScreen extends StatefulWidget {
   final String protocol;
   final String domain;
-  const DevicesScreen({Key? key, required this.protocol, required this.domain}) : super(key: key);
+  const DevicesScreen({Key? key, required this.protocol, required this.domain})
+      : super(key: key);
 
   @override
   State<DevicesScreen> createState() => _DevicesScreenState();
@@ -18,7 +19,6 @@ class _DevicesScreenState extends State<DevicesScreen> {
   List<String> departments = [];
   String selectedDepartment = "";
   bool departmentSelected = false;
-
 
   List<String> categories = [];
   String selectedCategory = "";
@@ -30,14 +30,10 @@ class _DevicesScreenState extends State<DevicesScreen> {
 
   Future<List<String>> getDepartments() async {
     String contents = await supporting.getApiData(
-      "departments",
-      widget.domain,
-      widget.protocol,
-      context
-    );
+        "departments", widget.domain, widget.protocol, context);
     List<dynamic> coded = await jsonDecode(contents);
     List<String> departments = [];
-    for(var x in coded) {
+    for (var x in coded) {
       departments.add(x);
     }
     return departments;
@@ -45,63 +41,56 @@ class _DevicesScreenState extends State<DevicesScreen> {
 
   Future<void> initDangIt() async {
     departments = await getDepartments();
-    setState(() {
-    });
+    setState(() {});
   }
 
   Future<void> getCategories() async {
     String contents = await supporting.getApiData(
-      "categories?department=$selectedDepartment",
-      widget.domain,
-      widget.protocol,
-      context
-    );
+        "categories?department=$selectedDepartment",
+        widget.domain,
+        widget.protocol,
+        context);
     categories = [];
     List<dynamic> coded = jsonDecode(contents);
-    for(var x in coded) {
+    for (var x in coded) {
       categories.add(x);
     }
 
-    setState(() {
-
-    });
+    setState(() {});
   }
 
   Future<void> getDevices() async {
     String contents = await supporting.getApiData(
-      "devices?department=$selectedDepartment&category=$selectedCategory",
-      widget.domain,
-      widget.protocol,
-      context
-    );
+        "devices?department=$selectedDepartment&category=$selectedCategory",
+        widget.domain,
+        widget.protocol,
+        context);
     rows = [];
     List<dynamic> coded = jsonDecode(contents);
-    for(var x in coded) {
+    for (var x in coded) {
       Device device = Device.fromJson(x);
-      rows.add(
-          DataRow(
-              cells: [
-                DataCell(Text(device.model.brand),),
-                DataCell(Text(device.model.description),),
-                DataCell(Text(device.location)),
-                DataCell(Text("${device.model.year}")),
-                DataCell(Text(device.serialNo)),
-                DataCell(Text("${device.staticIp}")),
-                DataCell(Text(device.ip)),
-                DataCell(Text(device.mac)),
-                DataCell(Text(device.remarks)),
-                DataCell(Text(device.supplies)),
-                DataCell(Text(device.obtainedOn)),
-                DataCell(Text(device.obtainedFrom)),
-                DataCell(Text(device.lastServiced)),
-                DataCell(Text('${device.totalServiced}')),
-              ]
-          )
-      );
+      rows.add(DataRow(cells: [
+        DataCell(
+          Text(device.model.brand),
+        ),
+        DataCell(
+          Text(device.model.description),
+        ),
+        DataCell(Text(device.location)),
+        DataCell(Text("${device.model.year}")),
+        DataCell(Text(device.serialNo)),
+        DataCell(Text("${device.staticIp}")),
+        DataCell(Text(device.ip)),
+        DataCell(Text(device.mac)),
+        DataCell(Text(device.remarks)),
+        DataCell(Text(device.supplies)),
+        DataCell(Text(device.obtainedOn)),
+        DataCell(Text(device.obtainedFrom)),
+        DataCell(Text(device.lastServiced)),
+        DataCell(Text('${device.totalServiced}')),
+      ]));
     }
-    setState(() {
-
-    });
+    setState(() {});
   }
 
   @override
@@ -129,11 +118,13 @@ class _DevicesScreenState extends State<DevicesScreen> {
             child: Padding(
               padding: const EdgeInsets.all(10),
               child: DropdownButton<String>(
-                hint: departmentSelected ? Text(selectedDepartment) : const Text('Select a Department'),
+                hint: departmentSelected
+                    ? Text(selectedDepartment)
+                    : const Text('Select a Department'),
                 elevation: 16,
                 dropdownColor: Colors.purple[100],
                 onChanged: (String? newValue) {
-                  if(newValue == null) {
+                  if (newValue == null) {
                     return;
                   }
 
@@ -141,10 +132,10 @@ class _DevicesScreenState extends State<DevicesScreen> {
                   selectedDepartment = newValue;
                   departmentSelected = true;
                   getCategories();
-                  setState(() {
-                  });
+                  setState(() {});
                 },
-                items: departments.map<DropdownMenuItem<String>>((String value) {
+                items:
+                    departments.map<DropdownMenuItem<String>>((String value) {
                   return DropdownMenuItem<String>(
                     value: value,
                     child: Text(value),
@@ -154,72 +145,100 @@ class _DevicesScreenState extends State<DevicesScreen> {
             ),
           ),
         ),
-        departmentSelected ? Center(
-          child: SizedBox(
-            width: getWindowWidth(context) - 20,
-            child: Padding(
-              padding: const EdgeInsets.all(10),
-              child: DropdownButton<String>(
-                hint: categorySelected ? Text(selectedCategory) : const Text('Select a Category'),
-                elevation: 16,
-                dropdownColor: Colors.purple[100],
-                onChanged: (String? newValue) {
-                  if(newValue == null) {
-                    return;
-                  }
-                  selectedCategory = newValue;
-                  categorySelected = true;
+        departmentSelected
+            ? Center(
+                child: SizedBox(
+                  width: getWindowWidth(context) - 20,
+                  child: Padding(
+                    padding: const EdgeInsets.all(10),
+                    child: DropdownButton<String>(
+                      hint: categorySelected
+                          ? Text(selectedCategory)
+                          : const Text('Select a Category'),
+                      elevation: 16,
+                      dropdownColor: Colors.purple[100],
+                      onChanged: (String? newValue) {
+                        if (newValue == null) {
+                          return;
+                        }
+                        selectedCategory = newValue;
+                        categorySelected = true;
 
-                  getDevices();
+                        getDevices();
 
-                  setState(() {
-
-                  });
-                },
-                items: categories.map<DropdownMenuItem<String>>((String value) {
-                  return DropdownMenuItem<String>(
-                    value: value,
-                    child: Text(value),
-                  );
-                }).toList(),
-              ),
-            ),
-          ),
-        )
-        : Container(),
-
-        categorySelected ? Center(
-          child: Scrollbar(
-            controller: controller2,
-            child: SingleChildScrollView(
-              controller: controller2,
-              scrollDirection: Axis.horizontal,
-              child: DataTable(
-                columns: const [
-                  DataColumn(label: Text('Brand'),),
-                  DataColumn(label: Text('Description'),),
-                  DataColumn(label: Text('Location'),),
-                  DataColumn(label: Text('Year'),),
-                  DataColumn(label: Text('Serial Number'),),
-                  DataColumn(label: Text('Static IP?'),),
-                  DataColumn(label: Text('Last Known IP'),),
-                  DataColumn(label: Text('MAC'),),
-                  DataColumn(label: Text('Remarks'),),
-                  DataColumn(label: Text('Supplies'),),
-                  DataColumn(label: Text('Obtained'),),
-                  DataColumn(label: Text('Obtained From'),),
-                  DataColumn(label: Text('Last Serviced'),),
-                  DataColumn(label: Text('Total Serviced'),),
-                ],
-                rows: rows,
-              ),
-            ),
-          ),
-        ) :
-        Container(),
+                        setState(() {});
+                      },
+                      items: categories
+                          .map<DropdownMenuItem<String>>((String value) {
+                        return DropdownMenuItem<String>(
+                          value: value,
+                          child: Text(value),
+                        );
+                      }).toList(),
+                    ),
+                  ),
+                ),
+              )
+            : Container(),
+        categorySelected
+            ? Center(
+                child: Scrollbar(
+                  controller: controller2,
+                  child: SingleChildScrollView(
+                    controller: controller2,
+                    scrollDirection: Axis.horizontal,
+                    child: DataTable(
+                      columns: const [
+                        DataColumn(
+                          label: Text('Brand'),
+                        ),
+                        DataColumn(
+                          label: Text('Description'),
+                        ),
+                        DataColumn(
+                          label: Text('Location'),
+                        ),
+                        DataColumn(
+                          label: Text('Year'),
+                        ),
+                        DataColumn(
+                          label: Text('Serial Number'),
+                        ),
+                        DataColumn(
+                          label: Text('Static IP?'),
+                        ),
+                        DataColumn(
+                          label: Text('Last Known IP'),
+                        ),
+                        DataColumn(
+                          label: Text('MAC'),
+                        ),
+                        DataColumn(
+                          label: Text('Remarks'),
+                        ),
+                        DataColumn(
+                          label: Text('Supplies'),
+                        ),
+                        DataColumn(
+                          label: Text('Obtained'),
+                        ),
+                        DataColumn(
+                          label: Text('Obtained From'),
+                        ),
+                        DataColumn(
+                          label: Text('Last Serviced'),
+                        ),
+                        DataColumn(
+                          label: Text('Total Serviced'),
+                        ),
+                      ],
+                      rows: rows,
+                    ),
+                  ),
+                ),
+              )
+            : Container(),
       ],
     );
   }
 }
-
-

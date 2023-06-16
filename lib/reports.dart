@@ -6,7 +6,8 @@ import 'package:help_desk_frontend/supporting.dart' as supporting;
 class ViewReports extends StatefulWidget {
   final String domain;
   final String protocol;
-  const ViewReports({Key? key, required this.domain, required this.protocol}) : super(key: key);
+  const ViewReports({Key? key, required this.domain, required this.protocol})
+      : super(key: key);
 
   @override
   State<ViewReports> createState() => _ViewReportsState();
@@ -58,16 +59,13 @@ class _ViewReportsState extends State<ViewReports> {
     }
     gen = !gen;
     this.gen = gen;
-    setState(() {
-
-    });
+    setState(() {});
   }
 
   void getObjects() {
     children = [];
 
     childrenRaw.forEach((raw, boolValue) {
-
       CheckboxListTile checkBox = CheckboxListTile(
         title: Text(raw),
         value: boolValue,
@@ -83,7 +81,7 @@ class _ViewReportsState extends State<ViewReports> {
 
   @override
   Widget build(BuildContext context) {
-    if(typeSelected && departmentSelected) {
+    if (typeSelected && departmentSelected) {
       getObjects();
     }
 
@@ -96,11 +94,13 @@ class _ViewReportsState extends State<ViewReports> {
               child: Padding(
                 padding: const EdgeInsets.all(10),
                 child: DropdownButton<String>(
-                  hint: departmentSelected ? Text(selectedDepartment) : const Text('Select a Department'),
+                  hint: departmentSelected
+                      ? Text(selectedDepartment)
+                      : const Text('Select a Department'),
                   elevation: 16,
                   dropdownColor: Colors.purple[100],
                   onChanged: (String? newValue) {
-                    if(newValue == null) {
+                    if (newValue == null) {
                       return;
                     }
 
@@ -111,7 +111,8 @@ class _ViewReportsState extends State<ViewReports> {
 
                     setState(() {});
                   },
-                  items: departments.map<DropdownMenuItem<String>>((String value) {
+                  items:
+                      departments.map<DropdownMenuItem<String>>((String value) {
                     return DropdownMenuItem<String>(
                       value: value,
                       child: Text(value),
@@ -125,11 +126,13 @@ class _ViewReportsState extends State<ViewReports> {
               child: Padding(
                 padding: const EdgeInsets.all(10),
                 child: DropdownButton<String>(
-                  hint: typeSelected ? Text(selectedType) : const Text('Select an Object'),
+                  hint: typeSelected
+                      ? Text(selectedType)
+                      : const Text('Select an Object'),
                   elevation: 16,
                   dropdownColor: Colors.purple[100],
                   onChanged: (String? newValue) {
-                    if(newValue == null) {
+                    if (newValue == null) {
                       return;
                     }
 
@@ -185,30 +188,29 @@ class _ViewReportsState extends State<ViewReports> {
                 ),
               ),
             ),
-
-            typeSelected && departmentSelected ? Align(
-              alignment: Alignment.bottomLeft,
-              child: SizedBox(
-                width: 200,
-                child: Column(
-                  children: children,
-                ),
-              ),
-            )
-            : Container(),
-
             typeSelected && departmentSelected
-            ? Center(
-              child: Container(
-                width: 150,
-                padding: const EdgeInsets.all(10),
-                child: ElevatedButton(
-                  onPressed: () {},
-                  child: const Text("Generate"),
-                ),
-              ),
-            )
-            : Container()
+                ? Align(
+                    alignment: Alignment.bottomLeft,
+                    child: SizedBox(
+                      width: 200,
+                      child: Column(
+                        children: children,
+                      ),
+                    ),
+                  )
+                : Container(),
+            typeSelected && departmentSelected
+                ? Center(
+                    child: Container(
+                      width: 150,
+                      padding: const EdgeInsets.all(10),
+                      child: ElevatedButton(
+                        onPressed: () {},
+                        child: const Text("Generate"),
+                      ),
+                    ),
+                  )
+                : Container()
           ],
         ),
       ],

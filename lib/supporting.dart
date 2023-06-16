@@ -13,6 +13,7 @@ import 'application_models.dart';
 const Map<String, String> map = {
   "Create Ticket": '/create_ticket',
   "View Tickets": '/view_tickets',
+  "Users": "/users"
   // "Devices": devices,
   // "Models": modelsScreen,
   // "Reports": reports,
@@ -30,11 +31,10 @@ Map<String, dynamic> convertDynamicToMap(dynamic object) {
   throw Exception('Failed to convert dynamic to Map<String, dynamic>.');
 }
 
-Future<String> getApiData(String path, String domain,
-    String protocol, dynamic context, {
-      var headers = const {'Content-Type': 'application/json'},
-      int delay = 0
-  }) async {
+Future<String> getApiData(
+    String path, String domain, String protocol, dynamic context,
+    {var headers = const {'Content-Type': 'application/json'},
+    int delay = 0}) async {
   ProgressDialog pd = ProgressDialog(context: context);
   pd.show(
       msg: 'Loading',
@@ -43,15 +43,14 @@ Future<String> getApiData(String path, String domain,
       progressValueColor: hexToColor("#222222"),
       progressBgColor: Colors.red,
       msgColor: Colors.white,
-      valueColor: Colors.white
-  );
+      valueColor: Colors.white);
   var uri = Uri.parse('$protocol://$domain/$path');
   var response = await http.get(uri, headers: headers);
 
   pd.close(delay: delay);
   await Future.delayed(const Duration(seconds: 1));
   int code = response.statusCode;
-  if(code != 200) {
+  if (code != 200) {
     String details = "Details:\n";
 
     String body = response.body;
@@ -59,9 +58,8 @@ Future<String> getApiData(String path, String domain,
     if (json == null) {
       showPopUp(context, "Error $code!", "Contact admin");
     } else {
-
       try {
-        for(var x in json) {
+        for (var x in json) {
           String type = x["type"];
           String msg = x["msg"];
 
@@ -101,21 +99,15 @@ Color hexToColor(String hexString) {
 void showPopUp(BuildContext context, String title, String message) {
   showDialog(
       context: context,
-      builder:  (BuildContext context) {
+      builder: (BuildContext context) {
         return AlertDialog(
           title: Text(
             title,
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 18
-            ),
+            style: const TextStyle(color: Colors.white, fontSize: 18),
           ),
           content: Text(
             message,
-            style: const TextStyle(
-                color: Colors.white,
-                fontSize: 18
-            ),
+            style: const TextStyle(color: Colors.white, fontSize: 18),
           ),
           backgroundColor: hexToColor("#222222"),
           actions: [
@@ -125,16 +117,12 @@ void showPopUp(BuildContext context, String title, String message) {
               },
               child: const Text(
                 'Close',
-                style: TextStyle(
-                  color: Colors.red,
-                  fontSize: 17
-                ),
+                style: TextStyle(color: Colors.red, fontSize: 17),
               ),
             ),
           ],
         );
-      }
-  );
+      });
 }
 
 class CustomRequest {
@@ -155,11 +143,8 @@ class CustomRequest {
 }
 
 Future<http.StreamedResponse> postRequest(
-    var data, String protocol, String domain, String path,
-    dynamic context,
-    {var headers = const {'Content-Type': 'application/json'}}
-    ) async {
-
+    var data, String protocol, String domain, String path, dynamic context,
+    {var headers = const {'Content-Type': 'application/json'}}) async {
   ProgressDialog pd = ProgressDialog(context: context);
   String url = '$protocol://$domain/$path';
 
@@ -170,8 +155,7 @@ Future<http.StreamedResponse> postRequest(
       progressValueColor: hexToColor("#222222"),
       progressBgColor: Colors.red,
       msgColor: Colors.white,
-      valueColor: Colors.white
-  );
+      valueColor: Colors.white);
 
   CustomRequest req = CustomRequest("POST", url, data, headers);
 
@@ -190,21 +174,19 @@ Future<http.StreamedResponse> postRequest(
   await Future.delayed(const Duration(seconds: 1));
 
   int code = response.statusCode;
-  if(code == 200) {
+  if (code == 200) {
     showPopUp(context, "Nice!", "Ticket Submitted");
     return response;
   } else {
     String details = "Details:\n";
 
-    String body = await response.stream.transform(utf8.decoder).
-    join();
+    String body = await response.stream.transform(utf8.decoder).join();
     var json = jsonDecode(body)["detail"];
     if (json == null) {
       showPopUp(context, "Error $code!", "Contact admin");
     } else {
-
       try {
-        for(var x in json) {
+        for (var x in json) {
           String type = x["type"];
           String msg = x["msg"];
 
@@ -224,15 +206,11 @@ Future<http.StreamedResponse> postRequest(
 }
 
 Future<http.Response> postRequest2(
-    var data, String protocol, String domain, String path,
-    dynamic context,
-    {
-      var headers = const {'Content-Type': 'application/json'},
-      bool showPrompt = false, String promptTitle = "",
-      String promptMessage = ""
-    }
-    ) async {
-
+    var data, String protocol, String domain, String path, dynamic context,
+    {var headers = const {'Content-Type': 'application/json'},
+    bool showPrompt = false,
+    String promptTitle = "",
+    String promptMessage = ""}) async {
   ProgressDialog pd = ProgressDialog(context: context);
   Uri url = Uri.parse('$protocol://$domain/$path');
 
@@ -243,15 +221,12 @@ Future<http.Response> postRequest2(
       progressValueColor: hexToColor("#222222"),
       progressBgColor: Colors.red,
       msgColor: Colors.white,
-      valueColor: Colors.white
-  );
+      valueColor: Colors.white);
 
   late http.Response response;
 
   try {
-    response = await http.post(
-        url, headers: headers, body: data
-    );
+    response = await http.post(url, headers: headers, body: data);
   } on Exception catch (e) {
     pd.close(delay: 0);
     await Future.delayed(const Duration(seconds: 1));
@@ -264,8 +239,10 @@ Future<http.Response> postRequest2(
   await Future.delayed(const Duration(seconds: 1));
 
   int code = response.statusCode;
-  if(code == 200) {
-    if(showPrompt) {
+  if (code == 200) {
+    if (showPrompt) {
+      String? message = jsonEncode(response.body)?
+        ["content"]["id"];
       showPopUp(context, promptTitle, promptMessage);
     }
     return response;
@@ -281,7 +258,7 @@ Future<http.Response> postRequest2(
       showPopUp(context, "Error $code!", "Contact admin");
     } else {
       try {
-        for(var x in json) {
+        for (var x in json) {
           String field = x["loc"][1];
           String type = x["type"];
           String msg = x["msg"];
@@ -303,7 +280,7 @@ Future<http.Response> postRequest2(
 
 List<Widget> getDrawerKids(User user, BuildContext context) {
   List<Widget> children = [];
-  for(String name in user.modules) {
+  for (String name in user.modules) {
     String? route = map[name];
     if (route == null) {
       continue;
@@ -317,16 +294,13 @@ List<Widget> getDrawerKids(User user, BuildContext context) {
           child: Text(
             name,
             style: const TextStyle(
-              color: Colors.white, // Change the text color here
-              fontSize: 21,
-              fontWeight: FontWeight.w500
-            ),
+                color: Colors.white, // Change the text color here
+                fontSize: 21,
+                fontWeight: FontWeight.w500),
           ),
         ),
         onTap: () {
-          Navigator.pushNamed(
-              context, route, arguments: user
-          );
+          Navigator.pushNamed(context, route, arguments: user);
         },
       ),
     );
@@ -340,10 +314,7 @@ class DrawerNavigation extends StatelessWidget {
   final User user;
   const DrawerNavigation({super.key, required this.user});
   final TextStyle style = const TextStyle(
-    color: Colors.white,
-    fontWeight: FontWeight.w500,
-    fontSize: 18
-  );
+      color: Colors.white, fontWeight: FontWeight.w500, fontSize: 18);
 
   @override
   Widget build(BuildContext context) {
@@ -374,9 +345,7 @@ class DrawerNavigation extends StatelessWidget {
                         style: style,
                       ),
                       onTap: () {
-                        Navigator.pushReplacementNamed(
-                            context, '/settings'
-                        );
+                        Navigator.pushReplacementNamed(context, '/settings');
                       },
                     ),
                     ListTile(
@@ -402,9 +371,7 @@ class DrawerNavigation extends StatelessWidget {
                         style: style,
                       ),
                       onTap: () {
-                        Navigator.pushReplacementNamed(
-                            context, '/login'
-                        );
+                        Navigator.pushReplacementNamed(context, '/login');
                       },
                     ),
                   ],
@@ -418,39 +385,33 @@ class DrawerNavigation extends StatelessWidget {
   }
 }
 
-Scaffold getScaffold(
-    Widget thingy, User user, {bool appBar = true})
-  {
+Scaffold getScaffold(Widget thingy, User user, {bool appBar = true}) {
   final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
 
   return Scaffold(
-    appBar: appBar ? AppBar(
-      key: scaffoldKey,
-      backgroundColor: Colors.red[900],
-      // leading: IconButton(
-      //   icon: const Icon(
-      //     Icons.menu,
-      //     color: Colors.white,
-      //   ),
-      //   tooltip: 'Menu',
-      //   onPressed: () {
-      //     Scaffold.of(context).openDrawer();
-      //   },
-      // ),
-      elevation: 0,
-      titleSpacing: 0,
-      title: const Text(
-          "Ticketing",
-          style: TextStyle(
-              color: Colors.white,
-              fontWeight: FontWeight.w500
+    appBar: appBar
+        ? AppBar(
+            key: scaffoldKey,
+            backgroundColor: Colors.red[900],
+            // leading: IconButton(
+            //   icon: const Icon(
+            //     Icons.menu,
+            //     color: Colors.white,
+            //   ),
+            //   tooltip: 'Menu',
+            //   onPressed: () {
+            //     Scaffold.of(context).openDrawer();
+            //   },
+            // ),
+            elevation: 0,
+            titleSpacing: 0,
+            title: const Text("Ticketing",
+                style: TextStyle(
+                    color: Colors.white, fontWeight: FontWeight.w500)),
           )
-      ),
-    ) : null,
-
+        : null,
     drawer: DrawerNavigation(user: user),
     backgroundColor: hexToColor("#222222"),
     body: thingy,
   );
-
 }

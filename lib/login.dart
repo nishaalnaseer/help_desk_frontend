@@ -27,13 +27,14 @@ class _LoginPageState extends State<LoginPage> {
 
   Future<void> login() async {
     nameController.text = "nishawl.naseer@outlook.com";
-    passwordController.text = "\$2b\$12\$E6WQteQYd.kIY01.kfPa3u1Kg3r5s0VrpxmGG2mjnFo7z84fwy.Q2";
+    passwordController.text =
+        "\$2b\$12\$E6WQteQYd.kIY01.kfPa3u1Kg3r5s0VrpxmGG2mjnFo7z84fwy.Q2";
 
     String email = nameController.text;
     String password = passwordController.text;
 
-    passwordController.clear();  // clear
-    nameController.clear();  // clear
+    passwordController.clear(); // clear
+    nameController.clear(); // clear
     var headers = {
       'Accept': 'application/json, text/plain, */*',
       "Access-Control-Allow-Origin": "*",
@@ -46,7 +47,8 @@ class _LoginPageState extends State<LoginPage> {
       'Sec-Fetch-Mode': 'cors',
       'Sec-Fetch-Site': 'same-origin',
       'Sec-GPC': '1',
-      'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36',
+      'User-Agent':
+          'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36',
       'X-Requested-With': 'XMLHttpRequest',
       'sec-ch-ua': '"Not.A/Brand";v="8", "Chromium";v="114", "Brave";v="114"',
       'sec-ch-ua-mobile': '?0',
@@ -69,8 +71,7 @@ class _LoginPageState extends State<LoginPage> {
           "token",
           headers: headers,
           context,
-          showPrompt: false
-      );
+          showPrompt: false);
     } on Exception catch (e) {
       return;
     }
@@ -80,25 +81,20 @@ class _LoginPageState extends State<LoginPage> {
     }
     var token = jsonDecode(response.body);
 
-    headers.update("Authorization", (value) =>
-      "${token["token_type"]} ${token["access_token"]}");
+    headers.update("Authorization",
+        (value) => "${token["token_type"]} ${token["access_token"]}");
     headers.putIfAbsent('Content-Type', () => 'application/json');
 
     String jsonRaw = await supporting.getApiData(
-        "users/me/",
-        widget.domain,
-        widget.protocol,
-        context,
-        headers: headers,
-        delay: 500
-    );
+        "users/me/", widget.domain, widget.protocol, context,
+        headers: headers, delay: 500);
     var json = jsonDecode(jsonRaw);
     User user = User.fromJson(json);
     user.setAuth(headers);
 
     String? defaultView = supporting.map[user.defaultView];
 
-    if(defaultView == null) {
+    if (defaultView == null) {
       Navigator.pushNamed(context, "/logged_in", arguments: user);
       return;
     }
@@ -109,146 +105,134 @@ class _LoginPageState extends State<LoginPage> {
   @override
   Widget build(BuildContext context) {
     return supporting.getScaffold(
-      Padding(
-        padding: const EdgeInsets.all(75),
-        child: Center(
-          child: SizedBox(
-            width: 400,
-            child: ListView(
-              children: <Widget>[
-                Container(
-                    alignment: Alignment.center,
-                    padding: const EdgeInsets.fromLTRB(10, 100, 10, 10),
-                    child: const Text(
-                      'Ticketing System',
-                      style: TextStyle(
-                          color: Colors.redAccent,
-                          fontWeight: FontWeight.w500,
-                          fontSize: 30
+        Padding(
+          padding: const EdgeInsets.all(75),
+          child: Center(
+            child: SizedBox(
+              width: 400,
+              child: ListView(
+                children: <Widget>[
+                  Container(
+                      alignment: Alignment.center,
+                      padding: const EdgeInsets.fromLTRB(10, 100, 10, 10),
+                      child: const Text(
+                        'Ticketing System',
+                        style: TextStyle(
+                            color: Colors.redAccent,
+                            fontWeight: FontWeight.w500,
+                            fontSize: 30),
+                      )),
+                  Container(
+                      alignment: Alignment.center,
+                      padding: const EdgeInsets.all(10),
+                      child: const Text(
+                        'Sign in',
+                        style: TextStyle(color: Colors.white, fontSize: 20),
+                      )),
+                  Container(
+                    padding: const EdgeInsets.fromLTRB(10, 30, 10, 10),
+                    child: TextField(
+                      cursorColor: Colors.red,
+                      controller: nameController,
+                      onChanged: (value) => username = value,
+                      style: const TextStyle(color: Colors.white, fontSize: 18),
+                      decoration: const InputDecoration(
+                        border: OutlineInputBorder(),
+                        focusedBorder: OutlineInputBorder(
+                          borderSide: BorderSide(
+                              color: Colors.red), // Change the color here
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderSide: BorderSide(
+                              color: Colors.red), // Change the color here
+                        ),
+                        errorBorder: OutlineInputBorder(
+                          borderSide: BorderSide(
+                              color: Colors.red), // Change the color here
+                        ),
+                        label: Text(
+                          "Email",
+                          style: TextStyle(color: Colors.white, fontSize: 17),
+                        ),
                       ),
-                    )
-                ),
-                Container(
-                    alignment: Alignment.center,
+                    ),
+                  ),
+                  Container(
                     padding: const EdgeInsets.all(10),
-                    child: const Text(
-                      'Sign in',
-                      style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 20
-                      ),
-                    )
-                ),
-                Container(
-                  padding: const EdgeInsets.fromLTRB(10, 30, 10, 10),
-                  child: TextField(
-                    cursorColor: Colors.red,
-                    controller: nameController,
-                    onChanged: (value) => username = value,
-                    style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 18
-                    ),
-                    decoration: const InputDecoration(
-                      border: OutlineInputBorder(),
-                      focusedBorder: OutlineInputBorder(
-                        borderSide: BorderSide(color: Colors.red), // Change the color here
-                      ),
-                      enabledBorder: OutlineInputBorder(
-                        borderSide: BorderSide(color: Colors.red), // Change the color here
-                      ),
-                      errorBorder: OutlineInputBorder(
-                        borderSide: BorderSide(color: Colors.red), // Change the color here
-                      ),
-                      label: Text(
-                        "Email",
-                        style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 17
+                    child: TextField(
+                      cursorColor: Colors.red,
+                      controller: passwordController,
+                      obscureText: true,
+                      style: const TextStyle(color: Colors.white),
+                      onChanged: (value) => password = value,
+                      decoration: const InputDecoration(
+                        label: Text(
+                          "Password",
+                          style: TextStyle(color: Colors.white, fontSize: 17),
+                        ),
+                        border: OutlineInputBorder(),
+                        focusedBorder: OutlineInputBorder(
+                          borderSide: BorderSide(
+                              color: Colors.red), // Change the color here
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderSide: BorderSide(
+                              color: Colors.red), // Change the color here
+                        ),
+                        errorBorder: OutlineInputBorder(
+                          borderSide: BorderSide(
+                              color: Colors.red), // Change the color here
                         ),
                       ),
                     ),
                   ),
-                ),
-                Container(
-                  padding: const EdgeInsets.all(10),
-                  child: TextField(
-                    cursorColor: Colors.red,
-                    controller: passwordController,
-                    obscureText: true,
-                    style: const TextStyle(
-                        color: Colors.white
-                    ),
-                    onChanged: (value) => password = value,
-                    decoration: const InputDecoration(
-                      label: Text(
-                        "Password",
+                  Container(
+                    padding: const EdgeInsets.all(10),
+                    child: ElevatedButton(
+                      onPressed: () {
+                        login();
+                      },
+                      child: const Text(
+                        "Login",
                         style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 17
+                          color: Colors.red,
+                          fontSize: 17,
+                          fontWeight: FontWeight.w500,
                         ),
-                      ),
-                      border: OutlineInputBorder(),
-                      focusedBorder: OutlineInputBorder(
-                        borderSide: BorderSide(color: Colors.red), // Change the color here
-                      ),
-                      enabledBorder: OutlineInputBorder(
-                        borderSide: BorderSide(color: Colors.red), // Change the color here
-                      ),
-                      errorBorder: OutlineInputBorder(
-                        borderSide: BorderSide(color: Colors.red), // Change the color here
                       ),
                     ),
                   ),
-                ),
-                Container(
-                  padding: const EdgeInsets.all(10),
-                  child: ElevatedButton(
+                  TextButton(
                     onPressed: () {
-                      login();
+                      //forgot password screen
                     },
                     child: const Text(
-                      "Login",
+                      'Forgot Password',
                       style: TextStyle(
-                        color: Colors.red,
+                        color: Colors.white,
                         fontSize: 17,
                         fontWeight: FontWeight.w500,
                       ),
                     ),
                   ),
-                ),
-                TextButton(
-                  onPressed: () {
-                    //forgot password screen
-                  },
-                  child: const Text(
-                    'Forgot Password',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 17,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         ),
-      ),
-      User(
-        id: -1,
-        name: "name",
-        department: "department",
-        email: "email",
-        number: "number",
-        location: "location",
-        accessibleReports: [],
-        accessibleTickets: [],
-        modules: [],
-        defaultView: "",
-        ticketableDepartments: [], ticketsFrom: []
-      ),
-      appBar: false
-    );
+        User(
+            id: -1,
+            name: "name",
+            department: "department",
+            email: "email",
+            number: "number",
+            location: "location",
+            accessibleReports: [],
+            accessibleTickets: [],
+            modules: [],
+            defaultView: "",
+            ticketableDepartments: [],
+            ticketsFrom: []),
+        appBar: false);
   }
 }

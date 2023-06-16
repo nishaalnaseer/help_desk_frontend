@@ -1,9 +1,7 @@
 List<String> generateList(json, String key) {
-  List<String> list =  json[key] != null ?
-      List.generate(
-      json[key].length, (index) =>
-      json[key][index]
-    ) : [];
+  List<String> list = json[key] != null
+      ? List.generate(json[key].length, (index) => json[key][index])
+      : [];
   list.sort();
 
   return list;
@@ -48,7 +46,6 @@ class Model {
       category: json["category"],
     );
   }
-
 }
 
 class Device {
@@ -84,19 +81,19 @@ class Device {
 
   factory Device.fromJson(Map<String, dynamic> json) {
     return Device(
-        uId: json["u_id"],
-        location: json["location"],
-        serialNo: json["serial_no"],
-        staticIp: json["static_ip"],
-        ip: json["ip"],
-        mac: json["mac"],
-        remarks: json["remarks"],
-        supplies: json["supplies"],
-        obtainedOn: json["obtained_on"],
-        obtainedFrom: json["obtained_from"],
-        lastServiced: json["last_serviced"],
-        totalServiced: int.parse(json["total_serviced"]),
-        model: Model.fromJson(json["model"]),
+      uId: json["u_id"],
+      location: json["location"],
+      serialNo: json["serial_no"],
+      staticIp: json["static_ip"],
+      ip: json["ip"],
+      mac: json["mac"],
+      remarks: json["remarks"],
+      supplies: json["supplies"],
+      obtainedOn: json["obtained_on"],
+      obtainedFrom: json["obtained_from"],
+      lastServiced: json["last_serviced"],
+      totalServiced: int.parse(json["total_serviced"]),
+      model: Model.fromJson(json["model"]),
     );
   }
 }
@@ -116,24 +113,22 @@ class User {
   List<String> ticketableDepartments;
   List<Device> devices = [];
 
-
   Map<String, String> _auth = {};
 
-  User({
-    required this.id,
-    required this.name,
-    required this.department,
-    required this.email,
-    required this.number,
-    required this.location,
-    required this.accessibleReports,
-    required this.ticketsFrom,
-    required this.accessibleTickets,
-    required this.modules,
-    required this.defaultView,
-    required this.ticketableDepartments,
-    List<Device>? devices
-  });
+  User(
+      {required this.id,
+      required this.name,
+      required this.department,
+      required this.email,
+      required this.number,
+      required this.location,
+      required this.accessibleReports,
+      required this.ticketsFrom,
+      required this.accessibleTickets,
+      required this.modules,
+      required this.defaultView,
+      required this.ticketableDepartments,
+      List<Device>? devices});
 
   factory User.fromJson(Map<String, dynamic> json) {
     return User(
@@ -144,19 +139,15 @@ class User {
       number: json["number"],
       location: json["location"],
       defaultView: json["default_view"],
-
       ticketsFrom: generateList(json, "tickets_from"),
       ticketableDepartments: generateList(json, "ticketable_departments"),
       modules: generateList(json, "modules"),
       accessibleTickets: generateList(json, "accessible_tickets"),
       accessibleReports: generateList(json, "accessible_reports"),
-
-      devices: json["devices"] != null ?
-        List.generate(json["devices"].length, (index) => 
-          Device.fromJson(json["devices"][index])
-        ) :
-        [],
-
+      devices: json["devices"] != null
+          ? List.generate(json["devices"].length,
+              (index) => Device.fromJson(json["devices"][index]))
+          : [],
     );
   }
 
@@ -189,13 +180,8 @@ class Message {
   }
 
   Map<String, dynamic> toJson() {
-    return {
-      "time": time,
-      "person_from": personFrom,
-      "message": message
-    };
+    return {"time": time, "person_from": personFrom, "message": message};
   }
-
 }
 
 class TicketUpdate {
@@ -211,9 +197,9 @@ class TicketUpdate {
 
   factory TicketUpdate.fromJson(Map<String, dynamic> json) {
     return TicketUpdate(
-        newStatus: json["new_status"],
-        time: json["time"],
-        updatedBy: json["user"],
+      newStatus: json["new_status"],
+      time: json["time"],
+      updatedBy: json["user"],
     );
   }
 }
@@ -241,29 +227,27 @@ class Ticket {
   final int submittedOn;
   List<dynamic>? devices = [];
 
-  Ticket({
-    required this.tId,
-    required this.submittedBy,
-    required this.submittedOn,
-    required this.ticketTo,
-    required this.nameTicket,
-    required this.emailTicket,
-    required this.numberTicket,
-    required this.deptTicket,
-    required this.location,
-    required this.subject,
-    required this.message,
-    required this.devices,
-    required this.messages,
-    required this.status,
-    required this.username,
-    required this.ip,
-    required this.host,
-    required this.hostIssue,
-    required this.updates,
-    required this.platform
-  });
-
+  Ticket(
+      {required this.tId,
+      required this.submittedBy,
+      required this.submittedOn,
+      required this.ticketTo,
+      required this.nameTicket,
+      required this.emailTicket,
+      required this.numberTicket,
+      required this.deptTicket,
+      required this.location,
+      required this.subject,
+      required this.message,
+      required this.devices,
+      required this.messages,
+      required this.status,
+      required this.username,
+      required this.ip,
+      required this.host,
+      required this.hostIssue,
+      required this.updates,
+      required this.platform});
 
   factory Ticket.fromJson(Map<String, dynamic> json) {
     return Ticket(
@@ -285,10 +269,10 @@ class Ticket {
       hostIssue: json["host_issue"],
       platform: json["platform"],
       devices: json["devices"] ?? [],
-      messages: List.generate(json["messages"].length, (index)
-        => Message.fromJson(json["messages"][index])),
-      updates: List.generate(json["updates"].length, (index)
-      => TicketUpdate.fromJson(json["updates"][index])),
+      messages: List.generate(json["messages"].length,
+          (index) => Message.fromJson(json["messages"][index])),
+      updates: List.generate(json["updates"].length,
+          (index) => TicketUpdate.fromJson(json["updates"][index])),
     );
   }
 
@@ -322,9 +306,14 @@ class UpdateBox {
   late final String displayFrom;
   late final String displayMessage;
 
-  UpdateBox(this.type, this.time, this.from, this.message,) {
+  UpdateBox(
+    this.type,
+    this.time,
+    this.from,
+    this.message,
+  ) {
     displayTime = "Time: $time";
-    if(type == "message") {
+    if (type == "message") {
       displayFrom = "From: $from";
       displayMessage = "Message: $message";
     } else {

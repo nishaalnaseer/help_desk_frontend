@@ -5,6 +5,7 @@ import 'create_ticket.dart';
 import 'view_tickets.dart';
 import 'view_ticket.dart';
 import 'application_models.dart';
+import 'users.dart';
 import 'supporting.dart' as supporting;
 
 import 'package:flutter/foundation.dart' show kIsWeb;
@@ -17,7 +18,6 @@ List<String> modules = [];
 late User user;
 
 void main() async {
-
   if (kIsWeb) {
     // html.HttpRequest.getString('assets/data.json').then((String jsonString) {
     //   final coded = jsonDecode(jsonString);
@@ -28,7 +28,6 @@ void main() async {
     // });
     domain = "127.0.0.1:8000";
     protocol = "http";
-
   } else {
     File file = File("assets/config.json");
     String contents = await file.readAsString();
@@ -40,15 +39,17 @@ void main() async {
   runApp(const DrawerNavigationApp());
 }
 
-Text? assignUserData(dynamic args,) {
+Text? assignUserData(
+  dynamic args,
+) {
   // dynamic arguments = ModalRoute.of(context)?.settings.arguments;
   Map<String, dynamic> argumentsMap = Map<String, dynamic>.from(args);
-  if(argumentsMap["modules"] == null) {
+  if (argumentsMap["modules"] == null) {
     return const Text("Error no module");
   } else {
     modules = argumentsMap["modules"];
   }
-  if(argumentsMap["user"] == null) {
+  if (argumentsMap["user"] == null) {
     return const Text("Error no user");
   } else {
     user = argumentsMap["user"];
@@ -56,7 +57,9 @@ Text? assignUserData(dynamic args,) {
   return null;
 }
 
-Text? assignUserData2(dynamic args,) {
+Text? assignUserData2(
+  dynamic args,
+) {
   // dynamic arguments = ModalRoute.of(context)?.settings.arguments;
   try {
     user = args;
@@ -80,99 +83,76 @@ class DrawerNavigationApp extends StatelessWidget {
         useMaterial3: true,
         scrollbarTheme: ScrollbarThemeData(
           thumbColor: MaterialStateProperty.all<Color>(Colors.red),
-          trackColor: MaterialStateProperty.all<Color>(Colors.red.withOpacity(0.3)),
+          trackColor:
+              MaterialStateProperty.all<Color>(Colors.red.withOpacity(0.3)),
           crossAxisMargin: 8,
           mainAxisMargin: 8,
           minThumbLength: 48,
         ),
       ),
       home: LoginPage(
-          domain: domain,
-          protocol: protocol,
+        domain: domain,
+        protocol: protocol,
       ),
       routes: {
-        '/settings': (context) => SettingsPage(
-          args: {
-            "user": user,
-            "modules": modules
-          }),
-
-        '/profile': (context) => ProfilePage(
-          args: {
-            "user": user,
-            "modules": modules
-          }),
-
+        '/settings': (context) =>
+            SettingsPage(args: {"user": user, "modules": modules}),
+        '/profile': (context) =>
+            ProfilePage(args: {"user": user, "modules": modules}),
         '/login': (context) {
           User(
-            id: -1,
-            name: "name",
-            department: "department",
-            email: "email",
-            number: "number",
-            location: "location",
-            accessibleReports: [],
-            accessibleTickets: [],
-            modules: [],
-            defaultView: "",
-            ticketableDepartments: [], ticketsFrom: []
-          );
+              id: -1,
+              name: "name",
+              department: "department",
+              email: "email",
+              number: "number",
+              location: "location",
+              accessibleReports: [],
+              accessibleTickets: [],
+              modules: [],
+              defaultView: "",
+              ticketableDepartments: [],
+              ticketsFrom: []);
 
           return LoginPage(
             domain: domain,
             protocol: protocol,
           );
         },
-
         '/logged_in': (context) {
-          Text? error = assignUserData2(
-              ModalRoute.of(context)?.settings.arguments
-          );
-          if(error != null) {
+          Text? error =
+              assignUserData2(ModalRoute.of(context)?.settings.arguments);
+          if (error != null) {
             return error;
           }
 
           return CreateTicket(
-            user: user,
-            modules: modules,
-            domain: domain,
-            protocol: protocol
-          );
+              user: user, modules: modules, domain: domain, protocol: protocol);
         },
-
         '/create_ticket': (context) {
-          Text? error = assignUserData2(
-            ModalRoute.of(context)?.settings.arguments
-          );
-          if(error != null) {
+          Text? error =
+              assignUserData2(ModalRoute.of(context)?.settings.arguments);
+          if (error != null) {
             return error;
           }
 
           return CreateTicket(
-            user: user,
-            modules: modules,
-            domain: domain,
-            protocol: protocol
-          );
+              user: user, modules: modules, domain: domain, protocol: protocol);
         },
-
         '/ticket_to_ticket': (context) {
           dynamic argsOld = ModalRoute.of(context)?.settings.arguments;
           Map<String, String> args = Map<String, String>.from(argsOld);
 
           return ViewTickets(
-            user: user,
-            domain: domain,
-            protocol: protocol,
-            previousArgs: args
-          );
+              user: user,
+              domain: domain,
+              protocol: protocol,
+              previousArgs: args);
         },
-
         '/view_tickets': (context) {
-          Text? error = assignUserData2(
-            ModalRoute.of(context)?.settings.arguments
-          );
-          if(error != null) {
+          Text? error =
+              assignUserData2(ModalRoute.of(context)?.settings.arguments);
+          if (error != null) {
             return error;
           }
 
@@ -183,7 +163,6 @@ class DrawerNavigationApp extends StatelessWidget {
             previousArgs: const {},
           );
         },
-
         '/view_ticket': (context) {
           dynamic args = ModalRoute.of(context)?.settings.arguments;
 
@@ -196,11 +175,24 @@ class DrawerNavigationApp extends StatelessWidget {
           Ticket ticket = args["ticket"];
           user = args["user"];
           return ViewTicket(
+              user: user,
+              ticket: ticket,
+              domain: domain,
+              protocol: protocol,
+              previousArgs: currentArgs);
+        },
+
+        '/users': (context) {
+          Text? error =
+          assignUserData2(ModalRoute.of(context)?.settings.arguments);
+          if (error != null) {
+            return error;
+          }
+
+          return ViewUsers(
             user: user,
-            ticket: ticket,
             domain: domain,
             protocol: protocol,
-            previousArgs: currentArgs
           );
         },
       },
@@ -218,7 +210,9 @@ class MainPage extends StatelessWidget {
       appBar: AppBar(
         title: const Text('Home'),
       ),
-      drawer: supporting.DrawerNavigation(user: user,),
+      drawer: supporting.DrawerNavigation(
+        user: user,
+      ),
       body: const Center(
         child: Text(
           'Home Page',
@@ -239,7 +233,9 @@ class SettingsPage extends StatelessWidget {
       appBar: AppBar(
         title: const Text('Settings'),
       ),
-      drawer: supporting.DrawerNavigation(user: user,),
+      drawer: supporting.DrawerNavigation(
+        user: user,
+      ),
       body: const Center(
         child: Text(
           'Settings Page',
@@ -256,7 +252,6 @@ class ProfilePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-
     return Scaffold(
       appBar: AppBar(
         title: const Text('Profile'),

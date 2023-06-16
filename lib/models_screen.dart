@@ -9,7 +9,8 @@ import 'supporting.dart' as supporting;
 class ModelsScreen extends StatefulWidget {
   final String protocol;
   final String domain;
-  const ModelsScreen({Key? key, required this.protocol, required this.domain}) : super(key: key);
+  const ModelsScreen({Key? key, required this.protocol, required this.domain})
+      : super(key: key);
 
   @override
   State<ModelsScreen> createState() => _ModelsScreenState();
@@ -30,44 +31,36 @@ class _ModelsScreenState extends State<ModelsScreen> {
 
   Future<void> getModels() async {
     String contents = await supporting.getApiData(
-      "models?department=IT&category=TV",
-      widget.domain,
-      widget.protocol,
-      context
-    );
+        "models?department=IT&category=TV",
+        widget.domain,
+        widget.protocol,
+        context);
     List<dynamic> coded = jsonDecode(contents);
     rows = [];
-    for(var obj in coded){
+    for (var obj in coded) {
       Map<String, dynamic> dataMap = supporting.convertDynamicToMap(obj);
 
       Model model = Model.fromJson(dataMap);
-      rows.add(
-        DataRow(
-          cells: [
-            DataCell(Text(model.brand),),
-            DataCell(Text(model.description)),
-            DataCell(Text(model.department)),
-            DataCell(Text(model.category)),
-            DataCell(Text("${model.qty}")),
-            DataCell(Text("${model.year}")),
-          ]
-        )
-      );
+      rows.add(DataRow(cells: [
+        DataCell(
+          Text(model.brand),
+        ),
+        DataCell(Text(model.description)),
+        DataCell(Text(model.department)),
+        DataCell(Text(model.category)),
+        DataCell(Text("${model.qty}")),
+        DataCell(Text("${model.year}")),
+      ]));
     }
-    setState(() {
-    });
+    setState(() {});
   }
 
   Future<List<String>> getDepartments() async {
     String contents = await supporting.getApiData(
-      "departments",
-      widget.domain,
-      widget.protocol,
-      context
-    );
+        "departments", widget.domain, widget.protocol, context);
     List<dynamic> coded = await jsonDecode(contents);
     List<String> departments = [];
-    for(var x in coded) {
+    for (var x in coded) {
       departments.add(x);
     }
     return departments;
@@ -75,26 +68,22 @@ class _ModelsScreenState extends State<ModelsScreen> {
 
   Future<void> initDangIt() async {
     departments = await getDepartments();
-    setState(() {
-    });
+    setState(() {});
   }
 
   Future<void> getCategories() async {
     String contents = await supporting.getApiData(
-      "categories?department=$selectedDepartment",
-      widget.domain,
-      widget.protocol,
-      context
-    );
+        "categories?department=$selectedDepartment",
+        widget.domain,
+        widget.protocol,
+        context);
     categories = [];
     List<dynamic> coded = jsonDecode(contents);
-    for(var x in coded) {
+    for (var x in coded) {
       categories.add(x);
     }
 
-    setState(() {
-
-    });
+    setState(() {});
   }
 
   @override
@@ -118,11 +107,13 @@ class _ModelsScreenState extends State<ModelsScreen> {
             child: Padding(
               padding: const EdgeInsets.all(10),
               child: DropdownButton<String>(
-                hint: departmentSelected ? Text(selectedDepartment) : const Text('Select a Department'),
+                hint: departmentSelected
+                    ? Text(selectedDepartment)
+                    : const Text('Select a Department'),
                 elevation: 16,
                 dropdownColor: Colors.purple[100],
                 onChanged: (String? newValue) {
-                  if(newValue == null) {
+                  if (newValue == null) {
                     return;
                   }
 
@@ -130,10 +121,10 @@ class _ModelsScreenState extends State<ModelsScreen> {
                   selectedDepartment = newValue;
                   departmentSelected = true;
                   getCategories();
-                  setState(() {
-                  });
+                  setState(() {});
                 },
-                items: departments.map<DropdownMenuItem<String>>((String value) {
+                items:
+                    departments.map<DropdownMenuItem<String>>((String value) {
                   return DropdownMenuItem<String>(
                     value: value,
                     child: Text(value),
@@ -143,64 +134,78 @@ class _ModelsScreenState extends State<ModelsScreen> {
             ),
           ),
         ),
-        departmentSelected ? Center(
-          child: SizedBox(
-            width: getWindowWidth(context) - 20,
-            child: Padding(
-              padding: const EdgeInsets.all(10),
-              child: DropdownButton<String>(
-                hint: categorySelected ? Text(selectedCategory) : const Text('Select a Category'),
-                elevation: 16,
-                dropdownColor: Colors.purple[100],
-                onChanged: (String? newValue) {
-                  if(newValue == null) {
-                    return;
-                  }
-                  selectedCategory = newValue;
-                  categorySelected = true;
+        departmentSelected
+            ? Center(
+                child: SizedBox(
+                  width: getWindowWidth(context) - 20,
+                  child: Padding(
+                    padding: const EdgeInsets.all(10),
+                    child: DropdownButton<String>(
+                      hint: categorySelected
+                          ? Text(selectedCategory)
+                          : const Text('Select a Category'),
+                      elevation: 16,
+                      dropdownColor: Colors.purple[100],
+                      onChanged: (String? newValue) {
+                        if (newValue == null) {
+                          return;
+                        }
+                        selectedCategory = newValue;
+                        categorySelected = true;
 
-                  getModels();
+                        getModels();
 
-                  setState(() {
-
-                  });
-                },
-                items: categories.map<DropdownMenuItem<String>>((String value) {
-                  return DropdownMenuItem<String>(
-                    value: value,
-                    child: Text(value),
-                  );
-                }).toList(),
-              ),
-            ),
-          ),
-        )
-            : Container(),
-
-        categorySelected ? Center(
-          child: Scrollbar(
-            controller: controller2,
-            child: SingleChildScrollView(
-              controller: controller2,
-              scrollDirection: Axis.horizontal,
-              child: SizedBox(
-                width: getWindowWidth(context) - 20,
-                child: DataTable(
-                  columns: const [
-                    DataColumn(label: Text("Brand"),),
-                    DataColumn(label: Text("Description"),),
-                    DataColumn(label: Text("Department"),),
-                    DataColumn(label: Text("Category"),),
-                    DataColumn(label: Text("Qty"),),
-                    DataColumn(label: Text('Year'),),
-                  ],
-                  rows: rows,
+                        setState(() {});
+                      },
+                      items: categories
+                          .map<DropdownMenuItem<String>>((String value) {
+                        return DropdownMenuItem<String>(
+                          value: value,
+                          child: Text(value),
+                        );
+                      }).toList(),
+                    ),
+                  ),
                 ),
-              ),
-            ),
-          ),
-        ) :
-        Container(),
+              )
+            : Container(),
+        categorySelected
+            ? Center(
+                child: Scrollbar(
+                  controller: controller2,
+                  child: SingleChildScrollView(
+                    controller: controller2,
+                    scrollDirection: Axis.horizontal,
+                    child: SizedBox(
+                      width: getWindowWidth(context) - 20,
+                      child: DataTable(
+                        columns: const [
+                          DataColumn(
+                            label: Text("Brand"),
+                          ),
+                          DataColumn(
+                            label: Text("Description"),
+                          ),
+                          DataColumn(
+                            label: Text("Department"),
+                          ),
+                          DataColumn(
+                            label: Text("Category"),
+                          ),
+                          DataColumn(
+                            label: Text("Qty"),
+                          ),
+                          DataColumn(
+                            label: Text('Year'),
+                          ),
+                        ],
+                        rows: rows,
+                      ),
+                    ),
+                  ),
+                ),
+              )
+            : Container(),
       ],
     );
   }
