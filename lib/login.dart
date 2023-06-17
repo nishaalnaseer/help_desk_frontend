@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'application_models.dart';
 
+
 import 'supporting.dart' as supporting;
 
 class LoginPage extends StatefulWidget {
@@ -27,12 +28,10 @@ class _LoginPageState extends State<LoginPage> {
 
   Future<void> login() async {
     nameController.text = "nishawl.naseer@outlook.com";
-    passwordController.text =
-        "\$2b\$12\$E6WQteQYd.kIY01.kfPa3u1Kg3r5s0VrpxmGG2mjnFo7z84fwy.Q2";
+    passwordController.text = "123";
 
+    String pass = passwordController.text;
     String email = nameController.text;
-    String password = passwordController.text;
-
     passwordController.clear(); // clear
     nameController.clear(); // clear
     var headers = {
@@ -46,20 +45,20 @@ class _LoginPageState extends State<LoginPage> {
     var data = {
       'grant_type': 'password',
       'username': email,
-      'password': password,
+      'password': pass,
     };
 
     late http.Response response;
 
     try {
       response = await supporting.postRequest2(
-          data,
-          widget.protocol,
-          widget.domain,
-          "token",
-          headers: headers,
-          context,
-          showPrompt: false);
+        data,
+        widget.protocol,
+        widget.domain,
+        "token",
+        headers: headers,
+        context,
+        showPrompt: false);
     } on Exception catch (e) {
       return;
     }
@@ -101,22 +100,22 @@ class _LoginPageState extends State<LoginPage> {
               child: ListView(
                 children: <Widget>[
                   Container(
-                      alignment: Alignment.center,
-                      padding: const EdgeInsets.fromLTRB(10, 100, 10, 10),
-                      child: const Text(
-                        'Ticketing System',
-                        style: TextStyle(
-                            color: Colors.redAccent,
-                            fontWeight: FontWeight.w500,
-                            fontSize: 30),
-                      )),
+                    alignment: Alignment.center,
+                    padding: const EdgeInsets.fromLTRB(10, 100, 10, 10),
+                    child: const Text(
+                      'Ticketing System',
+                      style: TextStyle(
+                        color: Colors.redAccent,
+                        fontWeight: FontWeight.w500,
+                        fontSize: 30),
+                    )),
                   Container(
-                      alignment: Alignment.center,
-                      padding: const EdgeInsets.all(10),
-                      child: const Text(
-                        'Sign in',
-                        style: TextStyle(color: Colors.white, fontSize: 20),
-                      )),
+                    alignment: Alignment.center,
+                    padding: const EdgeInsets.all(10),
+                    child: const Text(
+                      'Sign in',
+                      style: TextStyle(color: Colors.white, fontSize: 20),
+                    )),
                   Container(
                     padding: const EdgeInsets.fromLTRB(10, 30, 10, 10),
                     child: TextField(
@@ -209,18 +208,18 @@ class _LoginPageState extends State<LoginPage> {
           ),
         ),
         User(
-            id: -1,
-            name: "name",
-            department: "department",
-            email: "email",
-            number: "number",
-            location: "location",
-            accessibleReports: [],
-            accessibleTickets: [],
-            modules: [],
-            defaultView: "",
-            ticketableDepartments: [],
-            ticketsFrom: []),
+          id: -1,
+          name: "name",
+          department: "department",
+          email: "email",
+          number: "number",
+          location: "location",
+          accessibleReports: [],
+          accessibleTickets: [],
+          modules: [],
+          defaultView: "",
+          ticketableDepartments: [],
+          ticketsFrom: []),
         appBar: false);
   }
 }

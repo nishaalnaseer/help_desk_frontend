@@ -122,7 +122,8 @@ class _DepartmentsViewState extends State<DepartmentsView> {
           Center(
             child: Padding(
               padding: EdgeInsets.fromLTRB(
-                10, supporting.getWindowHeight(context) * 0.05, 10, 20),
+                10,
+                supporting.getWindowHeight(context) * 0.05, 10, 20),
               child: const Text(
                 "Departments!",
                 style: TextStyle(
@@ -152,9 +153,9 @@ class _DepartmentsViewState extends State<DepartmentsView> {
                 child: const Text(
                   "Add",
                   style: TextStyle(
-                      color: Colors.red,
-                      fontSize: 18,
-                      fontWeight: FontWeight.w500
+                    color: Colors.red,
+                    fontSize: 18,
+                    fontWeight: FontWeight.w500
                   ),
                 ),
               ),

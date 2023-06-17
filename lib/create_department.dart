@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 
 import 'application_models.dart';
@@ -23,12 +25,35 @@ class _CreateDepartmentState extends State<CreateDepartment> {
   String availableModules = "Available Modules: ";
   String modulesButton = "Add Module";
   String ticketableDepartmentsTicketsAccessible =
-      "Which ticketable department's tickets this department can access?";
+      "Which ticketable department's tickets can this department can access?";
   String ticketableDepartment = "Add ticketable Department";
   String departmentReport =
       "Which departments reports can this department access?";
   String ticketsFrom =
       "Which departments raised tickets can this department access?";
+
+  List<String> modules = [];
+  List<String> departments = [];
+  List<String> ticketableList = [];
+
+  String moduleHolder = "";
+  String reportHolder = "";
+  String ticketableHolder = "";
+  String raisedHolder = "";
+  bool raisedSelected = false;
+
+  List<String> selectedModules = [];
+  List<String> viewableTicketableDepartments = [];
+  List<String> viewableReports = [];
+  List<String> selectedRaised = [];
+
+  String selectedModulesString = "";
+  bool modulesSelectedBool = false;
+  bool reportSelectedBool = false;
+  bool ticketableDepartmenSelected = false;
+
+  String raisedButton = "Add Department";
+  String reportsButton = "Add Department";
 
   Padding inputField(
       TextEditingController controller, String holder, String display,
@@ -109,25 +134,90 @@ class _CreateDepartmentState extends State<CreateDepartment> {
                 width: 200,
                 child: Center(
                   child: ElevatedButton(
-                      onPressed: () {},
-                      child: const Text(
-                        "Load Data",
-                        style: TextStyle(color: Colors.red, fontSize: 18),
-                      )
+                    onPressed: () async {
+                      var response = await supporting.getRequest(
+                        widget.protocol,
+                        widget.domain,
+                        "all_departments_and_modules",
+                        context,
+                        headers: widget.user.getAuth()
+                      );
+
+                      if(response.statusCode != 200) {
+                        return;
+                      }
+
+                      var data = jsonDecode(response.body);
+
+                      List<dynamic> modulesRaw = data["modules"];
+                      List<dynamic> departmentsRaw = data["departments"];
+                      List<dynamic> ticketableRaw = data["ticketable"];
+
+                      modules = [];
+                      departments = [];
+                      ticketableList = [];
+
+                      for(dynamic x in modulesRaw) {
+                        modules.add(x);
+                      }
+
+                      for(dynamic x in departmentsRaw) {
+                        departments.add(x);
+                      }
+
+                      for(dynamic x in ticketableRaw) {
+                        ticketableList.add(x);
+                      }
+
+                      setState(() {
+
+                      });
+
+                    },
+                    child: const Text(
+                      "Load Data",
+                      style: TextStyle(color: Colors.red, fontSize: 18),
+                    )
                   ),
                 ),
               ),
             ),
 
             inputField(nameController, name, "Name"),
+
+            Align(
+              alignment: Alignment.bottomLeft,
+              child: Container(
+                width: 400,
+                padding: const EdgeInsets.fromLTRB(10, 30, 10, 30),
+                child: CheckboxListTile(
+                  title: const Text(
+                    "Can tickets be raised to this department?",
+                    style: TextStyle(color: Colors.white, fontSize: 18),
+                  ),
+                  // activeColor: Colors.white,
+                  selectedTileColor: Colors.red,
+                  checkColor: Colors.white,
+                  value: ticketable,
+                  fillColor: MaterialStateProperty.all<Color>(Colors.red),
+                  hoverColor: Colors.red[100],
+                  onChanged: (bool? value) {
+                    setState(() {
+                      ticketable = value ?? false;
+                    });
+                  },
+                ),
+              ),
+            ),
+
             Padding(
-              padding: const EdgeInsets.all(10),
+              padding: const EdgeInsets.fromLTRB(10, 30, 10, 30),
               child: DropdownButton<String>(
                 focusColor: Colors.transparent,
                 dropdownColor: Colors.red[800],
                 hint: viewSelected
                     ? Text(
-                  'Select a Default View: $selectedView',
+                  'Selected Default View: $selectedView',
                   style: const TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.w500,
@@ -150,7 +240,7 @@ class _CreateDepartmentState extends State<CreateDepartment> {
                   viewSelected = true;
                   setState(() {});
                 },
-                items: widget.user.ticketableDepartments
+                items: modules
                     .map<DropdownMenuItem<String>>((String value) {
                   return DropdownMenuItem<String>(
                     value: value,
@@ -167,32 +257,8 @@ class _CreateDepartmentState extends State<CreateDepartment> {
               ),
             ),
 
-            Align(
-              alignment: Alignment.bottomLeft,
-              child: SizedBox(
-                width: 400,
-                child: CheckboxListTile(
-                  title: const Text(
-                    "Can tickets be raised to this department?",
-                    style: TextStyle(color: Colors.white, fontSize: 18),
-                  ),
-                  // activeColor: Colors.white,
-                  selectedTileColor: Colors.red,
-                  checkColor: Colors.white,
-                  value: ticketable,
-                  fillColor: MaterialStateProperty.all<Color>(Colors.red),
-                  hoverColor: Colors.red[100],
-                  onChanged: (bool? value) {
-                    setState(() {
-                      ticketable = value ?? false;
-                    });
-                  },
-                ),
-              ),
-            ),
-
             Padding(
-              padding: const EdgeInsets.all(10),
+              padding: const EdgeInsets.fromLTRB(10, 30, 10, 10),
               child: Text(
                 availableModules,
                 style: const TextStyle(color: Colors.white, fontSize: 18),
@@ -203,20 +269,21 @@ class _CreateDepartmentState extends State<CreateDepartment> {
               child: DropdownButton<String>(
                 focusColor: Colors.transparent,
                 dropdownColor: Colors.red[800],
-                hint: viewSelected
+                hint: modulesSelectedBool
                     ? Text(
-                  selectedView,
+                  "Add / Remove $moduleHolder",
                   style: const TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w500,
-                      color: Colors.white),
+                    fontSize: 18,
+                    fontWeight: FontWeight.w500,
+                    color: Colors.white
+                  ),
                 )
-                    : const Text(
+                  : const Text(
                   'Add a Module',
                   style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w500,
-                      color: Colors.white
+                    fontSize: 18,
+                    fontWeight: FontWeight.w500,
+                    color: Colors.white
                   ),
                 ),
                 elevation: 16,
@@ -224,11 +291,21 @@ class _CreateDepartmentState extends State<CreateDepartment> {
                   if (newValue == null) {
                     return;
                   }
-                  selectedView = newValue;
-                  viewSelected = true;
-                  setState(() {});
+                  modulesSelectedBool = true;
+                  moduleHolder = newValue;
+
+                  if(selectedModules.contains(moduleHolder)) {
+                    modulesButton = "Remove Module";
+                  } else {
+                    modulesButton = "Add Module";
+                  }
+
+                  setState(() {
+
+                  });
+
                 },
-                items: widget.user.ticketableDepartments
+                items: modules
                     .map<DropdownMenuItem<String>>((String value) {
                   return DropdownMenuItem<String>(
                     value: value,
@@ -245,11 +322,28 @@ class _CreateDepartmentState extends State<CreateDepartment> {
               ),
             ),
             Container(
-              padding: const EdgeInsets.all(10),
+              padding: const EdgeInsets.fromLTRB(10, 10, 10, 30),
               width: 200,
               child: Center(
                 child: ElevatedButton(
-                    onPressed: () {},
+                    onPressed: () {
+                      if(selectedModules.contains(moduleHolder)) {
+                        selectedModules.remove(moduleHolder);
+                        modulesButton = "Add Module";
+                      } else {
+                        selectedModules.add(moduleHolder);
+                        modulesButton = "Remove Module";
+                      }
+                      availableModules = "Available Modules: ";
+
+                      for(String module in selectedModules) {
+                        availableModules += " $module,";
+                      }
+                      setState(() {
+
+                      });
+
+                    },
                     child: Text(
                       modulesButton,
                       style: const TextStyle(color: Colors.red, fontSize: 18),
@@ -259,14 +353,10 @@ class _CreateDepartmentState extends State<CreateDepartment> {
             ),
 
             Padding(
-              padding: const EdgeInsets.all(10),
-              child: Wrap(
-                children: [
-                  Text(
-                  ticketableDepartmentsTicketsAccessible,
-                  style: const TextStyle(color: Colors.white, fontSize: 18),
-                )
-                ],
+              padding: const EdgeInsets.fromLTRB(10, 30, 10, 10),
+              child: Text(
+                ticketableDepartmentsTicketsAccessible,
+                style: const TextStyle(color: Colors.white, fontSize: 18),
               ),
             ),
             Padding(
@@ -274,16 +364,17 @@ class _CreateDepartmentState extends State<CreateDepartment> {
               child: DropdownButton<String>(
                 focusColor: Colors.transparent,
                 dropdownColor: Colors.red[800],
-                hint: viewSelected
+                hint: ticketableDepartmenSelected
                     ? Text(
-                  selectedView,
+                  "Add / Remove $ticketableHolder",
                   style: const TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.w500,
-                      color: Colors.white),
+                      color: Colors.white
+                  ),
                 )
                     : const Text(
-                  'Add a Module',
+                  'Add a Ticketable department',
                   style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.w500,
@@ -295,11 +386,21 @@ class _CreateDepartmentState extends State<CreateDepartment> {
                   if (newValue == null) {
                     return;
                   }
-                  selectedView = newValue;
-                  viewSelected = true;
-                  setState(() {});
+                  ticketableDepartmenSelected = true;
+                  ticketableHolder = newValue;
+
+                  if(viewableTicketableDepartments.contains(ticketableHolder)) {
+                    ticketableDepartment = "Remove Ticketable Department";
+                  } else {
+                    ticketableDepartment = "Add Ticketable Department";
+                  }
+
+                  setState(() {
+
+                  });
+
                 },
-                items: widget.user.ticketableDepartments
+                items: ticketableList
                     .map<DropdownMenuItem<String>>((String value) {
                   return DropdownMenuItem<String>(
                     value: value,
@@ -316,21 +417,39 @@ class _CreateDepartmentState extends State<CreateDepartment> {
               ),
             ),
             Container(
-              padding: const EdgeInsets.all(10),
+              padding: const EdgeInsets.fromLTRB(10, 10, 10, 30),
               width: 200,
               child: Center(
                 child: ElevatedButton(
-                  onPressed: () {},
-                  child: Text(
-                    ticketableDepartment,
-                    style: const TextStyle(color: Colors.red, fontSize: 18),
-                  )
+                    onPressed: () {
+                      if(viewableTicketableDepartments.contains(ticketableHolder)) {
+                        viewableTicketableDepartments.remove(ticketableHolder);
+                        ticketableDepartment = "Add Ticketable Department";
+                      } else {
+                        viewableTicketableDepartments.add(ticketableHolder);
+                        ticketableDepartment = "Remove Ticketable Department";
+                      }
+                      ticketableDepartmentsTicketsAccessible =
+                      "Which ticketable department's tickets can this department can access? ";
+
+                      for(String department in viewableTicketableDepartments) {
+                        ticketableDepartmentsTicketsAccessible += " $department,";
+                      }
+                      setState(() {
+
+                      });
+
+                    },
+                    child: Text(
+                      ticketableDepartment,
+                      style: const TextStyle(color: Colors.red, fontSize: 18),
+                    )
                 ),
               ),
             ),
 
             Padding(
-              padding: const EdgeInsets.all(10),
+              padding: const EdgeInsets.fromLTRB(10, 30, 10, 10),
               child: Text(
                 ticketsFrom,
                 style: const TextStyle(color: Colors.white, fontSize: 18),
@@ -341,16 +460,17 @@ class _CreateDepartmentState extends State<CreateDepartment> {
               child: DropdownButton<String>(
                 focusColor: Colors.transparent,
                 dropdownColor: Colors.red[800],
-                hint: viewSelected
+                hint: raisedSelected
                     ? Text(
-                  selectedView,
+                  "Add / Remove $raisedHolder",
                   style: const TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.w500,
-                      color: Colors.white),
+                      color: Colors.white
+                  ),
                 )
                     : const Text(
-                  'Add a Module',
+                  'Add a Department',
                   style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.w500,
@@ -362,12 +482,23 @@ class _CreateDepartmentState extends State<CreateDepartment> {
                   if (newValue == null) {
                     return;
                   }
-                  selectedView = newValue;
-                  viewSelected = true;
-                  setState(() {});
+                  raisedSelected = true;
+                  raisedHolder = newValue;
+
+                  if(selectedRaised.contains(raisedHolder)) {
+                    raisedButton = "Remove Module";
+                  } else {
+                    raisedButton = "Add Module";
+                  }
+
+                  setState(() {
+
+                  });
+
                 },
-                items: widget.user.ticketableDepartments
-                    .map<DropdownMenuItem<String>>((String value) {
+                items:
+                    departments.map<DropdownMenuItem<String>>
+                      ((String value) {
                   return DropdownMenuItem<String>(
                     value: value,
                     child: Text(
@@ -383,13 +514,30 @@ class _CreateDepartmentState extends State<CreateDepartment> {
               ),
             ),
             Container(
-              padding: const EdgeInsets.all(10),
+              padding: const EdgeInsets.fromLTRB(10, 10, 10, 30),
               width: 200,
               child: Center(
                 child: ElevatedButton(
-                    onPressed: () {},
+                    onPressed: () {
+                      if(selectedRaised.contains(raisedHolder)) {
+                        selectedRaised.remove(raisedHolder);
+                        raisedButton = "Add Department";
+                      } else {
+                        selectedRaised.add(raisedHolder);
+                        raisedButton = "Remove Department";
+                      }
+                      ticketsFrom = "Available Modules: ";
+
+                      for(String department in selectedRaised) {
+                        ticketsFrom += " $department,";
+                      }
+                      setState(() {
+
+                      });
+
+                    },
                     child: Text(
-                      modulesButton,
+                      raisedButton,
                       style: const TextStyle(color: Colors.red, fontSize: 18),
                     )
                 ),
@@ -397,7 +545,7 @@ class _CreateDepartmentState extends State<CreateDepartment> {
             ),
 
             Padding(
-              padding: const EdgeInsets.all(10),
+              padding: const EdgeInsets.fromLTRB(10, 30, 10, 10),
               child: Text(
                 departmentReport,
                 style: const TextStyle(color: Colors.white, fontSize: 18),
@@ -408,16 +556,17 @@ class _CreateDepartmentState extends State<CreateDepartment> {
               child: DropdownButton<String>(
                 focusColor: Colors.transparent,
                 dropdownColor: Colors.red[800],
-                hint: viewSelected
+                hint: reportSelectedBool
                     ? Text(
-                  selectedView,
+                  "Add / Remove $reportHolder",
                   style: const TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.w500,
-                      color: Colors.white),
+                      color: Colors.white
+                  ),
                 )
                     : const Text(
-                  'Add a Module',
+                  'Add a Department',
                   style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.w500,
@@ -429,11 +578,21 @@ class _CreateDepartmentState extends State<CreateDepartment> {
                   if (newValue == null) {
                     return;
                   }
-                  selectedView = newValue;
-                  viewSelected = true;
-                  setState(() {});
+                  reportSelectedBool = true;
+                  reportHolder = newValue;
+
+                  if(viewableReports.contains(reportHolder)) {
+                    reportsButton = "Remove Department";
+                  } else {
+                    reportsButton = "Add Department";
+                  }
+
+                  setState(() {
+
+                  });
+
                 },
-                items: widget.user.ticketableDepartments
+                items: departments
                     .map<DropdownMenuItem<String>>((String value) {
                   return DropdownMenuItem<String>(
                     value: value,
@@ -450,13 +609,31 @@ class _CreateDepartmentState extends State<CreateDepartment> {
               ),
             ),
             Container(
-              padding: const EdgeInsets.all(10),
+              padding: const EdgeInsets.fromLTRB(10, 10, 10, 30),
               width: 200,
               child: Center(
                 child: ElevatedButton(
-                    onPressed: () {},
+                    onPressed: () {
+                      if(viewableReports.contains(reportHolder)) {
+                        viewableReports.remove(reportHolder);
+                        reportsButton = "Add Department";
+                      } else {
+                        viewableReports.add(reportHolder);
+                        reportsButton = "Remove Department";
+                      }
+                      departmentReport = "Which departments reports can "
+                          "this department access?";
+
+                      for(String department in viewableReports) {
+                        departmentReport += " $department,";
+                      }
+                      setState(() {
+
+                      });
+
+                    },
                     child: Text(
-                      modulesButton,
+                      reportsButton,
                       style: const TextStyle(color: Colors.red, fontSize: 18),
                     )
                 ),
@@ -469,7 +646,19 @@ class _CreateDepartmentState extends State<CreateDepartment> {
                 width: 200,
                 child: Center(
                   child: ElevatedButton(
-                    onPressed: () {},
+                    onPressed: () async {
+                      Department department = Department(
+                          dId: 0,
+                          name: nameController.text,
+                          defaultView: selectedView,
+                          ticketable: ticketable,
+                          modules: selectedModules,
+                          accessibleTickets: viewableTicketableDepartments,
+                          ticketsRaisedFrom: selectedRaised,
+                          reportsFrom: viewableReports
+                      );
+
+                    },
                     child: const Text(
                       "Submit",
                       style: TextStyle(color: Colors.red, fontSize: 18),
