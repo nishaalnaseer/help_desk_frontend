@@ -15,7 +15,8 @@ class Department {
   final List<String> modules;
   final List<String> accessibleTickets;
   final List<String> ticketsRaisedFrom;
-  final List<String> reportsFrom;
+  final List<String> nonTicketableReports;
+  final List<String> ticketableReports;
 
   Department({
     required this.dId,
@@ -25,7 +26,8 @@ class Department {
     required this.modules,
     required this.accessibleTickets,
     required this.ticketsRaisedFrom,
-    required this.reportsFrom,
+    required this.nonTicketableReports,
+    required this.ticketableReports,
   });
 
   factory Department.fromJson(Map<String, dynamic> json) {
@@ -37,20 +39,43 @@ class Department {
 
       modules: List.generate(
           json["modules"].length,
-              (index) => json["modules"][index]),
+              (index) => json["modules"][index]
+      ),
 
       accessibleTickets: List.generate(
           json["accessible_tickets"].length,
-              (index) => json["accessible_tickets"][index]),
+              (index) => json["accessible_tickets"][index]
+      ),
 
-      reportsFrom: List.generate(
-          json["reports_from"].length,
-              (index) => json["reports_from"][index]),
+      nonTicketableReports: List.generate(
+          json["non_ticketable_reports"].length,
+              (index) => json["non_ticketable_reports"][index]
+      ),
 
       ticketsRaisedFrom: List.generate(
           json["tickets_raised_from"].length,
-              (index) => json["tickets_raised_from"][index]),
+              (index) => json["tickets_raised_from"][index]
+      ),
+
+      ticketableReports: List.generate(
+          json["ticketable_reports"].length,
+              (index) => json["ticketable_reports"][index]
+      ),
     );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      "d_id": dId,
+      "name": name,
+      "default_view": defaultView,
+      "ticketable": ticketable,
+      "modules": modules,
+      "accessible_tickets": accessibleTickets,
+      "tickets_raised_from": ticketsRaisedFrom,
+      "non_ticketable_reports": nonTicketableReports,
+      "ticketable_reports": ticketableReports,
+    };
   }
 }
 

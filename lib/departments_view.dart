@@ -142,7 +142,41 @@ class _DepartmentsViewState extends State<DepartmentsView> {
             child: Align(
               alignment: Alignment.bottomRight,
               child: ElevatedButton(
-                onPressed: () {
+                onPressed: () async {
+                  var response = await supporting.getRequest(
+                      widget.protocol,
+                      widget.domain,
+                      "all_departments_and_modules",
+                      context,
+                      headers: widget.user.getAuth()
+                  );
+
+                  if(response.statusCode != 200) {
+                    return;
+                  }
+
+                  var data = jsonDecode(response.body);
+
+                  List<dynamic> modulesRaw = data["modules"];
+                  List<dynamic> departmentsRaw = data["departments"];
+                  List<dynamic> ticketableRaw = data["ticketable"];
+
+                  List<String> modules = [];
+                  List<String> departments = ["This Department"];
+                  List<String> ticketableList = [];
+
+                  for(dynamic x in modulesRaw) {
+                    modules.add(x);
+                  }
+
+                  for(dynamic x in departmentsRaw) {
+                    departments.add(x);
+                  }
+
+                  for(dynamic x in ticketableRaw) {
+                    ticketableList.add(x);
+                  }
+
                   Navigator.push(
                     context,
                     MaterialPageRoute(
@@ -150,6 +184,10 @@ class _DepartmentsViewState extends State<DepartmentsView> {
                         protocol: widget.protocol,
                         domain: widget.domain,
                         user: widget.user,
+                        modules: modules,
+                        departments: departments,
+                        ticketableList: ticketableList,
+
                       )
                     ),
                   );

@@ -14,17 +14,28 @@ class DropDownSelector extends StatefulWidget {
   });
 
   @override
-  State<DropDownSelector> createState() => _DropDownSelectorState();
+  State<DropDownSelector> createState() => DropDownSelectorState();
 }
 
-class _DropDownSelectorState extends State<DropDownSelector> {
+class DropDownSelectorState extends State<DropDownSelector> {
   late String trackText = widget.trackText;
   bool boolController = false;
   String valueHolder = "";
   late String buttonText = widget.buttonText;
   List<String> selections = [];
+  late List<String> options = widget.options;
 
-  List<String> get myValues => selections;
+  List<String> get selected => selections;
+
+  List<String> getSelected() {
+    return selections;
+  }
+
+  void update(List<String> newSelections) {
+    setState(() {
+      options = newSelections;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -52,20 +63,20 @@ class _DropDownSelectorState extends State<DropDownSelector> {
                 focusColor: Colors.transparent,
                 dropdownColor: Colors.red[800],
                 hint: boolController
-                    ? Text(
+                ? Text(
                   "Add / Remove $valueHolder",
                   style: const TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w500,
-                      color: Colors.white
+                    fontSize: 18,
+                    fontWeight: FontWeight.w500,
+                    color: Colors.white
                   ),
                 )
-                    : const Text(
-                  'Add a Department',
-                  style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w500,
-                      color: Colors.white
+                : Text(
+                  'Add a ${widget.buttonText}',
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w500,
+                    color: Colors.white
                   ),
                 ),
                 elevation: 16,
@@ -77,9 +88,9 @@ class _DropDownSelectorState extends State<DropDownSelector> {
                   valueHolder = newValue;
 
                   if(selections.contains(valueHolder)) {
-                    buttonText = "Remove Department";
+                    buttonText = "Remove ${widget.buttonText}";
                   } else {
-                    buttonText = "Add Department";
+                    buttonText = "Add ${widget.buttonText}";
                   }
 
                   setState(() {
@@ -87,7 +98,7 @@ class _DropDownSelectorState extends State<DropDownSelector> {
                   });
 
                 },
-                items: widget.options
+                items: options
                     .map<DropdownMenuItem<String>>((String value) {
                   return DropdownMenuItem<String>(
                     value: value,
@@ -113,10 +124,10 @@ class _DropDownSelectorState extends State<DropDownSelector> {
               onPressed: () {
                 if(selections.contains(valueHolder)) {
                   selections.remove(valueHolder);
-                  buttonText = "Add Department";
+                  buttonText = "Add ${widget.buttonText}";
                 } else {
                   selections.add(valueHolder);
-                  buttonText = "Remove Department";
+                  buttonText = "Remove ${widget.buttonText}";
                 }
                 trackText = widget.trackText;
 
@@ -126,7 +137,6 @@ class _DropDownSelectorState extends State<DropDownSelector> {
                 setState(() {
 
                 });
-
               },
               child: Text(
                 buttonText,

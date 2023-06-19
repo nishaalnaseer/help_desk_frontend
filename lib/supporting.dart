@@ -11,12 +11,12 @@ import 'package:flutter/material.dart';
 import 'application_models.dart';
 
 const Map<String, String> map = {
-  "Create Ticket": '/create_ticket',
-  "View Tickets": '/view_tickets',
-  "Users": "/users",
-  "Departments": "/departments",
-  // "Models": modelsScreen,
-  // "Reports": reports,
+  "CREATE_TICKET": '/create_ticket',
+  "VIEW_TICKETS": '/view_tickets',
+  "USERS": "/users",
+  "DEPARTMENTS": "/departments",
+  // DEVICES = "DEVICES"
+  // REPORTS = "REPORTS"
 };
 
 Map<String, dynamic> convertDynamicToMap(dynamic object) {
@@ -307,7 +307,7 @@ Future<http.Response> postRequest2(
 
   try {
     response = await http.post(
-        url, headers: headers, body: data
+      url, headers: headers, body: data
     );
   } on Exception catch (e) {
     pd.close(delay: 0);
@@ -492,8 +492,12 @@ Scaffold getScaffold(Widget thingy, User user, {bool appBar = true}) {
             elevation: 0,
             titleSpacing: 0,
             title: const Text("Ticketing",
-                style: TextStyle(
-                    color: Colors.white, fontWeight: FontWeight.w500)),
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight:
+                FontWeight.w500
+              )
+            ),
           )
         : null,
     drawer: DrawerNavigation(user: user),
