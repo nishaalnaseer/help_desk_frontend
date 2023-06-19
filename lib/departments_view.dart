@@ -18,7 +18,8 @@ class DepartmentsView extends StatefulWidget {
   });
 
   @override
-  State<DepartmentsView> createState() => _DepartmentsViewState();
+  State<DepartmentsView> createState() =>
+      _DepartmentsViewState();
 }
 
 class _DepartmentsViewState extends State<DepartmentsView> {
@@ -123,7 +124,10 @@ class _DepartmentsViewState extends State<DepartmentsView> {
             child: Padding(
               padding: EdgeInsets.fromLTRB(
                 10,
-                supporting.getWindowHeight(context) * 0.05, 10, 20),
+                supporting.getWindowHeight(context) * 0.05,
+                10,
+                20
+              ),
               child: const Text(
                 "Departments!",
                 style: TextStyle(

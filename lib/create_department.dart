@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 
 import 'application_models.dart';
+import 'drop_down_selector.dart';
 import 'supporting.dart' as supporting;
 
 
@@ -33,7 +34,7 @@ class _CreateDepartmentState extends State<CreateDepartment> {
       "Which departments raised tickets can this department access?";
 
   List<String> modules = [];
-  List<String> departments = [];
+  List<String> departments = ["This Department"];
   List<String> ticketableList = [];
 
   String moduleHolder = "";
@@ -154,7 +155,7 @@ class _CreateDepartmentState extends State<CreateDepartment> {
                       List<dynamic> ticketableRaw = data["ticketable"];
 
                       modules = [];
-                      departments = [];
+                      departments = ["This Department"];
                       ticketableList = [];
 
                       for(dynamic x in modulesRaw) {
@@ -255,6 +256,12 @@ class _CreateDepartmentState extends State<CreateDepartment> {
                   );
                 }).toList(),
               ),
+            ),
+
+            DropDownSelector(
+                trackText: "Available Modules: ",
+                buttonText: "Add Module",
+                options: modules
             ),
 
             Padding(
