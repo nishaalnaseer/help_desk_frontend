@@ -144,11 +144,11 @@ class _DepartmentsViewState extends State<DepartmentsView> {
               child: ElevatedButton(
                 onPressed: () async {
                   var response = await supporting.getRequest(
-                      widget.protocol,
-                      widget.domain,
-                      "all_departments_and_modules",
-                      context,
-                      headers: widget.user.getAuth()
+                    widget.protocol,
+                    widget.domain,
+                    "all_departments_and_modules",
+                    context,
+                    headers: widget.user.getAuth()
                   );
 
                   if(response.statusCode != 200) {
@@ -187,7 +187,6 @@ class _DepartmentsViewState extends State<DepartmentsView> {
                         modules: modules,
                         departments: departments,
                         ticketableList: ticketableList,
-
                       )
                     ),
                   );

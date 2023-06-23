@@ -47,6 +47,7 @@ class _LoginPageState extends State<LoginPage> {
       'username': email,
       'password': pass,
     };
+    print(data);
 
     late http.Response response;
 
