@@ -6,11 +6,13 @@ class DropDownSelector extends StatefulWidget {
   final String trackText;
   final String buttonText;
   final List<String> options;
+  final List<String>? initialValues;
   const DropDownSelector({
     super.key,
     required this.trackText,
     required this.buttonText, 
-    required this.options
+    required this.options,
+    this.initialValues,
   });
 
   @override
@@ -21,8 +23,8 @@ class DropDownSelectorState extends State<DropDownSelector> {
   late String trackText = widget.trackText;
   bool boolController = false;
   String valueHolder = "";
-  late String buttonText = widget.buttonText;
-  List<String> selections = [];
+  late String buttonText = "Add ${widget.buttonText}";
+  late List<String> selections = widget.initialValues ?? [];
   late List<String> options = widget.options;
 
   List<String> get selected => selections;
@@ -31,11 +33,11 @@ class DropDownSelectorState extends State<DropDownSelector> {
     return selections;
   }
 
-  void update(List<String> newSelections) {
-    setState(() {
-      options = newSelections;
-    });
-  }
+  // void update(List<String> newSelections) {
+  //   setState(() {
+  //     options = newSelections;
+  //   });
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -48,8 +50,8 @@ class DropDownSelectorState extends State<DropDownSelector> {
             child: Text(
               trackText,
               style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 18
+                color: Colors.white,
+                fontSize: 18
               ),
             ),
           ),
@@ -105,9 +107,9 @@ class DropDownSelectorState extends State<DropDownSelector> {
                     child: Text(
                       value,
                       style: const TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.w500,
-                          fontSize: 18
+                        color: Colors.white,
+                        fontWeight: FontWeight.w500,
+                        fontSize: 18
                       ),
                     ),
                   );
@@ -141,13 +143,13 @@ class DropDownSelectorState extends State<DropDownSelector> {
               child: Text(
                 buttonText,
                 style: const TextStyle(
-                    color: Colors.red,
-                    fontSize: 18
+                  color: Colors.red,
+                  fontSize: 18
                 ),
               )
             ),
           ),
-        ),
+          ),
         ],
     );
   }

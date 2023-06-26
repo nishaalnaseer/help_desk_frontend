@@ -386,6 +386,7 @@ List<Widget> getDrawerKids(User user, BuildContext context) {
           ),
         ),
         onTap: () {
+          // Navigator.pop(context);
           Navigator.pushNamed(context, route, arguments: user);
         },
       ),

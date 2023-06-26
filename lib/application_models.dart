@@ -12,6 +12,7 @@ class Department {
   final String name;
   final String defaultView;
   final bool ticketable;
+  final String submittedBy;
   final List<String> modules;
   final List<String> accessibleTickets;
   final List<String> ticketsRaisedFrom;
@@ -23,6 +24,7 @@ class Department {
     required this.name,
     required this.defaultView,
     required this.ticketable,
+    required this.submittedBy,
     required this.modules,
     required this.accessibleTickets,
     required this.ticketsRaisedFrom,
@@ -36,6 +38,7 @@ class Department {
       name: json["name"],
       defaultView: json["default_view"],
       ticketable: json["ticketable"],
+      submittedBy: json["submitted_by"],
 
       modules: List.generate(
           json["modules"].length,
@@ -69,6 +72,7 @@ class Department {
       "d_id": dId,
       "name": name,
       "default_view": defaultView,
+      "submitted_by": submittedBy,
       "ticketable": ticketable,
       "modules": modules,
       "accessible_tickets": accessibleTickets,

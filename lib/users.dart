@@ -94,6 +94,7 @@ class _ViewUsersState extends State<ViewUsers> {
 
         ],
       ),
-      widget.user);
+      widget.user
+    );
   }
 }

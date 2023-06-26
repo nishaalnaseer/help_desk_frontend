@@ -2,9 +2,12 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:help_desk_frontend/create_department.dart';
+import 'package:help_desk_frontend/view_department.dart';
+import 'package:http/http.dart' as http;
 
 import 'application_models.dart';
 import 'supporting.dart' as supporting;
+import 'view_department.dart';
 
 class DepartmentsView extends StatefulWidget {
   final User user;
@@ -25,23 +28,27 @@ class DepartmentsView extends StatefulWidget {
 class _DepartmentsViewState extends State<DepartmentsView> {
   List<DataRow> rows = [];
   bool dataInit = false;
+  List<String> modules = [];
+  List<String> departments = ["This Department"];
+  List<String> ticketableList = [];
 
   DataColumn getColumn(String text) {
     return DataColumn(
-        label: Wrap(
-          children: [
-            Text(
-              text,
-              style: const TextStyle(
-                color: Colors.white,
-                fontWeight: FontWeight.w500,
-                fontSize: 18
-              ),
-              softWrap: true,
-              overflow: TextOverflow.ellipsis,
-            )
-          ],
-        ));
+      label: Wrap(
+        children: [
+          Text(
+            text,
+            style: const TextStyle(
+              color: Colors.white,
+              fontWeight: FontWeight.w500,
+              fontSize: 18
+            ),
+            softWrap: true,
+            overflow: TextOverflow.ellipsis,
+          )
+        ],
+      )
+    );
   }
 
   DataCell getDataCell(String text) {
@@ -90,7 +97,37 @@ class _DepartmentsViewState extends State<DepartmentsView> {
               Wrap(
                 children: [
                   ElevatedButton(
-                    onPressed: () {},
+                    onPressed: () async {
+                      var response = await supporting.getApiData(
+                        "department?d_id=${department.dId}",
+                        widget.domain,
+                        widget.protocol,
+                        context,
+                        headers: widget.user.getAuth()
+                      );
+                      Department uDepartment;
+                      try {
+                        var json = jsonDecode(response);
+                        uDepartment = Department.fromJson(json);
+                      } on Exception catch (e) {
+                        return;
+                      }
+
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => ViewDepartment(
+                              protocol: widget.protocol,
+                              domain: widget.domain,
+                              user: widget.user,
+                              department: uDepartment,
+                              modules: modules,
+                              departments: departments,
+                              ticketableList: ticketableList,
+                            )
+                        ),
+                      );
+                    },
                     child: const Text(
                       "Inspect/Edit",
                       style: TextStyle(
@@ -113,6 +150,49 @@ class _DepartmentsViewState extends State<DepartmentsView> {
     setState(() {
 
     });
+  }
+
+  Future<void> listsInit() async {
+    var uri = Uri.parse(
+        "${widget.protocol}://${widget.domain}"
+            "/all_departments_and_modules"
+    );
+    var response = await http.get(
+        uri,
+        headers: widget.user.getAuth()
+    );
+
+    if (response.statusCode != 200) {
+      return;
+    }
+
+    var data = jsonDecode(response.body);
+
+    List<dynamic> modulesRaw = data["modules"];
+    List<dynamic> departmentsRaw = data["departments"];
+    List<dynamic> ticketableRaw = data["ticketable"];
+
+    modules = [];
+    departments = ["This Department"];
+    ticketableList = [];
+
+    for(dynamic x in modulesRaw) {
+      modules.add(x);
+    }
+
+    for(dynamic x in departmentsRaw) {
+      departments.add(x);
+    }
+
+    for(dynamic x in ticketableRaw) {
+      ticketableList.add(x);
+    }
+  }
+
+  @override
+  void initState(){
+    listsInit();
+    super.initState();
   }
 
   @override
@@ -143,40 +223,6 @@ class _DepartmentsViewState extends State<DepartmentsView> {
               alignment: Alignment.bottomRight,
               child: ElevatedButton(
                 onPressed: () async {
-                  var response = await supporting.getRequest(
-                    widget.protocol,
-                    widget.domain,
-                    "all_departments_and_modules",
-                    context,
-                    headers: widget.user.getAuth()
-                  );
-
-                  if(response.statusCode != 200) {
-                    return;
-                  }
-
-                  var data = jsonDecode(response.body);
-
-                  List<dynamic> modulesRaw = data["modules"];
-                  List<dynamic> departmentsRaw = data["departments"];
-                  List<dynamic> ticketableRaw = data["ticketable"];
-
-                  List<String> modules = [];
-                  List<String> departments = ["This Department"];
-                  List<String> ticketableList = [];
-
-                  for(dynamic x in modulesRaw) {
-                    modules.add(x);
-                  }
-
-                  for(dynamic x in departmentsRaw) {
-                    departments.add(x);
-                  }
-
-                  for(dynamic x in ticketableRaw) {
-                    ticketableList.add(x);
-                  }
-
                   Navigator.push(
                     context,
                     MaterialPageRoute(

@@ -36,10 +36,6 @@ class _CreateDepartmentState extends State<CreateDepartment> {
   bool viewSelected = false;
   bool ticketable = false;
 
-  List<String> modules = [];
-  List<String> departments = ["This Department"];
-  List<String> ticketableList = [];
-
   final modulesKey = GlobalKey<DropDownSelectorState>();
   final ticketsToKey = GlobalKey<DropDownSelectorState>();
   final ticketsFromKey = GlobalKey<DropDownSelectorState>();
@@ -103,7 +99,10 @@ class _CreateDepartmentState extends State<CreateDepartment> {
                borderSide: BorderSide(color: Colors.red), // Change the color here
              ),
              labelText: display,
-             labelStyle: const TextStyle(fontSize: 18, color: Colors.white),
+             labelStyle: const TextStyle(
+               fontSize: 18,
+               color: Colors.white
+             ),
            ),
          ),
     );
@@ -156,64 +155,6 @@ class _CreateDepartmentState extends State<CreateDepartment> {
               ),
             ),
           ),
-
-          // Padding(
-          //   padding: const EdgeInsets.all(10),
-          //   child: SizedBox(
-          //     width: 200,
-          //     child: Center(
-          //       child: ElevatedButton(
-          //         onPressed: () async {
-          //           var response = await supporting.getRequest(
-          //             widget.protocol,
-          //             widget.domain,
-          //             "all_departments_and_modules",
-          //             context,
-          //             headers: widget.user.getAuth()
-          //           );
-          //
-          //           if(response.statusCode != 200) {
-          //             return;
-          //           }
-          //
-          //           var data = jsonDecode(response.body);
-          //
-          //           List<dynamic> modulesRaw = data["modules"];
-          //           List<dynamic> departmentsRaw = data["departments"];
-          //           List<dynamic> ticketableRaw = data["ticketable"];
-          //
-          //           modules = [];
-          //           departments = ["This Department"];
-          //           ticketableList = [];
-          //
-          //           for(dynamic x in modulesRaw) {
-          //             modules.add(x);
-          //           }
-          //           modulesKey.currentState?.setState(() {});
-          //
-          //           for(dynamic x in departmentsRaw) {
-          //             departments.add(x);
-          //           }
-          //           ticketsFromKey.currentState?.setState(() {});
-          //           nonTicketableReportsKey.currentState?.setState(() {});
-          //
-          //           for(dynamic x in ticketableRaw) {
-          //             ticketableList.add(x);
-          //           }
-          //           ticketsToKey.currentState?.setState(() {});
-          //           ticketableReportsKey.currentState?.setState(() {});
-          //           setState(() {
-          //
-          //           });
-          //         },
-          //         child: const Text(
-          //           "Load Data",
-          //           style: TextStyle(color: Colors.red, fontSize: 18),
-          //         )
-          //       ),
-          //     ),
-          //   ),
-          // ),
 
           inputField(nameController, name, "Name"),
 
@@ -302,24 +243,34 @@ class _CreateDepartmentState extends State<CreateDepartment> {
              child: Center(
                child: ElevatedButton(
                  onPressed: () async {
-                   DropDownSelectorState? state = modulesKey.currentState;
-                   List<String>? selectedModules = state?.getSelected();
+                   DropDownSelectorState? state =
+                       modulesKey.currentState;
+                   List<String>? selectedModules =
+                      state?.getSelected();
 
                    state = ticketsToKey.currentState;
-                   List<String>? selectedToTicketable = state?.getSelected();
+                   List<String>? selectedToTicketable =
+                     state?.getSelected();
 
                    state = ticketsFromKey.currentState;
-                   List<String>? selectedFromTicketable = state?.getSelected();
+                   List<String>? selectedFromTicketable =
+                     state?.getSelected();
 
                    state = ticketableReportsKey.currentState;
-                   List<String>? ticketableReports = state?.getSelected();
+                   List<String>? ticketableReports =
+                     state?.getSelected();
 
                    state = nonTicketableReportsKey.currentState;
-                   List<String>? nonTicketableReports = state?.getSelected();
+                   List<String>? nonTicketableReports =
+                     state?.getSelected();
 
-                   if (selectedModules == null || selectedToTicketable == null ||
-                       selectedFromTicketable == null || nonTicketableReports == null
-                       || ticketableReports == null) {
+                   if (
+                        selectedModules == null ||
+                        selectedToTicketable == null ||
+                        selectedFromTicketable == null ||
+                        nonTicketableReports == null ||
+                        ticketableReports == null
+                   ) {
                      return;
                    }
 
@@ -333,6 +284,7 @@ class _CreateDepartmentState extends State<CreateDepartment> {
                      ticketsRaisedFrom: selectedFromTicketable,
                      nonTicketableReports: nonTicketableReports,
                      ticketableReports: ticketableReports,
+                     submittedBy: widget.user.email,
                    );
                    var data = jsonEncode(department.toJson());
 

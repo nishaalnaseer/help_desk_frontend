@@ -131,6 +131,7 @@ class DrawerNavigationApp extends StatelessWidget {
               user: user, modules: modules, domain: domain, protocol: protocol);
         },
         '/create_ticket': (context) {
+
           Text? error =
               assignUserData2(ModalRoute.of(context)?.settings.arguments);
           if (error != null) {
@@ -140,16 +141,14 @@ class DrawerNavigationApp extends StatelessWidget {
           return CreateTicket(
               user: user, modules: modules, domain: domain, protocol: protocol);
         },
-        '/ticket_to_ticket': (context) {
-          dynamic argsOld = ModalRoute.of(context)?.settings.arguments;
-          Map<String, String> args = Map<String, String>.from(argsOld);
-
-          return ViewTickets(
-              user: user,
-              domain: domain,
-              protocol: protocol,
-            );
-        },
+        // '/ticket_to_ticket': (context) {
+        //   dynamic argsOld = ModalRoute.of(context)?.settings.arguments;
+        //   return ViewTickets(
+        //       user: user,
+        //       domain: domain,
+        //       protocol: protocol,
+        //     );
+        // },
         '/view_tickets': (context) {
           Text? error =
               assignUserData2(ModalRoute.of(context)?.settings.arguments);
@@ -165,12 +164,6 @@ class DrawerNavigationApp extends StatelessWidget {
         },
         '/view_ticket': (context) {
           dynamic args = ModalRoute.of(context)?.settings.arguments;
-
-          Map<String, String> currentArgs = {
-            "from": args["from"],
-            "to": args["to"],
-            "status": args["status"],
-          };
 
           Ticket ticket = args["ticket"];
           user = args["user"];
