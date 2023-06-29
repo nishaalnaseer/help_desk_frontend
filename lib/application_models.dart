@@ -180,7 +180,7 @@ class User {
   String email;
   String number;
   String location;
-  String department;
+  Department department;
   String defaultView;
   List<String> modules;
   List<String> accessibleReports;
@@ -210,7 +210,7 @@ class User {
     return User(
       id: json["u_id"],
       name: json["name"],
-      department: json["department"],
+      department: Department.fromJson(json["department"]),
       email: json["username"],
       number: json["number"],
       location: json["location"],

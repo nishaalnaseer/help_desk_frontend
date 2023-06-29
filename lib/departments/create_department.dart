@@ -2,9 +2,9 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 
-import 'application_models.dart';
+import '../application_models.dart';
 import 'drop_down_selector.dart';
-import 'supporting.dart' as supporting;
+import '../supporting.dart' as supporting;
 
 
 class CreateDepartment extends StatefulWidget {
@@ -70,7 +70,8 @@ class _CreateDepartmentState extends State<CreateDepartment> {
   );
   late DropDownSelector reportsNonTicketable = DropDownSelector(
     key: nonTicketableReportsKey,
-    trackText: "Which departments reports can this department access?",
+    trackText: "Which departments reports can this"
+        " department access?",
     buttonText: "Department",
     options: widget.departments
   );

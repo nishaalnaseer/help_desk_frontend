@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 
-import 'departments_view.dart';
-import 'login.dart';
-import 'create_ticket.dart';
-import 'view_tickets.dart';
-import 'view_ticket.dart';
+import 'departments/departments_view.dart';
+import 'users/login.dart';
+import 'tickets/create_ticket.dart';
+import 'tickets/view_tickets.dart';
+import 'tickets/view_ticket.dart';
 import 'application_models.dart';
-import 'users.dart';
+import 'users/users.dart';
 import 'supporting.dart' as supporting;
 
 import 'package:flutter/foundation.dart' show kIsWeb;
@@ -102,18 +102,29 @@ class DrawerNavigationApp extends StatelessWidget {
             ProfilePage(args: {"user": user, "modules": modules}),
         '/login': (context) {
           User(
-              id: -1,
-              name: "name",
-              department: "department",
-              email: "email",
-              number: "number",
-              location: "location",
-              accessibleReports: [],
-              accessibleTickets: [],
-              modules: [],
-              defaultView: "",
-              ticketableDepartments: [],
-              ticketsFrom: []);
+            id: -1,
+            name: "name",
+            department: Department(
+                dId: 0,
+                name: "name",
+                defaultView: "defaultView",
+                ticketable: false,
+                submittedBy: "submittedBy",
+                modules: modules,
+                accessibleTickets: [],
+                ticketsRaisedFrom: [],
+                nonTicketableReports: [],
+                ticketableReports: []
+            ),
+            email: "email",
+            number: "number",
+            location: "location",
+            accessibleReports: [],
+            accessibleTickets: [],
+            modules: [],
+            defaultView: "",
+            ticketableDepartments: [],
+            ticketsFrom: []);
 
           return LoginPage(
             domain: domain,
@@ -176,6 +187,7 @@ class DrawerNavigationApp extends StatelessWidget {
         },
 
         '/users': (context) {
+
           Text? error =
           assignUserData2(ModalRoute.of(context)?.settings.arguments);
           if (error != null) {

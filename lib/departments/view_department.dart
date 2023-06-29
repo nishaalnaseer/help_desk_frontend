@@ -1,6 +1,8 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
-import 'supporting.dart' as supporting;
-import 'application_models.dart';
+import '../supporting.dart' as supporting;
+import '../application_models.dart';
 import 'drop_down_selector.dart';
 
 class ViewDepartment extends StatefulWidget {
@@ -44,41 +46,11 @@ class _ViewDepartmentState extends State<ViewDepartment> {
   final ticketsFromKey = GlobalKey<DropDownSelectorState>();
   final ticketableReportsKey = GlobalKey<DropDownSelectorState>();
   final nonTicketableReportsKey = GlobalKey<DropDownSelectorState>();
-  late DropDownSelector modulesSelector = DropDownSelector(
-    key: modulesKey,
-    trackText: modulesSelectorDisplay,
-    buttonText: "Module",
-    options: widget.modules,
-    initialValues: widget.department.modules,
-  );
-  late DropDownSelector ticketToSelector = DropDownSelector(
-    key: ticketsToKey,
-    trackText: ticketToSelectorDisplay,
-    buttonText: "Department",
-    options: widget.ticketableList,
-    initialValues: widget.department.accessibleTickets,
-  );
-  late DropDownSelector ticketFromSelector = DropDownSelector(
-    key: ticketsFromKey,
-    trackText: ticketFromSelectorDisplay,
-    buttonText: "Department",
-    options: departments,
-    initialValues: widget.department.ticketsRaisedFrom,
-  );
-  late DropDownSelector reportsTicketable = DropDownSelector(
-    key: ticketableReportsKey,
-    trackText: reportsTicketableDisplay,
-    buttonText: "Department",
-    options: widget.ticketableList,
-    initialValues: widget.department.ticketableReports,
-  );
-  late DropDownSelector reportsNonTicketable = DropDownSelector(
-    key: nonTicketableReportsKey,
-    trackText: reportsNonTicketableDisplay,
-    buttonText: "Department",
-    options: departments,
-    initialValues: widget.department.nonTicketableReports,
-  );
+  late DropDownSelector modulesSelector;
+  late DropDownSelector ticketToSelector;
+  late DropDownSelector ticketFromSelector;
+  late DropDownSelector reportsTicketable;
+  late DropDownSelector reportsNonTicketable;
 
   @override
   void dispose() {
@@ -93,8 +65,8 @@ class _ViewDepartmentState extends State<ViewDepartment> {
         " tickets can this department access?";
     var reportsTicketableDisplay = "Which tickeatable departments"
         " reports can this department access?";
-    var reportsNonTicketableDisplay = "Which departments reports"
-        " can this department access?";
+    var reportsNonTicketableDisplay = "Which non-ticketable "
+        "departments reports can this department access?";
 
     for(var x in widget.department.modules) {
       modulesSelectorDisplay += " $x,";
@@ -120,6 +92,51 @@ class _ViewDepartmentState extends State<ViewDepartment> {
     this.reportsTicketableDisplay = reportsTicketableDisplay;
     this.ticketFromSelectorDisplay = ticketFromSelectorDisplay;
     this.reportsNonTicketableDisplay = reportsNonTicketableDisplay;
+
+    modulesSelector = DropDownSelector(
+      key: modulesKey,
+      trackText: "Available Modules: ",
+      buttonText: "Module",
+      options: widget.modules,
+      initialValues: widget.department.modules,
+      initialText: modulesSelectorDisplay,
+    );
+    ticketToSelector = DropDownSelector(
+      key: ticketsToKey,
+      trackText:  "Which ticketable department's tickets can"
+          " this department can access?",
+      buttonText: "Department",
+      options: widget.ticketableList,
+      initialValues: widget.department.accessibleTickets,
+      initialText: ticketToSelectorDisplay,
+    );
+    ticketFromSelector = DropDownSelector(
+      key: ticketsFromKey,
+      trackText: "Which departments raised tickets can this "
+          "department access?",
+      buttonText: "Department",
+      options: departments,
+      initialValues: widget.department.ticketsRaisedFrom,
+      initialText: ticketFromSelectorDisplay,
+    );
+    reportsTicketable = DropDownSelector(
+      key: ticketableReportsKey,
+      trackText: "Which tickeatable departments reports can this "
+          "department access?",
+      buttonText: "Department",
+      options: widget.ticketableList,
+      initialValues: widget.department.ticketableReports,
+      initialText: reportsTicketableDisplay,
+    );
+    reportsNonTicketable = DropDownSelector(
+      key: nonTicketableReportsKey,
+      trackText: "Which non-ticketable departments reports "
+          "can this department access?",
+      buttonText: "Department",
+      options: departments,
+      initialValues: widget.department.nonTicketableReports,
+      initialText: reportsNonTicketableDisplay,
+    );
   }
 
   List<String> getDepartments() {
@@ -130,14 +147,13 @@ class _ViewDepartmentState extends State<ViewDepartment> {
 
   List<String> getValues(GlobalKey<DropDownSelectorState> key) {
     DropDownSelectorState? state = key.currentState;
-    List<String>? selectedFromTicketable =
-      state?.getSelected();
+    List<String>? values = state?.selections;
 
-    if(selectedFromTicketable == null) {
+    if(values == null) {
       throw Exception("Null DropDownSelectorState Value");
     }
 
-    return selectedFromTicketable;
+    return values;
   }
 
   @override
@@ -163,7 +179,7 @@ class _ViewDepartmentState extends State<ViewDepartment> {
                     widget.protocol,
                     widget.domain,
                     "release_department_lock?"
-                        "d_id=${widget.department.dId}",
+                        "d_name=${widget.department.name}",
                     context,
                     headers: headers
                   );
@@ -304,61 +320,86 @@ class _ViewDepartmentState extends State<ViewDepartment> {
               child: Center(
                 child: ElevatedButton(
                   onPressed: () async {
-                    // DropDownSelectorState? state =
-                    //     modulesKey.currentState;
-                    // List<String>? selectedModules = state?.getSelected();
-                    //
-                    // state = ticketsToKey.currentState;
-                    // List<String>? selectedToTicketable =
-                    // state?.getSelected();
-                    //
-                    // state = ticketsFromKey.currentState;
-                    // List<String>? selectedFromTicketable =
-                    // state?.getSelected();
-                    //
-                    // state = ticketableReportsKey.currentState;
-                    // List<String>? ticketableReports =
-                    // state?.getSelected();
-                    //
-                    // state = nonTicketableReportsKey.currentState;
-                    // List<String>? nonTicketableReports =
-                    // state?.getSelected();
-                    //
-                    // if (
-                    // selectedModules == null ||
-                    //     selectedToTicketable == null ||
-                    //     selectedFromTicketable == null ||
-                    //     nonTicketableReports == null ||
-                    //     ticketableReports == null
-                    // ) {
-                    //   return;
-                    // }
-                    //
-                    // Department department = Department(
-                    //   dId: 0,
-                    //   name: nameController.text,
-                    //   defaultView: selectedView,
-                    //   ticketable: ticketable,
-                    //   modules: selectedModules,
-                    //   accessibleTickets: selectedToTicketable,
-                    //   ticketsRaisedFrom: selectedFromTicketable,
-                    //   nonTicketableReports: nonTicketableReports,
-                    //   ticketableReports: ticketableReports,
-                    //   submittedBy: widget.user.email,
-                    // );
-                    // var data = jsonEncode(department.toJson());
-                    //
-                    // supporting.postRequest2(
-                    //   data,
-                    //   widget.protocol,
-                    //   widget.domain,
-                    //   "department",
-                    //   context,
-                    //   headers: widget.user.getAuth(),
-                    //   showPrompt: true,
-                    //   promptTitle: "Nice",
-                    //   promptMessage: "Department Created",
-                    // );
+                    DropDownSelectorState? state =
+                        modulesKey.currentState;
+                    List<String>? selectedModules =
+                    state?.getSelected();
+
+                    state = ticketsToKey.currentState;
+                    List<String>? selectedToTicketable =
+                    state?.getSelected();
+
+                    state = ticketsFromKey.currentState;
+                    List<String>? selectedFromTicketable =
+                    state?.getSelected();
+
+                    state = ticketableReportsKey.currentState;
+                    List<String>? ticketableReports =
+                    state?.getSelected();
+
+                    state = nonTicketableReportsKey.currentState;
+                    List<String>? nonTicketableReports =
+                    state?.getSelected();
+
+                    if (
+                    selectedModules == null ||
+                        selectedToTicketable == null ||
+                        selectedFromTicketable == null ||
+                        nonTicketableReports == null ||
+                        ticketableReports == null
+                    ) {
+                      return;
+                    }
+
+                    var department = Department(
+                      dId: widget.department.dId,
+                      name: widget.department.name,
+                      defaultView: selectedView,
+                      ticketable: newTicketable,
+                      submittedBy: widget.department.submittedBy,
+                      modules: selectedModules,
+                      accessibleTickets: selectedToTicketable,
+                      ticketsRaisedFrom: selectedFromTicketable,
+                      nonTicketableReports: nonTicketableReports,
+                      ticketableReports: ticketableReports
+                    );
+
+                    var data = department.toJson();
+                    var header = widget.user.getAuth();
+                    header.putIfAbsent(
+                        "Content-Type", () => "application/json");
+
+                    var response = await supporting.patchRequest(
+                      jsonEncode(data),
+                      widget.protocol,
+                      widget.domain,
+                      "department",
+                      context,
+                      widget.user.getAuth(),
+                      showPrompt: true,
+                      promptTitle: "Nice",
+                      promptMessage: "Department: "
+                          "${department.name} changes submitted"
+                    );
+                    
+                    await Future.delayed(const Duration(seconds: 3));
+
+                    // todo implement post request with no loading here
+                    if(
+                    response.statusCode == 201 ||
+                    response.statusCode == 200
+                    ) {
+                      await supporting.postRequest2(
+                          "",
+                          widget.protocol,
+                          widget.domain,
+                          "release_department_lock?"
+                              "d_id=${widget.department.dId}",
+                          context,
+                          headers: header
+                      );
+                      Navigator.pop(context);
+                    }
                   },
                   child: const Text(
                     "Submit Changes",

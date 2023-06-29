@@ -3,8 +3,8 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
-import 'application_models.dart';
-import 'supporting.dart' as supporting;
+import '../application_models.dart';
+import '../supporting.dart' as supporting;
 
 class ViewTicket extends StatefulWidget {
   final String protocol;
@@ -40,7 +40,7 @@ class _ViewTicketState extends State<ViewTicket> {
   late bool canAddMessages = (widget.ticket.status != "COMPLETED" &&
       widget.ticket.status != "REJECTED");
   late bool showChangeStatus =
-      (widget.ticket.ticketTo == widget.user.department) && canAddMessages;
+      (widget.ticket.ticketTo == widget.user.department.name) && canAddMessages;
 
   Padding getText(String text) {
     return Padding(
@@ -270,15 +270,18 @@ class _ViewTicketState extends State<ViewTicket> {
                  padding: const EdgeInsets.all(10),
                  child: ElevatedButton(
                    onPressed: () async {
+                     var header = widget.user.getAuth();
+                     header.putIfAbsent(
+                         "Content-Type", () => "application/json");
                      var response =
-                       await supporting.postRequest2(
+                       await supporting.patchRequest(
                          jsonEncode({}),
                          widget.protocol,
                          widget.domain,
-                         "status_change?new_status=$selectedNewStatus"
+                         "status?new_status=$selectedNewStatus"
                          "&ticket_id=${widget.ticket.tId}",
                          context,
-                         headers: widget.user.getAuth(),
+                         header,
                          showPrompt: true,
                          promptTitle: "Status Changed!",
                          promptMessage:
@@ -527,6 +530,10 @@ class _ViewTicketState extends State<ViewTicket> {
                                 1000,
                             personFrom: widget.user.email,
                             message: newMessage);
+                        var header = widget.user.getAuth();
+                        header.putIfAbsent(
+                            "Content-Type", () => "application/json"
+                        );
                         var response = await supporting.postRequest2(
                             jsonEncode({}),
                             widget.protocol,
@@ -534,7 +541,7 @@ class _ViewTicketState extends State<ViewTicket> {
                             "message?message=$newMessage"
                             "&ticket_id=${widget.ticket.tId}",
                             context,
-                            headers: widget.user.getAuth(),
+                            headers: header,
                             showPrompt: false,
                             promptTitle: "Nice",
                             promptMessage: "Message Submitted");

@@ -506,3 +506,82 @@ Scaffold getScaffold(Widget thingy, User user, {bool appBar = true}) {
     body: thingy,
   );
 }
+
+Future<http.Response> patchRequest(
+    var data, String protocol, String domain,
+    String path, dynamic context,var headers,
+    {bool showPrompt = false,
+     String promptTitle = "",
+     String promptMessage = ""}) async {
+  ProgressDialog pd = ProgressDialog(context: context);
+  Uri url = Uri.parse('$protocol://$domain/$path');
+
+  pd.show(
+      msg: 'Loading',
+      progressType: ProgressType.valuable,
+      backgroundColor: hexToColor("#222222"),
+      progressValueColor: hexToColor("#222222"),
+      progressBgColor: Colors.red,
+      msgColor: Colors.white,
+      valueColor: Colors.white);
+
+  late http.Response response;
+
+  try {
+    response = await http.patch(
+        url, headers: headers, body: data
+    );
+  } on Exception catch (e) {
+    pd.close(delay: 0);
+    await Future.delayed(const Duration(seconds: 1));
+    showPopUp(context, "Error", "Something went wrong: $e");
+    throw Exception("Something went wrong: $e");
+  }
+
+  pd.close(delay: 0);
+
+  await Future.delayed(const Duration(seconds: 1));
+
+  int code = response.statusCode;
+  if (code == 200 || code == 201) {
+    if (showPrompt) {
+      String? message = jsonDecode(response.body)?["content"];
+
+      if (message == null) {
+        showPopUp(context, promptTitle, promptMessage);
+      } else {
+        showPopUp(context, promptTitle, message);
+      }
+    }
+    return response;
+  } else if (code > 499) {
+    showPopUp(context, "Error", "Details: code $code");
+    return response;
+  } else {
+    String details = "Details:\n";
+
+    String body = response.body;
+    var json = jsonDecode(body)["detail"];
+    if (json == null) {
+      showPopUp(context, "Error $code!", "Contact admin");
+    } else {
+      try {
+        for (var x in json) {
+          String field = x["loc"][1];
+          String type = x["type"];
+          String msg = x["msg"];
+
+          details += "Type: $type, $msg: $field\n";
+        }
+      } on TypeError catch (e) {
+        details = json;
+      } catch (e) {
+        // Catch other types of exceptions
+        details = 'An unexpected exception occurred: $e';
+      }
+    }
+
+    showPopUp(context, "Error $code!", details);
+    return response;
+  }
+}

@@ -8,8 +8,8 @@ import 'package:platform/platform.dart';
 import 'package:window_manager/window_manager.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 
-import 'supporting.dart' as supporting;
-import 'application_models.dart';
+import '../supporting.dart' as supporting;
+import '../application_models.dart';
 
 class CreateTicket extends StatefulWidget {
   final String protocol;
@@ -108,7 +108,7 @@ class _CreateTicketState extends State<CreateTicket> {
                     nameController.text = widget.user.name;
                     emailController.text = widget.user.email;
                     numController.text = widget.user.number;
-                    deptController.text = widget.user.department;
+                    deptController.text = widget.user.department.name;
                     locationController.text = widget.user.location;
                     setState(() {});
                   },
@@ -261,13 +261,16 @@ class _CreateTicketState extends State<CreateTicket> {
                         messages: [],
                         updates: []);
                     var ticketInfo = ticket.toJson();
+                    var header = widget.user.getAuth();
+                    header.putIfAbsent(
+                        "Content-Type", () => "application/json");
                     var response = await supporting.postRequest2(
                       jsonEncode(ticketInfo),
                       widget.protocol,
                       widget.domain,
                       "ticket",
                       context,
-                      headers: widget.user.getAuth(),
+                      headers: header,
                       showPrompt: true,
                       promptTitle: "Nice!",
                       promptMessage: "Ticket Submitted"

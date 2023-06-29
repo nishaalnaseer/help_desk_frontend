@@ -3,9 +3,9 @@ import 'dart:convert';
 import 'package:flutter_improved_scrolling/flutter_improved_scrolling.dart';
 
 import 'package:flutter/material.dart';
-import 'package:help_desk_frontend/view_ticket.dart';
-import 'application_models.dart';
-import 'supporting.dart' as supporting;
+import 'package:help_desk_frontend/tickets/view_ticket.dart';
+import '../application_models.dart';
+import '../supporting.dart' as supporting;
 
 class ViewTickets extends StatefulWidget {
   final String domain;
@@ -68,9 +68,12 @@ class _ViewTicketsState extends State<ViewTickets> {
   }
 
   Future<List<DataRow>> getAsyncTickets() async {
+    if(selectedStatus == "On hold") {
+      selectedStatus = "On_hold";
+    }
     String contents = await supporting.getApiData(
         "tickets?tickets_from=$selectedDepartmentFrom&"
-        "department=$selectedDepartment&ticket_status=$selectedStatus",
+        "department=$selectedDepartment&ticket_status=${selectedStatus.toUpperCase()}",
         widget.domain,
         widget.protocol,
         context,

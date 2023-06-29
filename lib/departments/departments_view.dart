@@ -1,12 +1,12 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
-import 'package:help_desk_frontend/create_department.dart';
-import 'package:help_desk_frontend/view_department.dart';
+import 'package:help_desk_frontend/departments/create_department.dart';
+import 'package:help_desk_frontend/departments/view_department.dart';
 import 'package:http/http.dart' as http;
 
-import 'application_models.dart';
-import 'supporting.dart' as supporting;
+import '../application_models.dart';
+import '../supporting.dart' as supporting;
 import 'view_department.dart';
 
 class DepartmentsView extends StatefulWidget {
@@ -82,6 +82,8 @@ class _DepartmentsViewState extends State<DepartmentsView> {
       return;
     }
 
+    List<DataRow> rows = [];
+
     var data = jsonDecode(response.body);
     for(var row in data) {
       Department department = Department.fromJson(row);
@@ -99,7 +101,7 @@ class _DepartmentsViewState extends State<DepartmentsView> {
                   ElevatedButton(
                     onPressed: () async {
                       var response = await supporting.getApiData(
-                        "department?d_id=${department.dId}",
+                        "department?d_name=${department.name}",
                         widget.domain,
                         widget.protocol,
                         context,
@@ -144,7 +146,7 @@ class _DepartmentsViewState extends State<DepartmentsView> {
         )
       );
     }
-
+    this.rows = rows;
 
     dataInit =  true;
     setState(() {
@@ -213,7 +215,8 @@ class _DepartmentsViewState extends State<DepartmentsView> {
                 style: TextStyle(
                   fontSize: 25,
                   fontWeight: FontWeight.w500,
-                  color: Colors.red),
+                  color: Colors.red
+                ),
               ),
             ),
           ),

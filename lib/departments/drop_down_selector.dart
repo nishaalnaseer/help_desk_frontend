@@ -1,18 +1,20 @@
 import 'package:flutter/material.dart';
 
-import 'supporting.dart' as supporting;
+import '../supporting.dart' as supporting;
 
 class DropDownSelector extends StatefulWidget {
   final String trackText;
   final String buttonText;
   final List<String> options;
   final List<String>? initialValues;
+  final String? initialText;
   const DropDownSelector({
     super.key,
     required this.trackText,
-    required this.buttonText, 
+    required this.buttonText,
     required this.options,
     this.initialValues,
+    this.initialText,
   });
 
   @override
@@ -20,7 +22,7 @@ class DropDownSelector extends StatefulWidget {
 }
 
 class DropDownSelectorState extends State<DropDownSelector> {
-  late String trackText = widget.trackText;
+  late String trackText = widget.initialText ?? widget.trackText;
   bool boolController = false;
   String valueHolder = "";
   late String buttonText = "Add ${widget.buttonText}";

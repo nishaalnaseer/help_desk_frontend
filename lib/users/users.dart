@@ -1,6 +1,9 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
-import 'application_models.dart';
-import 'supporting.dart' as supporting;
+import '../application_models.dart';
+import '../supporting.dart' as supporting;
+import 'package:http/http.dart' as http;
 
 class ViewUsers extends StatefulWidget {
   final User user;
@@ -18,7 +21,44 @@ class ViewUsers extends StatefulWidget {
 class _ViewUsersState extends State<ViewUsers> {
   String selectedDepartment = "";
   bool departmentSelected = false;
-  List<String> departments = [];
+  late final List<String> departments;
+  bool departmentsInitialised = false;
+
+  void getDepartments() async {
+    var response = await http.get(
+      Uri.parse("${widget.protocol}://${widget.domain}"
+          "/departments"), headers: widget.user.getAuth(),
+    );
+
+    if(response.statusCode != 200) {
+      throw Exception("Unhandled exception on GET /departments route");
+    }
+    List<dynamic> data = jsonDecode(response.body);
+
+    List<String> rows = ["All",];
+    for(var departmentJson in data) {
+      rows.add(departmentJson["name"]);
+    }
+    departments = rows;
+    departmentsInitialised = true;
+    setState(() {
+
+    });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    getDepartments();
+  }
+
+  List<String> properArray() {
+    if(departmentsInitialised) {
+      return departments;
+    } else {
+      return [];
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -45,7 +85,7 @@ class _ViewUsersState extends State<ViewUsers> {
               padding: const EdgeInsets.all(10),
               child: DropdownButton<String>(
                 hint: departmentSelected
-                ? Text(
+                    ? Text(
                   "Selected Department: $selectedDepartment",
                   style: const TextStyle(
                       color: Colors.white,
@@ -53,7 +93,7 @@ class _ViewUsersState extends State<ViewUsers> {
                       fontWeight: FontWeight.w500
                   ),
                 )
-                : const Text(
+                    : const Text(
                   'Select a Department',
                   style: TextStyle(
                       color: Colors.white,
@@ -74,7 +114,7 @@ class _ViewUsersState extends State<ViewUsers> {
 
                   setState(() {});
                 },
-                items: widget.user.ticketsFrom.map<DropdownMenuItem<String>>
+                items: (properArray()).map<DropdownMenuItem<String>>
                   ((String value) {
                   return DropdownMenuItem<String>(
                     value: value,

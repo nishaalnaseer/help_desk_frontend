@@ -2,10 +2,10 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'application_models.dart';
+import '../application_models.dart';
 
 
-import 'supporting.dart' as supporting;
+import '../supporting.dart' as supporting;
 
 class LoginPage extends StatefulWidget {
   final String domain;
@@ -210,7 +210,18 @@ class _LoginPageState extends State<LoginPage> {
         User(
           id: -1,
           name: "name",
-          department: "department",
+          department: Department(
+                dId: 0,
+                name: "name",
+                defaultView: "defaultView",
+                ticketable: false,
+                submittedBy: "submittedBy",
+                modules: [],
+                accessibleTickets: [],
+                ticketsRaisedFrom: [],
+                nonTicketableReports: [],
+                ticketableReports: []
+            ),
           email: "email",
           number: "number",
           location: "location",
