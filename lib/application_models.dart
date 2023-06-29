@@ -182,10 +182,6 @@ class User {
   String location;
   Department department;
   String defaultView;
-  List<String> modules;
-  List<String> accessibleReports;
-  List<String> ticketsFrom;
-  List<String> accessibleTickets;
   List<String> ticketableDepartments;
   List<Device> devices = [];
 
@@ -198,10 +194,6 @@ class User {
       required this.email,
       required this.number,
       required this.location,
-      required this.accessibleReports,
-      required this.ticketsFrom,
-      required this.accessibleTickets,
-      required this.modules,
       required this.defaultView,
       required this.ticketableDepartments,
       List<Device>? devices});
@@ -215,16 +207,24 @@ class User {
       number: json["number"],
       location: json["location"],
       defaultView: json["default_view"],
-      ticketsFrom: generateList(json, "tickets_from"),
       ticketableDepartments: generateList(json, "ticketable_departments"),
-      modules: generateList(json, "modules"),
-      accessibleTickets: generateList(json, "accessible_tickets"),
-      accessibleReports: generateList(json, "accessible_reports"),
       devices: json["devices"] != null
           ? List.generate(json["devices"].length,
               (index) => Device.fromJson(json["devices"][index]))
           : [],
     );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      "id": id,
+      "name": name,
+      "department": department.toJson(),
+      "email": email,
+      "number": number,
+      "location": location,
+      "default_view": defaultView,
+    };
   }
 
   void setAuth(Map<String, String> newHeader) {

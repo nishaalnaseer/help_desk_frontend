@@ -73,7 +73,26 @@ class _ViewUsersState extends State<ViewUsers> {
                 style: TextStyle(
                   color: Colors.white,
                   fontWeight: FontWeight.w700,
-                  fontSize: 19
+                  fontSize: 25
+                ),
+              ),
+            ),
+          ),
+
+          Container(
+            padding: const EdgeInsets.all(10),
+            width: 200,
+            child: Align(
+              alignment: Alignment.topRight,
+              child: ElevatedButton(
+                onPressed: () {  },
+                child: const Text(
+                  "Add User",
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w500,
+                    color: Colors.red
+                  ),
                 ),
               ),
             ),
@@ -131,6 +150,44 @@ class _ViewUsersState extends State<ViewUsers> {
               ),
             ),
           ),
+
+          departmentSelected ?
+          Padding(
+            padding: const EdgeInsets.all(10),
+            child: Center(
+              child: Scrollbar(
+                // thumbVisibility: true,
+                controller: controller2,
+                child: SingleChildScrollView(
+                  controller: controller2,
+                  scrollDirection: Axis.horizontal,
+                  child: Container(
+                    constraints: BoxConstraints(
+                      minWidth: supporting.getWindowWidth(context) -
+                          20, // Set the minimum width here
+                    ),
+                    child: SizedBox(
+                      // width: supporting.getWindowWidth(context),
+                      child: DataTable(
+                        columns: [
+                          getColumn("ID"),
+                          getColumn("Name"),
+                          getColumn("Status"),
+                          getColumn("Contact"),
+                          getColumn("Department"),
+                          getColumn("Location"),
+                          getColumn("Subject"),
+                          getColumn("")
+                        ],
+                        rows: rows,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ) :
+          Container()
 
         ],
       ),

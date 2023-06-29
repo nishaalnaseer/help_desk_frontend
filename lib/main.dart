@@ -119,12 +119,9 @@ class DrawerNavigationApp extends StatelessWidget {
             email: "email",
             number: "number",
             location: "location",
-            accessibleReports: [],
-            accessibleTickets: [],
-            modules: [],
             defaultView: "",
             ticketableDepartments: [],
-            ticketsFrom: []);
+            );
 
           return LoginPage(
             domain: domain,

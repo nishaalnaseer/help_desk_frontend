@@ -366,7 +366,7 @@ Future<http.Response> postRequest2(
 
 List<Widget> getDrawerKids(User user, BuildContext context) {
   List<Widget> children = [];
-  for (String name in user.modules) {
+  for (String name in user.department.modules) {
     String? route = map[name];
     if (route == null) {
       continue;

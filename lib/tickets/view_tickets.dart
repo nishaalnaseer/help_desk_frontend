@@ -55,7 +55,7 @@ class _ViewTicketsState extends State<ViewTickets> {
 
   @override
   void initState() {
-    for (String dep in widget.user.accessibleTickets) {
+    for (String dep in widget.user.department.accessibleTickets) {
       departmentsFrom.add(dep);
     }
     super.initState();
@@ -305,7 +305,7 @@ class _ViewTicketsState extends State<ViewTickets> {
 
                   setState(() {});
                 },
-                items: widget.user.ticketsFrom
+                items: widget.user.department.ticketsRaisedFrom
                     .map<DropdownMenuItem<String>>((String value) {
                   return DropdownMenuItem<String>(
                     value: value,

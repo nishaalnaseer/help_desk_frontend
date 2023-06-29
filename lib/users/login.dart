@@ -225,12 +225,9 @@ class _LoginPageState extends State<LoginPage> {
           email: "email",
           number: "number",
           location: "location",
-          accessibleReports: [],
-          accessibleTickets: [],
-          modules: [],
           defaultView: "",
           ticketableDepartments: [],
-          ticketsFrom: []),
+        ),
         appBar: false);
   }
 }
