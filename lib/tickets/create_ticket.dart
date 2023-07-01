@@ -5,7 +5,6 @@ import 'package:flutter/material.dart';
 
 import 'package:http/http.dart' as http;
 import 'package:platform/platform.dart';
-import 'package:window_manager/window_manager.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 
 import '../supporting.dart' as supporting;
@@ -35,8 +34,6 @@ class _CreateTicketState extends State<CreateTicket> {
   String name = "";
   TextEditingController numController = TextEditingController();
   String contacts = "";
-  TextEditingController deptController = TextEditingController();
-  String department = "";
   TextEditingController locationController = TextEditingController();
   String location = "";
   TextEditingController subjectController = TextEditingController();
@@ -45,6 +42,7 @@ class _CreateTicketState extends State<CreateTicket> {
   String message = "";
   String username = "";
   bool isThisDevice = false;
+  List<String> ticketableDepartments = [];
 
   Padding inputField(
       TextEditingController controller, String holder, String display,
@@ -75,10 +73,41 @@ class _CreateTicketState extends State<CreateTicket> {
       ),
     );
   }
-
-  List<String> ticketingDepartments = [];
   bool departmentSelected = false;
   String selectedDepartment = "";
+
+  void getData() async {
+    var response = await http.get(
+      Uri.parse(
+          "${widget.protocol}://"
+          "${widget.domain}/all_departments_and_modules"
+      ),
+      headers: widget.user.getAuth()
+    );
+
+    if (response.statusCode != 200) {
+      return;
+    }
+
+    Map<String, dynamic> data = jsonDecode(response.body);
+    List<dynamic> ticketable = data["ticketable"];
+    List<String> deps = [];
+
+    for (var x in ticketable) {
+      deps.add(x);
+    }
+
+    ticketableDepartments = deps;
+    setState(() {
+
+    });
+  }
+
+  @override
+  void initState() {
+    getData();
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -108,7 +137,6 @@ class _CreateTicketState extends State<CreateTicket> {
                     nameController.text = widget.user.name;
                     emailController.text = widget.user.email;
                     numController.text = widget.user.number;
-                    deptController.text = widget.user.department.name;
                     locationController.text = widget.user.location;
                     setState(() {});
                   },
@@ -153,7 +181,7 @@ class _CreateTicketState extends State<CreateTicket> {
                 departmentSelected = true;
                 setState(() {});
               },
-              items: widget.user.ticketableDepartments
+              items: ticketableDepartments
                   .map<DropdownMenuItem<String>>((String value) {
                 return DropdownMenuItem<String>(
                   value: value,
@@ -168,10 +196,19 @@ class _CreateTicketState extends State<CreateTicket> {
               }).toList(),
             ),
           ),
+          Padding(
+            padding: const EdgeInsets.all(10),
+            child: Text(
+              "Ticket From: ${widget.user.department.name}",
+              style: const TextStyle(
+                fontSize: 18,
+                color: Colors.white
+              ),
+            ),
+          ),
           inputField(nameController, name, "Name"),
           inputField(emailController, email, "Email"),
           inputField(numController, contacts, "Contact Number"),
-          inputField(deptController, department, "Department"),
           inputField(locationController, location, "Location"),
           inputField(subjectController, subject, "Subject"),
           Align(
@@ -237,8 +274,6 @@ class _CreateTicketState extends State<CreateTicket> {
                       username = "unknown";
                     }
 
-                // todo return new ticket id from server and display it on the prompt
-
                     Ticket ticket = Ticket(
                         tId: 0,
                         submittedOn: 0,
@@ -247,7 +282,7 @@ class _CreateTicketState extends State<CreateTicket> {
                         nameTicket: nameController.text,
                         emailTicket: emailController.text,
                         numberTicket: numController.text,
-                        deptTicket: deptController.text,
+                        deptTicket: widget.user.department.name,
                         location: locationController.text,
                         subject: subjectController.text,
                         message: messageController.text,
@@ -280,7 +315,6 @@ class _CreateTicketState extends State<CreateTicket> {
                       nameController.text = "";
                       emailController.text = "";
                       numController.text = "";
-                      deptController.text = "";
                       locationController.text = "";
                       subjectController.text = "";
                       messageController.text = "";
@@ -294,7 +328,8 @@ class _CreateTicketState extends State<CreateTicket> {
                     style: TextStyle(
                       fontWeight: FontWeight.w500,
                       color: Colors.red,
-                      fontSize: 17),
+                      fontSize: 17
+                    ),
                   ),
                 ),
               ),
@@ -302,6 +337,7 @@ class _CreateTicketState extends State<CreateTicket> {
           ),
         ],
       ),
-      widget.user);
+      widget.user
+    );
   }
 }

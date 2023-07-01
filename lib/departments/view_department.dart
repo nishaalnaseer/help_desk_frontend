@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import '../supporting.dart' as supporting;
 import '../application_models.dart';
 import 'drop_down_selector.dart';
+import 'package:http/http.dart' as http;
 
 class ViewDepartment extends StatefulWidget {
   final String protocol;
@@ -181,9 +182,9 @@ class _ViewDepartmentState extends State<ViewDepartment> {
                     "release_department_lock?"
                         "d_name=${widget.department.name}",
                     context,
-                    headers: headers
+                    headers: headers,
+                    backTwice: true
                   );
-                  Navigator.pop(context);
                 },
                 child: const Text(
                   "Back",
@@ -379,26 +380,21 @@ class _ViewDepartmentState extends State<ViewDepartment> {
                       showPrompt: true,
                       promptTitle: "Nice",
                       promptMessage: "Department: "
-                          "${department.name} changes submitted"
+                          "${department.name} changes submitted",
+                      backTwice: true
                     );
-                    
-                    await Future.delayed(const Duration(seconds: 3));
-
-                    // todo implement post request with no loading here
                     if(
                     response.statusCode == 201 ||
                     response.statusCode == 200
                     ) {
-                      await supporting.postRequest2(
-                          "",
-                          widget.protocol,
-                          widget.domain,
-                          "release_department_lock?"
-                              "d_id=${widget.department.dId}",
-                          context,
-                          headers: header
+                      // TODO chang this to the dispose method and correct it to the updated endpoint
+                      http.post(
+                          Uri.parse(
+                              "${widget.protocol}://${widget.domain}/"
+                              "release_department_lock?d_id="
+                              "${widget.department.dId}"
+                        )
                       );
-                      Navigator.pop(context);
                     }
                   },
                   child: const Text(

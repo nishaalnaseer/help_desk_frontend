@@ -108,11 +108,6 @@ class _CreateDepartmentState extends State<CreateDepartment> {
          ),
     );
   }
-  @override
-  void initState() {
-    // TODO: implement initState
-    super.initState();
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -299,6 +294,7 @@ class _CreateDepartmentState extends State<CreateDepartment> {
                      showPrompt: true,
                      promptTitle: "Nice",
                      promptMessage: "Department Created",
+                     backTwice: true
                    );
                  },
                  child: const Text(

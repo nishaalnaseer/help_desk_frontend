@@ -2,8 +2,8 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 
-import 'supporting.dart' as supporting;
-import 'application_models.dart';
+import '../supporting.dart' as supporting;
+import '../application_models.dart';
 
 class DevicesScreen extends StatefulWidget {
   final String protocol;

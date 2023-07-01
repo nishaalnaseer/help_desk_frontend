@@ -135,7 +135,6 @@ class _ViewTicketState extends State<ViewTicket> {
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
 
     Map<int, UpdateBox> updateMap = {};
@@ -306,14 +305,12 @@ class _ViewTicketState extends State<ViewTicket> {
                            widget.user.email,
                            "Changed Status to : $selectedNewStatus"));
 
-                       canAddMessages = (widget
-                                   .ticket.status !=
-                               "COMPLETED" &&
-                           widget.ticket.status != "REJECTED");
-                       showChangeStatus =
-                           (widget.ticket.ticketTo ==
-                                   widget.user.department) &&
-                               canAddMessages;
+                       canAddMessages = (
+                           widget.ticket.status != "COMPLETED" &&
+                           widget.ticket.status != "REJECTED"
+                       );
+                       showChangeStatus = (widget.ticket.ticketTo == widget.user.department.name)
+                           && canAddMessages;
 
                        setState(() {});
                        }

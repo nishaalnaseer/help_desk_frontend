@@ -1,7 +1,5 @@
 import 'dart:convert';
 
-import 'package:flutter_improved_scrolling/flutter_improved_scrolling.dart';
-
 import 'package:flutter/material.dart';
 import 'package:help_desk_frontend/tickets/view_ticket.dart';
 import '../application_models.dart';
@@ -192,81 +190,83 @@ class _ViewTicketsState extends State<ViewTickets> {
               ),
             ),
             Center(
-              child: Row(children: [
-                SizedBox(
-                  width: 200,
-                  height: 50,
-                  child: Padding(
-                    padding: const EdgeInsets.all(10),
-                    child: SearchBar(
-                      onTap: () {
-                        searchController.clear();
-                      },
-                      controller: searchController,
-                      hintText: "Search By ID",
-                      hintStyle: MaterialStateProperty.all<TextStyle>(
-                        const TextStyle(
-                          color: Colors.red,
-                          fontSize: 18,
-                          fontWeight: FontWeight.w500,
+              child: Row(
+                children: [
+                  SizedBox(
+                    width: 200,
+                    height: 50,
+                    child: Padding(
+                      padding: const EdgeInsets.all(10),
+                      child: SearchBar(
+                        onTap: () {
+                          searchController.clear();
+                        },
+                        controller: searchController,
+                        hintText: "Search By ID",
+                        hintStyle: MaterialStateProperty.all<TextStyle>(
+                          const TextStyle(
+                            color: Colors.red,
+                            fontSize: 18,
+                            fontWeight: FontWeight.w500,
+                          ),
                         ),
                       ),
                     ),
                   ),
-                ),
-                SizedBox(
-                  width: 200,
-                  height: 50,
-                  child: Padding(
-                    padding: const EdgeInsets.all(10),
-                    child: ElevatedButton(
-                      onPressed: () async {
-                        int ticketId;
-                        try {
-                          ticketId = int.parse(searchController.text);
-                        } catch (e) {
-                          return;
-                        }
+                  SizedBox(
+                    width: 200,
+                    height: 50,
+                    child: Padding(
+                      padding: const EdgeInsets.all(10),
+                      child: ElevatedButton(
+                        onPressed: () async {
+                          int ticketId;
+                          try {
+                            ticketId = int.parse(searchController.text);
+                          } catch (e) {
+                            return;
+                          }
 
-                        String json;
-                        try {
-                          json = await supporting.getApiData(
-                              "ticket?ticket_id=$ticketId",
-                              widget.domain,
-                              widget.protocol,
-                              context,
-                              headers: widget.user.getAuth());
-                        } catch (e) {
-                          return;
-                        }
+                          String json;
+                          try {
+                            json = await supporting.getApiData(
+                                "ticket?ticket_id=$ticketId",
+                                widget.domain,
+                                widget.protocol,
+                                context,
+                                headers: widget.user.getAuth());
+                          } catch (e) {
+                            return;
+                          }
 
-                        Map<String, dynamic> map = jsonDecode(json);
+                          Map<String, dynamic> map = jsonDecode(json);
 
-                        Ticket bigTicket = Ticket.fromJson(map);
+                          Ticket bigTicket = Ticket.fromJson(map);
 
-                        var args = {
-                          "user": widget.user,
-                          "ticket": bigTicket,
-                          "from": selectedDepartmentFrom,
-                          "to": selectedDepartment,
-                          "status": selectedStatus
-                        };
+                          var args = {
+                            "user": widget.user,
+                            "ticket": bigTicket,
+                            "from": selectedDepartmentFrom,
+                            "to": selectedDepartment,
+                            "status": selectedStatus
+                          };
 
-                        Navigator.pushNamed(context, "/view_ticket",
-                            arguments: args);
-                      },
-                      child: const Text(
-                        "Search",
-                        style: TextStyle(
-                          color: Colors.red,
-                          fontSize: 18,
-                          fontWeight: FontWeight.w500,
+                          Navigator.pushNamed(context, "/view_ticket",
+                              arguments: args);
+                        },
+                        child: const Text(
+                          "Search",
+                          style: TextStyle(
+                            color: Colors.red,
+                            fontSize: 18,
+                            fontWeight: FontWeight.w500,
+                          ),
                         ),
                       ),
                     ),
-                  ),
-                )
-              ]),
+                  )
+                ]
+              ),
             ),
             Padding(
               padding: const EdgeInsets.all(10),
@@ -357,16 +357,17 @@ class _ViewTicketsState extends State<ViewTickets> {
 
                   setState(() {});
                 },
-                items: widget.user.ticketableDepartments
+                items: widget.user.department.accessibleTickets
                     .map<DropdownMenuItem<String>>((String value) {
                   return DropdownMenuItem<String>(
                     value: value,
                     child: Text(
                       value,
                       style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 18,
-                          fontWeight: FontWeight.w500),
+                        color: Colors.white,
+                        fontSize: 18,
+                        fontWeight: FontWeight.w500
+                      ),
                     ),
                   );
                 }).toList(),
@@ -445,10 +446,10 @@ class _ViewTicketsState extends State<ViewTickets> {
                                 columns: [
                                   getColumn("ID"),
                                   getColumn("Name"),
-                                  getColumn("Status"),
-                                  getColumn("Contact"),
                                   getColumn("Department"),
                                   getColumn("Location"),
+                                  getColumn("Email"),
+                                  getColumn("Numbr"),
                                   getColumn("Subject"),
                                   getColumn("")
                                 ],
@@ -463,6 +464,7 @@ class _ViewTicketsState extends State<ViewTickets> {
                 : Container(),
           ],
         ),
-        widget.user);
+        widget.user
+    );
   }
 }

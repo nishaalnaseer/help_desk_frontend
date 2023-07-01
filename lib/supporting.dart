@@ -68,7 +68,7 @@ Future<String> getApiData(
       } on TypeError catch (e) {
         details = json;
         showPopUp(context, "Error $code!", details);
-        throw HttpException("Code $code");
+        return jsonEncode({[]});
       } catch (e) {
         // Catch other types of exceptions
         details = 'An unexpected exception occurred: $e';
@@ -96,7 +96,8 @@ Color hexToColor(String hexString) {
   return Color(int.parse('FF$hexCode', radix: 16));
 }
 
-void showPopUp(BuildContext context, String title, String message) {
+void showPopUp(BuildContext context, String title, String message,
+    {bool backTwice = false}) {
   showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -114,6 +115,10 @@ void showPopUp(BuildContext context, String title, String message) {
             ElevatedButton(
               onPressed: () {
                 Navigator.of(context).pop();
+
+                if (backTwice) {
+                  Navigator.of(context).pop();
+                }
               },
               child: const Text(
                 'Close',
@@ -287,7 +292,7 @@ Future<http.Response> getRequest(
 
 Future<http.Response> postRequest2(
     var data, String protocol, String domain, String path, dynamic context,
-    {var headers = const {'Content-Type': 'application/json'},
+    {bool backTwice = false, var headers = const {'Content-Type': 'application/json'},
     bool showPrompt = false,
     String promptTitle = "",
     String promptMessage = ""}) async {
@@ -328,7 +333,7 @@ Future<http.Response> postRequest2(
       if(message == null) {
         showPopUp(context, promptTitle, promptMessage);
       } else {
-        showPopUp(context, promptTitle, message);
+        showPopUp(context, promptTitle, message, backTwice: backTwice);
       }
     }
     return response;
@@ -386,7 +391,7 @@ List<Widget> getDrawerKids(User user, BuildContext context) {
           ),
         ),
         onTap: () {
-          // Navigator.pop(context);
+          Navigator.popUntil(context, (route) => false);
           Navigator.pushNamed(context, route, arguments: user);
         },
       ),
@@ -512,7 +517,8 @@ Future<http.Response> patchRequest(
     String path, dynamic context,var headers,
     {bool showPrompt = false,
      String promptTitle = "",
-     String promptMessage = ""}) async {
+     String promptMessage = "", backTwice = false
+    }) async {
   ProgressDialog pd = ProgressDialog(context: context);
   Uri url = Uri.parse('$protocol://$domain/$path');
 
@@ -548,9 +554,9 @@ Future<http.Response> patchRequest(
       String? message = jsonDecode(response.body)?["content"];
 
       if (message == null) {
-        showPopUp(context, promptTitle, promptMessage);
+        showPopUp(context, promptTitle, promptMessage, backTwice: backTwice);
       } else {
-        showPopUp(context, promptTitle, message);
+        showPopUp(context, promptTitle, message, backTwice: backTwice);
       }
     }
     return response;

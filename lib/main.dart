@@ -1,17 +1,15 @@
 import 'package:flutter/material.dart';
 
-import 'departments/departments_view.dart';
+import 'departments/view_departments.dart';
 import 'users/login.dart';
 import 'tickets/create_ticket.dart';
 import 'tickets/view_tickets.dart';
 import 'tickets/view_ticket.dart';
 import 'application_models.dart';
-import 'users/users.dart';
+import 'users/view_users.dart';
 import 'supporting.dart' as supporting;
 
 import 'package:flutter/foundation.dart' show kIsWeb;
-import 'dart:convert';
-import 'dart:io';
 
 late String protocol;
 late String domain;
@@ -20,21 +18,15 @@ late User user;
 
 void main() async {
   if (kIsWeb) {
-    // html.HttpRequest.getString('assets/data.json').then((String jsonString) {
-    //   final coded = jsonDecode(jsonString);
-    //   domain = coded["domain"];
-    //   protocol = coded["protocol"];
-    // }).catchError((error) {
-    //    print("error");
-    // });
-    domain = "127.0.0.1:8000";
+    // domain = "nishawl.ddns.net";
+    // protocol = "https";
+    domain = "localhost:8000";
     protocol = "http";
   } else {
-    File file = File("assets/config.json");
-    String contents = await file.readAsString();
-    var coded = jsonDecode(contents);
-    domain = coded["domain"];
-    protocol = coded["protocol"];
+    domain = "nishawl.ddns.net";
+    protocol = "https";
+    // domain = "localhost";
+    // protocol = "http";
   }
 
   runApp(const DrawerNavigationApp());
@@ -101,27 +93,6 @@ class DrawerNavigationApp extends StatelessWidget {
         '/profile': (context) =>
             ProfilePage(args: {"user": user, "modules": modules}),
         '/login': (context) {
-          User(
-            id: -1,
-            name: "name",
-            department: Department(
-                dId: 0,
-                name: "name",
-                defaultView: "defaultView",
-                ticketable: false,
-                submittedBy: "submittedBy",
-                modules: modules,
-                accessibleTickets: [],
-                ticketsRaisedFrom: [],
-                nonTicketableReports: [],
-                ticketableReports: []
-            ),
-            email: "email",
-            number: "number",
-            location: "location",
-            defaultView: "",
-            ticketableDepartments: [],
-            );
 
           return LoginPage(
             domain: domain,

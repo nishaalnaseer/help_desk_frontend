@@ -182,21 +182,25 @@ class User {
   String location;
   Department department;
   String defaultView;
-  List<String> ticketableDepartments;
+  String status;
+  String? socialMedia;
   List<Device> devices = [];
 
   Map<String, String> _auth = {};
 
   User(
-      {required this.id,
-      required this.name,
-      required this.department,
-      required this.email,
-      required this.number,
-      required this.location,
-      required this.defaultView,
-      required this.ticketableDepartments,
-      List<Device>? devices});
+      {
+        required this.id,
+        required this.name,
+        required this.department,
+        required this.email,
+        required this.number,
+        required this.location,
+        required this.defaultView,
+        required this.status,
+        required this.socialMedia,
+        List<Device>? devices
+      });
 
   factory User.fromJson(Map<String, dynamic> json) {
     return User(
@@ -207,7 +211,8 @@ class User {
       number: json["number"],
       location: json["location"],
       defaultView: json["default_view"],
-      ticketableDepartments: generateList(json, "ticketable_departments"),
+      status: json["status"],
+      socialMedia: json["social_media"],
       devices: json["devices"] != null
           ? List.generate(json["devices"].length,
               (index) => Device.fromJson(json["devices"][index]))
@@ -217,13 +222,15 @@ class User {
 
   Map<String, dynamic> toJson() {
     return {
-      "id": id,
+      "u_id": id,
       "name": name,
       "department": department.toJson(),
-      "email": email,
+      "username": email,
       "number": number,
       "location": location,
       "default_view": defaultView,
+      "social_media": socialMedia,
+      "status": status
     };
   }
 

@@ -3,8 +3,8 @@ import 'package:http/http.dart' as http;
 
 import 'package:flutter/material.dart';
 
-import 'application_models.dart';
-import 'supporting.dart' as supporting;
+import '../application_models.dart';
+import '../supporting.dart' as supporting;
 
 class ModelsScreen extends StatefulWidget {
   final String protocol;

@@ -27,19 +27,13 @@ class _LoginPageState extends State<LoginPage> {
   String password = "";
 
   Future<void> login() async {
-    nameController.text = "nishawl.naseer@outlook.com";
-    passwordController.text = "123";
-
     String pass = passwordController.text;
     String email = nameController.text;
-    passwordController.clear(); // clear
-    nameController.clear(); // clear
     var headers = {
       'Accept': 'application/json, text/plain, */*',
       "Access-Control-Allow-Origin": "*",
       'Accept-Language': 'en-US,en',
-      'Authorization': 'Basic Og==',
-      'Connection': 'keep-alive',
+      'Authorization': 'Basic Og=='
     };
 
     var data = {
@@ -81,7 +75,11 @@ class _LoginPageState extends State<LoginPage> {
 
     String? defaultView = supporting.map[user.defaultView];
 
+    passwordController.clear(); // clear
+    nameController.clear(); // clear
+
     if (defaultView == null) {
+
       Navigator.pushNamed(context, "/logged_in", arguments: user);
       return;
     }
@@ -210,24 +208,26 @@ class _LoginPageState extends State<LoginPage> {
         User(
           id: -1,
           name: "name",
+          status: "DISABLED",
           department: Department(
-                dId: 0,
-                name: "name",
-                defaultView: "defaultView",
-                ticketable: false,
-                submittedBy: "submittedBy",
-                modules: [],
-                accessibleTickets: [],
-                ticketsRaisedFrom: [],
-                nonTicketableReports: [],
-                ticketableReports: []
+            dId: 0,
+            name: "name",
+            defaultView: "defaultView",
+            ticketable: false,
+            submittedBy: "submittedBy",
+            modules: [],
+            accessibleTickets: [],
+            ticketsRaisedFrom: [],
+            nonTicketableReports: [],
+            ticketableReports: []
             ),
           email: "email",
           number: "number",
           location: "location",
           defaultView: "",
-          ticketableDepartments: [],
+          socialMedia: ""
         ),
-        appBar: false);
+        appBar: false
+    );
   }
 }

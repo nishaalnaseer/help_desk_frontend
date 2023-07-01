@@ -1,9 +1,12 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
-import '../application_models.dart';
-import '../supporting.dart' as supporting;
+import 'package:help_desk_frontend/users/view_user.dart';
+import 'package:help_desk_frontend/application_models.dart';
+import 'package:help_desk_frontend/supporting.dart' as supporting;
 import 'package:http/http.dart' as http;
+
+import 'create_user.dart';
 
 class ViewUsers extends StatefulWidget {
   final User user;
@@ -23,6 +26,15 @@ class _ViewUsersState extends State<ViewUsers> {
   bool departmentSelected = false;
   late final List<String> departments;
   bool departmentsInitialised = false;
+  TextStyle style = const TextStyle(
+      color: Colors.white,
+      fontWeight: FontWeight.w500,
+      fontSize: 18
+  );
+  final ScrollController controller = ScrollController();
+  final ScrollController controller2 = ScrollController();
+
+  List<DataRow> rows = [];
 
   void getDepartments() async {
     var response = await http.get(
@@ -60,6 +72,116 @@ class _ViewUsersState extends State<ViewUsers> {
     }
   }
 
+  DataColumn getColumn(String text) {
+    return DataColumn(
+      label: Wrap(
+        children: [
+          Text(
+            text,
+            style: style,
+            softWrap: true,
+            overflow: TextOverflow.ellipsis,
+          )
+        ],
+      )
+    );
+  }
+
+  DataCell getDataCell(String text) {
+    return DataCell(
+      Wrap(
+        children: [
+          Text(
+            text,
+            style: style,
+            softWrap: true,
+            overflow: TextOverflow.ellipsis,
+          )
+        ]
+      )
+    );
+  }
+
+  void getUsers() async {
+    var response = await supporting.getRequest(
+      widget.protocol,
+      widget.domain,
+      "users?d_name=${selectedDepartment.toUpperCase()}",
+      headers: widget.user.getAuth(),
+      context
+    );
+
+    if(response.statusCode != 200) {
+      return;
+    }
+
+    rows = [];
+
+    List<dynamic> json = jsonDecode(response.body);
+
+    for (var obj in json) {
+      User user = User.fromJson(obj);
+
+      rows.add(DataRow(cells: [
+        getDataCell('${user.id}'),
+        getDataCell(user.name),
+        getDataCell(user.status),
+        getDataCell(user.number),
+        getDataCell(user.department.name),
+        getDataCell(user.location),
+        DataCell(
+          SizedBox(
+            width: 200,
+            child: ElevatedButton(
+                onPressed: () async {
+                  var response = await supporting.getRequest(
+                    widget.protocol,
+                    widget.domain,
+                    "user?username=${user.email}",
+                    context,
+                    headers: widget.user.getAuth()
+                  );
+
+                  if(response.statusCode != 200) {
+                    return;
+                  }
+
+                  var json = jsonDecode(response.body);
+
+                  User userScope = User.fromJson(json);
+
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => ViewUser(
+                        protocol: widget.protocol,
+                        domain: widget.domain,
+                        user: widget.user,
+                        userScope: userScope
+                      )
+                    ),
+                  );
+                },
+                child: const Text(
+                  "Inspect/Edit",
+                  style: TextStyle(
+                      color: Colors.red,
+                      fontSize: 18,
+                      fontWeight: FontWeight.w500
+                  ),
+                )
+            ),
+          ),
+        )
+      ]));
+    }
+
+    setState(() {
+
+    });
+
+  }
+
   @override
   Widget build(BuildContext context) {
     return supporting.getScaffold(
@@ -85,7 +207,18 @@ class _ViewUsersState extends State<ViewUsers> {
             child: Align(
               alignment: Alignment.topRight,
               child: ElevatedButton(
-                onPressed: () {  },
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => CreateUser(
+                        protocol: widget.protocol,
+                        domain: widget.domain,
+                        user: widget.user
+                      )
+                    ),
+                  );
+                },
                 child: const Text(
                   "Add User",
                   style: TextStyle(
@@ -107,17 +240,17 @@ class _ViewUsersState extends State<ViewUsers> {
                     ? Text(
                   "Selected Department: $selectedDepartment",
                   style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 18,
-                      fontWeight: FontWeight.w500
+                    color: Colors.white,
+                    fontSize: 18,
+                    fontWeight: FontWeight.w500
                   ),
                 )
                     : const Text(
                   'Select a Department',
                   style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 18,
-                      fontWeight: FontWeight.w500
+                    color: Colors.white,
+                    fontSize: 18,
+                    fontWeight: FontWeight.w500
                   ),
                 ),
                 elevation: 16,
@@ -131,7 +264,11 @@ class _ViewUsersState extends State<ViewUsers> {
                   selectedDepartment = newValue;
                   departmentSelected = true;
 
-                  setState(() {});
+                  setState(() {
+
+                  });
+
+                  getUsers();
                 },
                 items: (properArray()).map<DropdownMenuItem<String>>
                   ((String value) {
@@ -176,7 +313,6 @@ class _ViewUsersState extends State<ViewUsers> {
                           getColumn("Contact"),
                           getColumn("Department"),
                           getColumn("Location"),
-                          getColumn("Subject"),
                           getColumn("")
                         ],
                         rows: rows,
@@ -188,7 +324,6 @@ class _ViewUsersState extends State<ViewUsers> {
             ),
           ) :
           Container()
-
         ],
       ),
       widget.user
