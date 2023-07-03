@@ -36,56 +36,10 @@ class _ViewUserState extends State<ViewUser> {
   var number = InputField(display: "Number");
   var location = InputField(display: "Location");
   var socialMedia = InputField(display: "Social Media ID", mandatory: false);
-
-  // TextEditingController nameController = TextEditingController();
-  // String name = "";
-  // TextEditingController locationController = TextEditingController();
-  // String location = "";
-  // TextEditingController emailController = TextEditingController();
-  // String email = "";
-  // TextEditingController numberController = TextEditingController();
-  // String number = "";
-  // TextEditingController socialMediaController = TextEditingController();
-  // String socialMedia = "";
   bool resetPassword = false;
   late String status = user.status;
-
   late String selectedDepartment = user.department.name;
   List<String> departments = [];
-
-  Padding inputField(
-      TextEditingController controller, String holder, String display,
-      {int maximumLines = 1, int minimumLines = 1}) {
-    return Padding(
-      padding: const EdgeInsets.all(10),
-      child: TextField(
-        controller: controller,
-        cursorColor: Colors.red,
-        minLines: minimumLines,
-        maxLines: maximumLines,
-        onChanged: (value) => holder = value,
-        style: const TextStyle(
-            fontSize: 18,
-            color: Colors.white,
-            fontWeight: FontWeight.w500
-        ),
-        decoration: InputDecoration(
-          border: const OutlineInputBorder(),
-          focusedBorder: const OutlineInputBorder(
-            borderSide: BorderSide(color: Colors.red), // Change the color here
-          ),
-          enabledBorder: const OutlineInputBorder(
-            borderSide: BorderSide(color: Colors.red), // Change the color here
-          ),
-          errorBorder: const OutlineInputBorder(
-            borderSide: BorderSide(color: Colors.red), // Change the color here
-          ),
-          labelText: display,
-          labelStyle: const TextStyle(fontSize: 18, color: Colors.white),
-        ),
-      ),
-    );
-  }
 
   void init() async {
 
@@ -349,4 +303,3 @@ class _ViewUserState extends State<ViewUser> {
     );
   }
 }
-//349
