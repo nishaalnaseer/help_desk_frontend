@@ -3,7 +3,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import '../application_models.dart';
-
+import '../input_validations.dart';
 
 import '../supporting.dart' as supporting;
 
@@ -21,14 +21,27 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
-  TextEditingController nameController = TextEditingController();
-  TextEditingController passwordController = TextEditingController();
-  String username = "";
-  String password = "";
+  InputField username = InputField(
+      display: "Email",
+      // padding: const EdgeInsets.fromLTRB(10, 50, 10, 10
+      // )
+  );
+  InputField password = InputField(
+      display: "Password",
+      obscureText: true
+  );
+
+  late final List<InputField> inputs = [username, password];
 
   Future<void> login() async {
-    String pass = passwordController.text;
-    String email = nameController.text;
+
+    bool validated = inputValidation(inputs, context);
+    if (!validated) {
+      return;
+    }
+
+    String pass = password.text();
+    String email = username.text();
     var headers = {
       'Accept': 'application/json, text/plain, */*',
       "Access-Control-Allow-Origin": "*",
@@ -75,16 +88,15 @@ class _LoginPageState extends State<LoginPage> {
 
     String? defaultView = supporting.map[user.defaultView];
 
-    passwordController.clear(); // clear
-    nameController.clear(); // clear
-
-    if (defaultView == null) {
-
-      Navigator.pushNamed(context, "/logged_in", arguments: user);
-      return;
-    }
-
-    Navigator.pushNamed(context, defaultView, arguments: user);
+    Navigator.pushNamed(
+        context,
+        defaultView ?? "/logged_in",
+        arguments: {
+          "user": user,
+          "protocol": widget.protocol,
+          "domain": widget.domain
+        }
+    );
   }
 
   @override
@@ -111,66 +123,18 @@ class _LoginPageState extends State<LoginPage> {
                     alignment: Alignment.center,
                     padding: const EdgeInsets.all(10),
                     child: const Text(
-                      'Sign in',
+                      'Sign In',
                       style: TextStyle(color: Colors.white, fontSize: 20),
                     )),
-                  Container(
+                  Padding(
                     padding: const EdgeInsets.fromLTRB(10, 30, 10, 10),
-                    child: TextField(
-                      cursorColor: Colors.red,
-                      controller: nameController,
-                      onChanged: (value) => username = value,
-                      style: const TextStyle(color: Colors.white, fontSize: 18),
-                      decoration: const InputDecoration(
-                        border: OutlineInputBorder(),
-                        focusedBorder: OutlineInputBorder(
-                          borderSide: BorderSide(
-                              color: Colors.red), // Change the color here
-                        ),
-                        enabledBorder: OutlineInputBorder(
-                          borderSide: BorderSide(
-                              color: Colors.red), // Change the color here
-                        ),
-                        errorBorder: OutlineInputBorder(
-                          borderSide: BorderSide(
-                              color: Colors.red), // Change the color here
-                        ),
-                        label: Text(
-                          "Email",
-                          style: TextStyle(color: Colors.white, fontSize: 17),
-                        ),
-                      ),
-                    ),
+                    child: username.inputField,
                   ),
-                  Container(
+                  Padding(
                     padding: const EdgeInsets.all(10),
-                    child: TextField(
-                      cursorColor: Colors.red,
-                      controller: passwordController,
-                      obscureText: true,
-                      style: const TextStyle(color: Colors.white),
-                      onChanged: (value) => password = value,
-                      decoration: const InputDecoration(
-                        label: Text(
-                          "Password",
-                          style: TextStyle(color: Colors.white, fontSize: 17),
-                        ),
-                        border: OutlineInputBorder(),
-                        focusedBorder: OutlineInputBorder(
-                          borderSide: BorderSide(
-                              color: Colors.red), // Change the color here
-                        ),
-                        enabledBorder: OutlineInputBorder(
-                          borderSide: BorderSide(
-                              color: Colors.red), // Change the color here
-                        ),
-                        errorBorder: OutlineInputBorder(
-                          borderSide: BorderSide(
-                              color: Colors.red), // Change the color here
-                        ),
-                      ),
-                    ),
+                    child: password.inputField,
                   ),
+
                   Container(
                     padding: const EdgeInsets.all(10),
                     child: ElevatedButton(
@@ -220,13 +184,15 @@ class _LoginPageState extends State<LoginPage> {
             ticketsRaisedFrom: [],
             nonTicketableReports: [],
             ticketableReports: []
-            ),
+          ),
           email: "email",
           number: "number",
           location: "location",
           defaultView: "",
           socialMedia: ""
         ),
+        widget.protocol,
+        widget.domain,
         appBar: false
     );
   }

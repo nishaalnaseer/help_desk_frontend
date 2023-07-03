@@ -175,296 +175,298 @@ class _ViewTicketsState extends State<ViewTickets> {
   @override
   Widget build(BuildContext context) {
     return supporting.getScaffold(
-        ListView(
-          children: [
-            const Center(
-              child: Padding(
-                padding: EdgeInsets.all(10),
-                child: Text(
-                  "View Tickets",
-                  style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 18,
-                      fontWeight: FontWeight.w500),
-                ),
+      ListView(
+        children: [
+          const Center(
+            child: Padding(
+              padding: EdgeInsets.all(10),
+              child: Text(
+                "View Tickets",
+                style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 18,
+                    fontWeight: FontWeight.w500),
               ),
             ),
-            Center(
-              child: Row(
-                children: [
-                  SizedBox(
-                    width: 200,
-                    height: 50,
-                    child: Padding(
-                      padding: const EdgeInsets.all(10),
-                      child: SearchBar(
-                        onTap: () {
-                          searchController.clear();
-                        },
-                        controller: searchController,
-                        hintText: "Search By ID",
-                        hintStyle: MaterialStateProperty.all<TextStyle>(
-                          const TextStyle(
-                            color: Colors.red,
-                            fontSize: 18,
-                            fontWeight: FontWeight.w500,
+          ),
+          Center(
+            child: Row(
+              children: [
+                SizedBox(
+                  width: 200,
+                  height: 50,
+                  child: Padding(
+                    padding: const EdgeInsets.all(10),
+                    child: SearchBar(
+                      onTap: () {
+                        searchController.clear();
+                      },
+                      controller: searchController,
+                      hintText: "Search By ID",
+                      hintStyle: MaterialStateProperty.all<TextStyle>(
+                        const TextStyle(
+                          color: Colors.red,
+                          fontSize: 18,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+                SizedBox(
+                  width: 200,
+                  height: 50,
+                  child: Padding(
+                    padding: const EdgeInsets.all(10),
+                    child: ElevatedButton(
+                      onPressed: () async {
+                        int ticketId;
+                        try {
+                          ticketId = int.parse(searchController.text);
+                        } catch (e) {
+                          return;
+                        }
+
+                        String json;
+                        try {
+                          json = await supporting.getApiData(
+                              "ticket?ticket_id=$ticketId",
+                              widget.domain,
+                              widget.protocol,
+                              context,
+                              headers: widget.user.getAuth());
+                        } catch (e) {
+                          return;
+                        }
+
+                        Map<String, dynamic> map = jsonDecode(json);
+
+                        Ticket bigTicket = Ticket.fromJson(map);
+
+                        var args = {
+                          "user": widget.user,
+                          "ticket": bigTicket,
+                          "from": selectedDepartmentFrom,
+                          "to": selectedDepartment,
+                          "status": selectedStatus
+                        };
+
+                        Navigator.pushNamed(context, "/view_ticket",
+                            arguments: args);
+                      },
+                      child: const Text(
+                        "Search",
+                        style: TextStyle(
+                          color: Colors.red,
+                          fontSize: 18,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ),
+                  ),
+                )
+              ]
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(10),
+            child: DropdownButton<String>(
+              focusColor: Colors.transparent,
+              dropdownColor: Colors.red[800],
+              hint: departmentSelectedFrom
+                  ? Text(
+                      'From: $selectedDepartmentFrom',
+                      style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 18,
+                          fontWeight: FontWeight.w500),
+                    )
+                  : const Text(
+                      'From: ',
+                      style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 18,
+                          fontWeight: FontWeight.w500),
+                    ),
+              elevation: 16,
+              onChanged: (String? newValue) {
+                if (newValue == null) {
+                  return;
+                }
+
+                selectedDepartmentFrom = newValue;
+                departmentSelectedFrom = true;
+                allSelected = statusSelected &&
+                    departmentSelected &&
+                    departmentSelectedFrom;
+                if (allSelected) {
+                  getTicketsUpdate();
+                }
+
+                setState(() {});
+              },
+              items: widget.user.department.ticketsRaisedFrom
+                  .map<DropdownMenuItem<String>>((String value) {
+                return DropdownMenuItem<String>(
+                  value: value,
+                  child: Text(
+                    value,
+                    style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 18,
+                        fontWeight: FontWeight.w500),
+                  ),
+                );
+              }).toList(),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(10),
+            child: DropdownButton<String>(
+              focusColor: Colors.transparent,
+              dropdownColor: Colors.red[800],
+              hint: departmentSelected
+                  ? Text(
+                      'To: $selectedDepartment',
+                      style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 18,
+                          fontWeight: FontWeight.w500),
+                    )
+                  : const Text(
+                      'To: ',
+                      style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 18,
+                          fontWeight: FontWeight.w500),
+                    ),
+              elevation: 16,
+              onChanged: (String? newValue) {
+                if (newValue == null) {
+                  return;
+                }
+
+                selectedDepartment = newValue;
+                departmentSelected = true;
+                allSelected = statusSelected &&
+                    departmentSelected &&
+                    departmentSelectedFrom;
+                if (allSelected) {
+                  getTicketsUpdate();
+                }
+
+                setState(() {});
+              },
+              items: widget.user.department.accessibleTickets
+                  .map<DropdownMenuItem<String>>((String value) {
+                return DropdownMenuItem<String>(
+                  value: value,
+                  child: Text(
+                    value,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 18,
+                      fontWeight: FontWeight.w500
+                    ),
+                  ),
+                );
+              }).toList(),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(10),
+            child: DropdownButton<String>(
+              focusColor: Colors.transparent,
+              dropdownColor: Colors.red[800],
+              hint: statusSelected
+                  ? Text(
+                      'Selected Status: $selectedStatus',
+                      style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 18,
+                          fontWeight: FontWeight.w500),
+                    )
+                  : const Text(
+                      'Select a Status',
+                      style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 18,
+                          fontWeight: FontWeight.w500),
+                    ),
+              elevation: 16,
+              onChanged: (String? newValue) {
+                if (newValue == null) {
+                  return;
+                }
+
+                selectedStatus = newValue;
+                statusSelected = true;
+
+                allSelected = statusSelected &&
+                    departmentSelected &&
+                    departmentSelectedFrom;
+                if (allSelected) {
+                  getTicketsUpdate();
+                }
+
+                setState(() {});
+              },
+              items: statuses.map<DropdownMenuItem<String>>((String value) {
+                return DropdownMenuItem<String>(
+                  value: value,
+                  child: Text(
+                    value,
+                    style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 18,
+                        fontWeight: FontWeight.w500),
+                  ),
+                );
+              }).toList(),
+            ),
+          ),
+          allSelected
+              ? Padding(
+                  padding: const EdgeInsets.all(10),
+                  child: Center(
+                    child: Scrollbar(
+                      // thumbVisibility: true,
+                      controller: controller2,
+                      child: SingleChildScrollView(
+                        controller: controller2,
+                        scrollDirection: Axis.horizontal,
+                        child: Container(
+                          constraints: BoxConstraints(
+                            minWidth: supporting.getWindowWidth(context) -
+                                20, // Set the minimum width here
+                          ),
+                          child: SizedBox(
+                            // width: supporting.getWindowWidth(context),
+                            child: DataTable(
+                              columns: [
+                                getColumn("ID"),
+                                getColumn("Name"),
+                                getColumn("Department"),
+                                getColumn("Location"),
+                                getColumn("Email"),
+                                getColumn("Numbr"),
+                                getColumn("Subject"),
+                                getColumn("")
+                              ],
+                              rows: rows,
+                            ),
                           ),
                         ),
                       ),
                     ),
                   ),
-                  SizedBox(
-                    width: 200,
-                    height: 50,
-                    child: Padding(
-                      padding: const EdgeInsets.all(10),
-                      child: ElevatedButton(
-                        onPressed: () async {
-                          int ticketId;
-                          try {
-                            ticketId = int.parse(searchController.text);
-                          } catch (e) {
-                            return;
-                          }
-
-                          String json;
-                          try {
-                            json = await supporting.getApiData(
-                                "ticket?ticket_id=$ticketId",
-                                widget.domain,
-                                widget.protocol,
-                                context,
-                                headers: widget.user.getAuth());
-                          } catch (e) {
-                            return;
-                          }
-
-                          Map<String, dynamic> map = jsonDecode(json);
-
-                          Ticket bigTicket = Ticket.fromJson(map);
-
-                          var args = {
-                            "user": widget.user,
-                            "ticket": bigTicket,
-                            "from": selectedDepartmentFrom,
-                            "to": selectedDepartment,
-                            "status": selectedStatus
-                          };
-
-                          Navigator.pushNamed(context, "/view_ticket",
-                              arguments: args);
-                        },
-                        child: const Text(
-                          "Search",
-                          style: TextStyle(
-                            color: Colors.red,
-                            fontSize: 18,
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                      ),
-                    ),
-                  )
-                ]
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(10),
-              child: DropdownButton<String>(
-                focusColor: Colors.transparent,
-                dropdownColor: Colors.red[800],
-                hint: departmentSelectedFrom
-                    ? Text(
-                        'From: $selectedDepartmentFrom',
-                        style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 18,
-                            fontWeight: FontWeight.w500),
-                      )
-                    : const Text(
-                        'From: ',
-                        style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 18,
-                            fontWeight: FontWeight.w500),
-                      ),
-                elevation: 16,
-                onChanged: (String? newValue) {
-                  if (newValue == null) {
-                    return;
-                  }
-
-                  selectedDepartmentFrom = newValue;
-                  departmentSelectedFrom = true;
-                  allSelected = statusSelected &&
-                      departmentSelected &&
-                      departmentSelectedFrom;
-                  if (allSelected) {
-                    getTicketsUpdate();
-                  }
-
-                  setState(() {});
-                },
-                items: widget.user.department.ticketsRaisedFrom
-                    .map<DropdownMenuItem<String>>((String value) {
-                  return DropdownMenuItem<String>(
-                    value: value,
-                    child: Text(
-                      value,
-                      style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 18,
-                          fontWeight: FontWeight.w500),
-                    ),
-                  );
-                }).toList(),
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(10),
-              child: DropdownButton<String>(
-                focusColor: Colors.transparent,
-                dropdownColor: Colors.red[800],
-                hint: departmentSelected
-                    ? Text(
-                        'To: $selectedDepartment',
-                        style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 18,
-                            fontWeight: FontWeight.w500),
-                      )
-                    : const Text(
-                        'To: ',
-                        style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 18,
-                            fontWeight: FontWeight.w500),
-                      ),
-                elevation: 16,
-                onChanged: (String? newValue) {
-                  if (newValue == null) {
-                    return;
-                  }
-
-                  selectedDepartment = newValue;
-                  departmentSelected = true;
-                  allSelected = statusSelected &&
-                      departmentSelected &&
-                      departmentSelectedFrom;
-                  if (allSelected) {
-                    getTicketsUpdate();
-                  }
-
-                  setState(() {});
-                },
-                items: widget.user.department.accessibleTickets
-                    .map<DropdownMenuItem<String>>((String value) {
-                  return DropdownMenuItem<String>(
-                    value: value,
-                    child: Text(
-                      value,
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 18,
-                        fontWeight: FontWeight.w500
-                      ),
-                    ),
-                  );
-                }).toList(),
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(10),
-              child: DropdownButton<String>(
-                focusColor: Colors.transparent,
-                dropdownColor: Colors.red[800],
-                hint: statusSelected
-                    ? Text(
-                        'Selected Status: $selectedStatus',
-                        style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 18,
-                            fontWeight: FontWeight.w500),
-                      )
-                    : const Text(
-                        'Select a Status',
-                        style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 18,
-                            fontWeight: FontWeight.w500),
-                      ),
-                elevation: 16,
-                onChanged: (String? newValue) {
-                  if (newValue == null) {
-                    return;
-                  }
-
-                  selectedStatus = newValue;
-                  statusSelected = true;
-
-                  allSelected = statusSelected &&
-                      departmentSelected &&
-                      departmentSelectedFrom;
-                  if (allSelected) {
-                    getTicketsUpdate();
-                  }
-
-                  setState(() {});
-                },
-                items: statuses.map<DropdownMenuItem<String>>((String value) {
-                  return DropdownMenuItem<String>(
-                    value: value,
-                    child: Text(
-                      value,
-                      style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 18,
-                          fontWeight: FontWeight.w500),
-                    ),
-                  );
-                }).toList(),
-              ),
-            ),
-            allSelected
-                ? Padding(
-                    padding: const EdgeInsets.all(10),
-                    child: Center(
-                      child: Scrollbar(
-                        // thumbVisibility: true,
-                        controller: controller2,
-                        child: SingleChildScrollView(
-                          controller: controller2,
-                          scrollDirection: Axis.horizontal,
-                          child: Container(
-                            constraints: BoxConstraints(
-                              minWidth: supporting.getWindowWidth(context) -
-                                  20, // Set the minimum width here
-                            ),
-                            child: SizedBox(
-                              // width: supporting.getWindowWidth(context),
-                              child: DataTable(
-                                columns: [
-                                  getColumn("ID"),
-                                  getColumn("Name"),
-                                  getColumn("Department"),
-                                  getColumn("Location"),
-                                  getColumn("Email"),
-                                  getColumn("Numbr"),
-                                  getColumn("Subject"),
-                                  getColumn("")
-                                ],
-                                rows: rows,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                  )
-                : Container(),
-          ],
-        ),
-        widget.user
+                )
+              : Container(),
+        ],
+      ),
+      widget.user,
+      widget.protocol,
+      widget.domain,
     );
   }
 }

@@ -41,6 +41,7 @@ class _ViewDepartmentState extends State<ViewDepartment> {
   late String selectedView = widget.department.defaultView;
 
   late List<String> departments = getDepartments();
+  bool releaseSent = false;
 
   final modulesKey = GlobalKey<DropDownSelectorState>();
   final ticketsToKey = GlobalKey<DropDownSelectorState>();
@@ -55,7 +56,22 @@ class _ViewDepartmentState extends State<ViewDepartment> {
 
   @override
   void dispose() {
+    releaseApiLock();
     super.dispose();
+  }
+
+  void releaseApiLock() async {
+    if(!releaseSent) {
+      http.post(
+          Uri.parse(
+              "${widget.protocol}://${widget.domain}/"
+                  "release_lock?module=DEPARTMENTS&resource_id="
+                  "${widget.department.dId}"
+          ),
+          headers: widget.user.getAuth()
+      );
+      releaseSent = false;
+    }
   }
 
   void initData() async {
@@ -174,17 +190,8 @@ class _ViewDepartmentState extends State<ViewDepartment> {
               alignment: Alignment.topLeft,
               child: ElevatedButton(
                 onPressed: () async {
-                  var headers = widget.user.getAuth();
-                  await supporting.postRequest2(
-                    "",
-                    widget.protocol,
-                    widget.domain,
-                    "release_department_lock?"
-                        "d_name=${widget.department.name}",
-                    context,
-                    headers: headers,
-                    backTwice: true
-                  );
+                  releaseApiLock();
+                  Navigator.pop(context);
                 },
                 child: const Text(
                   "Back",
@@ -383,19 +390,6 @@ class _ViewDepartmentState extends State<ViewDepartment> {
                           "${department.name} changes submitted",
                       backTwice: true
                     );
-                    if(
-                    response.statusCode == 201 ||
-                    response.statusCode == 200
-                    ) {
-                      // TODO chang this to the dispose method and correct it to the updated endpoint
-                      http.post(
-                          Uri.parse(
-                              "${widget.protocol}://${widget.domain}/"
-                              "release_department_lock?d_id="
-                              "${widget.department.dId}"
-                        )
-                      );
-                    }
                   },
                   child: const Text(
                     "Submit Changes",
@@ -407,7 +401,9 @@ class _ViewDepartmentState extends State<ViewDepartment> {
           )
         ],
       ),
-      widget.user
+      widget.user,
+      widget.protocol,
+      widget.domain,
     );
   }
 }

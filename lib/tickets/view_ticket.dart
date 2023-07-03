@@ -517,11 +517,21 @@ class _ViewTicketState extends State<ViewTicket> {
                     padding: const EdgeInsets.all(10),
                     child: ElevatedButton(
                       onPressed: () async {
+                        String newMessage = controller.text;
+
+                        if( newMessage.trim().isEmpty) {
+                          supporting.showPopUp(
+                              context,
+                              "Validation Error!",
+                              "Message Can Not Be Empty!"
+                          );
+                          return;
+                        }
+
                         setState(() {
                           addingMessage = false;
                         });
 
-                        String newMessage = controller.text;
                         Message message = Message(
                             time: DateTime.now().millisecondsSinceEpoch ~/
                                 1000,
@@ -573,6 +583,9 @@ class _ViewTicketState extends State<ViewTicket> {
               : Container()
         ],
       ),
-      widget.user);
+      widget.user,
+      widget.protocol,
+      widget.domain,
+    );
   }
 }

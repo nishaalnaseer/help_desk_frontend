@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:help_desk_frontend/input_validations.dart';
 import 'package:http/http.dart' as http;
 import 'package:help_desk_frontend/supporting.dart' as supporting;
 import  'package:flutter/material.dart';
@@ -29,16 +30,23 @@ class _ViewUserState extends State<ViewUser> {
     color: Colors.white,
     fontWeight: FontWeight.w500
   );
-  TextEditingController nameController = TextEditingController();
-  String name = "";
-  TextEditingController locationController = TextEditingController();
-  String location = "";
-  TextEditingController emailController = TextEditingController();
-  String email = "";
-  TextEditingController numberController = TextEditingController();
-  String number = "";
-  TextEditingController socialMediaController = TextEditingController();
-  String socialMedia = "";
+
+  var name = InputField(display: "Name");
+  var email = InputField(display: "Email");
+  var number = InputField(display: "Number");
+  var location = InputField(display: "Location");
+  var socialMedia = InputField(display: "Social Media ID", mandatory: false);
+
+  // TextEditingController nameController = TextEditingController();
+  // String name = "";
+  // TextEditingController locationController = TextEditingController();
+  // String location = "";
+  // TextEditingController emailController = TextEditingController();
+  // String email = "";
+  // TextEditingController numberController = TextEditingController();
+  // String number = "";
+  // TextEditingController socialMediaController = TextEditingController();
+  // String socialMedia = "";
   bool resetPassword = false;
   late String status = user.status;
 
@@ -79,9 +87,6 @@ class _ViewUserState extends State<ViewUser> {
     );
   }
 
-  // department
-  // status
-
   void init() async {
 
     var response = await http.get(
@@ -102,11 +107,11 @@ class _ViewUserState extends State<ViewUser> {
       this.departments.add(x);
     }
 
-    nameController.text = user.name;
-    locationController.text = user.location;
-    emailController.text = user.email;
-    numberController.text = user.number;
-    socialMediaController.text = user.socialMedia ?? "";
+    name.setText(user.name);
+    email.setText(user.email);
+    number.setText(user.number);
+    location.setText(user.location);
+    socialMedia.setText(user.socialMedia ?? "");
     setState(() {
 
     });
@@ -163,30 +168,25 @@ class _ViewUserState extends State<ViewUser> {
                 style: style,
               ),
           ),
-          inputField(
-              nameController,
-              name,
-              "Name"
+          Padding(
+            padding: const EdgeInsets.all(10),
+            child: name.inputField,
           ),
-          inputField(
-              emailController,
-              email,
-              "Email"
+          Padding(
+            padding: const EdgeInsets.all(10),
+            child: email.inputField,
           ),
-          inputField(
-              numberController,
-              number,
-              "Number"
+          Padding(
+            padding: const EdgeInsets.all(10),
+            child: number.inputField,
           ),
-          inputField(
-              locationController,
-              location,
-              "Location"
+          Padding(
+            padding: const EdgeInsets.all(10),
+            child: location.inputField,
           ),
-          inputField(
-              socialMediaController,
-              socialMedia,
-              "Social Media ID"
+          Padding(
+            padding: const EdgeInsets.all(10),
+            child: socialMedia.inputField,
           ),
           Align(
             alignment: Alignment.bottomLeft,
@@ -305,14 +305,14 @@ class _ViewUserState extends State<ViewUser> {
 
                   User newUser = User(
                     id: user.id,
-                    name: nameController.text,
+                    name: name.text(),
                     department: department,
-                    email: emailController.text,
-                    number: numberController.text,
-                    location: locationController.text,
+                    email: email.text(),
+                    number: number.text(),
+                    location: location.text(),
                     defaultView: user.defaultView,
                     status: status,
-                    socialMedia: socialMediaController.text
+                    socialMedia: socialMedia.text()
                   );
                   var data = newUser.toJson();
                   data.putIfAbsent("password", () => "p"*60);
@@ -343,7 +343,10 @@ class _ViewUserState extends State<ViewUser> {
           )
         ],
       ),
-      widget.user
+      widget.user,
+      widget.protocol,
+      widget.domain,
     );
   }
 }
+//349

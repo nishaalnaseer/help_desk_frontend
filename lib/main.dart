@@ -11,6 +11,8 @@ import 'supporting.dart' as supporting;
 
 import 'package:flutter/foundation.dart' show kIsWeb;
 
+// TODO give hints to mandatory text fields with *
+
 late String protocol;
 late String domain;
 List<String> modules = [];
@@ -18,15 +20,15 @@ late User user;
 
 void main() async {
   if (kIsWeb) {
+    domain = "nishawl.ddns.net";
+    protocol = "https";
+    // domain = "localhost:8000";
+    // protocol = "http";
+  } else {
     // domain = "nishawl.ddns.net";
     // protocol = "https";
     domain = "localhost:8000";
     protocol = "http";
-  } else {
-    domain = "nishawl.ddns.net";
-    protocol = "https";
-    // domain = "localhost";
-    // protocol = "http";
   }
 
   runApp(const DrawerNavigationApp());
@@ -87,101 +89,135 @@ class DrawerNavigationApp extends StatelessWidget {
         domain: domain,
         protocol: protocol,
       ),
-      routes: {
-        '/settings': (context) =>
-            SettingsPage(args: {"user": user, "modules": modules}),
-        '/profile': (context) =>
-            ProfilePage(args: {"user": user, "modules": modules}),
-        '/login': (context) {
+      onGenerateRoute: (settings) {
+        switch (settings.name) {
+          case '/logged_in':
+            Map<String, dynamic> arguments = settings.arguments as Map<String, dynamic>;
+            // Extract the necessary data from settings.arguments
+            User user = arguments['user'];
+            List<String> modules = arguments['modules'];
+            String domain = arguments['domain'];
+            String protocol = arguments['protocol'];
 
-          return LoginPage(
-            domain: domain,
-            protocol: protocol,
-          );
-        },
-        '/logged_in': (context) {
-          Text? error =
-              assignUserData2(ModalRoute.of(context)?.settings.arguments);
-          if (error != null) {
-            return error;
-          }
-
-          return CreateTicket(
-              user: user, modules: modules, domain: domain, protocol: protocol);
-        },
-        '/create_ticket': (context) {
-
-          Text? error =
-              assignUserData2(ModalRoute.of(context)?.settings.arguments);
-          if (error != null) {
-            return error;
-          }
-
-          return CreateTicket(
-              user: user, modules: modules, domain: domain, protocol: protocol);
-        },
-        // '/ticket_to_ticket': (context) {
-        //   dynamic argsOld = ModalRoute.of(context)?.settings.arguments;
-        //   return ViewTickets(
-        //       user: user,
-        //       domain: domain,
-        //       protocol: protocol,
-        //     );
-        // },
-        '/view_tickets': (context) {
-          Text? error =
-              assignUserData2(ModalRoute.of(context)?.settings.arguments);
-          if (error != null) {
-            return error;
-          }
-
-          return ViewTickets(
-            user: user,
-            domain: domain,
-            protocol: protocol,
-          );
-        },
-        '/view_ticket': (context) {
-          dynamic args = ModalRoute.of(context)?.settings.arguments;
-
-          Ticket ticket = args["ticket"];
-          user = args["user"];
-          return ViewTicket(
-              user: user,
-              ticket: ticket,
-              domain: domain,
-              protocol: protocol,
+            return MaterialPageRoute(
+              builder: (context) => CreateTicket(
+                user: user,
+                modules: modules,
+                domain: domain,
+                protocol: protocol,
+              ),
             );
-        },
 
-        '/users': (context) {
+          case "/login":
+            Map<String, dynamic> arguments = settings.arguments as Map<String, dynamic>;
+            return MaterialPageRoute(
+              builder: (context) => LoginPage(
+                domain: domain,
+                protocol: protocol,
+              ),
+            );
 
-          Text? error =
-          assignUserData2(ModalRoute.of(context)?.settings.arguments);
-          if (error != null) {
-            return error;
-          }
+          case "/settings":
+            Map<String, dynamic> arguments = settings.arguments as Map<String, dynamic>;
+            User user = arguments['user'];
+            String domain = arguments['domain'];
+            String protocol = arguments['protocol'];
+            return MaterialPageRoute(
+              builder: (context) => SettingsPage(
+                  args: {
+                    "user": user, "modules": modules
+                  }),
+            );
 
-          return ViewUsers(
-            user: user,
-            domain: domain,
-            protocol: protocol,
-          );
-        },
+          case "/profile":
+            Map<String, dynamic> arguments = settings.arguments as Map<String, dynamic>;
+            User user = arguments['user'];
+            String domain = arguments['domain'];
+            String protocol = arguments['protocol'];
+            return MaterialPageRoute(
+              builder: (context) => ProfilePage(
+                  args: {
+                    "user": user, "modules": modules
+                  }),
+            );
 
-        '/departments': (context) {
-          Text? error =
-          assignUserData2(ModalRoute.of(context)?.settings.arguments);
-          if (error != null) {
-            return error;
-          }
+          case "/create_ticket":
+            Map<String, dynamic> arguments = settings.arguments as Map<String, dynamic>;
+            User user = arguments['user'];
+            String domain = arguments['domain'];
+            String protocol = arguments['protocol'];
 
-          return DepartmentsView(
-            user: user,
-            domain: domain,
-            protocol: protocol,
-          );
-        },
+            return MaterialPageRoute(
+              builder: (context) => CreateTicket(
+                  user: user,
+                  modules: modules,
+                  domain: domain,
+                  protocol: protocol
+              ),
+            );
+
+          case "/view_tickets":
+            Map<String, dynamic> arguments = settings.arguments as Map<String, dynamic>;
+            User user = arguments['user'];
+            String domain = arguments['domain'];
+            String protocol = arguments['protocol'];
+
+            return MaterialPageRoute(
+              builder: (context) => ViewTickets(
+                user: user,
+                domain: domain,
+                protocol: protocol,
+              ),
+            );
+
+          case "/view_ticket":
+            Map<String, dynamic> arguments = settings.arguments as Map<String, dynamic>;
+            User user = arguments['user'];
+            String domain = arguments['domain'];
+            String protocol = arguments['protocol'];
+            Ticket ticket = arguments["ticket"];
+
+            return MaterialPageRoute(
+              builder: (context) => ViewTicket(
+                user: user,
+                ticket: ticket,
+                domain: domain,
+                protocol: protocol,
+              ),
+            );
+
+          case "/users":
+            Map<String, dynamic> arguments = settings.arguments as Map<String, dynamic>;
+            User user = arguments['user'];
+            String domain = arguments['domain'];
+            String protocol = arguments['protocol'];
+
+            return MaterialPageRoute(
+              builder: (context) => ViewUsers(
+                user: user,
+                domain: domain,
+                protocol: protocol,
+              ),
+            );
+
+          case "/departments":
+            Map<String, dynamic> arguments = settings.arguments as Map<String, dynamic>;
+            User user = arguments['user'];
+            String domain = arguments['domain'];
+            String protocol = arguments['protocol'];
+
+            return MaterialPageRoute(
+              builder: (context) => DepartmentsView(
+                user: user,
+                domain: domain,
+                protocol: protocol,
+              ),
+            );
+        }
+
+        // Handle other routes if needed
+
+        return null;
       },
     );
   }
@@ -198,6 +234,8 @@ class MainPage extends StatelessWidget {
         title: const Text('Home'),
       ),
       drawer: supporting.DrawerNavigation(
+        domain: domain,
+        protocol: protocol,
         user: user,
       ),
       body: const Center(
@@ -221,6 +259,8 @@ class SettingsPage extends StatelessWidget {
         title: const Text('Settings'),
       ),
       drawer: supporting.DrawerNavigation(
+        domain: domain,
+        protocol: protocol,
         user: user,
       ),
       body: const Center(
@@ -243,7 +283,11 @@ class ProfilePage extends StatelessWidget {
       appBar: AppBar(
         title: const Text('Profile'),
       ),
-      drawer: supporting.DrawerNavigation(user: user),
+      drawer: supporting.DrawerNavigation(
+          domain: domain,
+          protocol: protocol,
+          user: user
+      ),
       body: const Center(
         child: Text(
           'Profile Page',

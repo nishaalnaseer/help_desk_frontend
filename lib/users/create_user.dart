@@ -4,6 +4,7 @@ import 'package:help_desk_frontend/supporting.dart' as supporting;
 import  'package:flutter/material.dart';
 import 'package:help_desk_frontend/application_models.dart';
 import 'package:http/http.dart' as http;
+import '../input_validations.dart';
 
 class CreateUser extends StatefulWidget {
   final String protocol;
@@ -21,16 +22,17 @@ class CreateUser extends StatefulWidget {
 }
 
 class _CreateUserState extends State<CreateUser> {
-  TextEditingController nameController = TextEditingController();
-  String name = "";
-  TextEditingController locationController = TextEditingController();
-  String location = "";
-  TextEditingController emailController = TextEditingController();
-  String email = "";
-  TextEditingController numberController = TextEditingController();
-  String number = "";
-  TextEditingController socialMediaController = TextEditingController();
-  String socialMedia = "";
+  var name = InputField(display: "Name");
+  var email = InputField(display: "Email");
+  var number = InputField(display: "Number");
+  var location = InputField(display: "Location");
+  var socialMedia = InputField(display: "Social Media ID", mandatory: false);
+  late final List<InputField> inputs = [
+    name,
+    email,
+    number,
+    location,
+  ];
 
   String department = "";
   late String defaultModule = widget.user.department.defaultView;
@@ -38,40 +40,6 @@ class _CreateUserState extends State<CreateUser> {
   bool moduleSelected = false;
   List<String> departments = [];
   List<String> modules = [];
-
-  Padding inputField(
-      TextEditingController controller, String holder, String display,
-      {int maximumLines = 1, int minimumLines = 1}) {
-    return Padding(
-      padding: const EdgeInsets.all(10),
-      child: TextField(
-        controller: controller,
-        cursorColor: Colors.red,
-        minLines: minimumLines,
-        maxLines: maximumLines,
-        onChanged: (value) => holder = value,
-        style: const TextStyle(
-            fontSize: 18,
-            color: Colors.white,
-            fontWeight: FontWeight.w500
-        ),
-        decoration: InputDecoration(
-          border: const OutlineInputBorder(),
-          focusedBorder: const OutlineInputBorder(
-            borderSide: BorderSide(color: Colors.red), // Change the color here
-          ),
-          enabledBorder: const OutlineInputBorder(
-            borderSide: BorderSide(color: Colors.red), // Change the color here
-          ),
-          errorBorder: const OutlineInputBorder(
-            borderSide: BorderSide(color: Colors.red), // Change the color here
-          ),
-          labelText: display,
-          labelStyle: const TextStyle(fontSize: 18, color: Colors.white),
-        ),
-      ),
-    );
-  }
 
   void getModulesDepartments() async {
     var response = await http.get(
@@ -145,30 +113,25 @@ class _CreateUserState extends State<CreateUser> {
                 ),
               ),
             ),
-            inputField(
-              nameController,
-              name,
-              "Name"
+            Padding(
+              padding: const EdgeInsets.all(10),
+              child: name.inputField,
             ),
-            inputField(
-              emailController,
-              email,
-              "Email"
+            Padding(
+              padding: const EdgeInsets.all(10),
+              child: email.inputField,
             ),
-            inputField(
-              numberController,
-              number,
-              "Number"
+            Padding(
+              padding: const EdgeInsets.all(10),
+              child: number.inputField,
             ),
-            inputField(
-              locationController,
-              location,
-              "Location"
+            Padding(
+              padding: const EdgeInsets.all(10),
+              child: location.inputField,
             ),
-            inputField(
-              socialMediaController,
-              socialMedia,
-              "Social Media ID"
+            Padding(
+              padding: const EdgeInsets.all(10),
+              child: socialMedia.inputField,
             ),
             Padding(
               padding: const EdgeInsets.all(10),
@@ -258,15 +221,14 @@ class _CreateUserState extends State<CreateUser> {
                 width: 200,
                 child: ElevatedButton(
                   onPressed: () async {
-                    String name = nameController.text;
-                    String location = locationController.text;
-                    String email = emailController.text;
-                    String number = numberController.text;
-                    String socialMedia = socialMediaController.text;
+                    bool ok = inputValidation(inputs, context);
+                    if (!ok) {
+                      return;
+                    }
 
                     User user = User(
                       id: 0,
-                      name: name,
+                      name: name.text(),
                       department: Department(
                         dId: 0,
                         name: department,
@@ -280,10 +242,10 @@ class _CreateUserState extends State<CreateUser> {
                         nonTicketableReports: [],
                         ticketableReports: [],
                       ),
-                      socialMedia: socialMedia,
-                      email: email,
-                      number: number,
-                      location: location,
+                      socialMedia: socialMedia.text(),
+                      email: email.text(),
+                      number: number.text(),
+                      location: location.text(),
                       defaultView: defaultModule,
                       status: "ENABLED",
                     );
@@ -318,7 +280,9 @@ class _CreateUserState extends State<CreateUser> {
             )
           ],
         ),
-        widget.user
+        widget.user,
+        widget.domain,
+        widget.protocol,
     );
   }
 }

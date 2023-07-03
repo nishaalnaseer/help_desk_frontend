@@ -326,7 +326,9 @@ class _ViewUsersState extends State<ViewUsers> {
           Container()
         ],
       ),
-      widget.user
+      widget.user,
+      widget.protocol,
+      widget.domain,
     );
   }
 }

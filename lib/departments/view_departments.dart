@@ -175,7 +175,7 @@ class _DepartmentsViewState extends State<DepartmentsView> {
     List<dynamic> ticketableRaw = data["ticketable"];
 
     modules = [];
-    departments = ["This Department"];
+    departments = [];
     ticketableList = [];
 
     for(dynamic x in modulesRaw) {
@@ -226,6 +226,8 @@ class _DepartmentsViewState extends State<DepartmentsView> {
               alignment: Alignment.bottomRight,
               child: ElevatedButton(
                 onPressed: () async {
+                  List<String> modifiedDeps = departments;
+                  modifiedDeps.add("This Department");
                   Navigator.push(
                     context,
                     MaterialPageRoute(
@@ -234,7 +236,7 @@ class _DepartmentsViewState extends State<DepartmentsView> {
                         domain: widget.domain,
                         user: widget.user,
                         modules: modules,
-                        departments: departments,
+                        departments: modifiedDeps,
                         ticketableList: ticketableList,
                       )
                     ),
@@ -292,7 +294,9 @@ class _DepartmentsViewState extends State<DepartmentsView> {
           Container()
         ],
       ),
-      widget.user
+      widget.user,
+      widget.protocol,
+      widget.domain,
     );
   }
 }

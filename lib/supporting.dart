@@ -369,7 +369,12 @@ Future<http.Response> postRequest2(
   }
 }
 
-List<Widget> getDrawerKids(User user, BuildContext context) {
+List<Widget> getDrawerKids(
+    String protocol,
+    String domain,
+    User user,
+    BuildContext context
+    ) {
   List<Widget> children = [];
   for (String name in user.department.modules) {
     String? route = map[name];
@@ -392,7 +397,13 @@ List<Widget> getDrawerKids(User user, BuildContext context) {
         ),
         onTap: () {
           Navigator.popUntil(context, (route) => false);
-          Navigator.pushNamed(context, route, arguments: user);
+          Navigator.pushNamed(context, route,
+              arguments: {
+                "user": user,
+                "protocol": protocol,
+                "domain": domain
+            }
+          );
         },
       ),
     );
@@ -404,7 +415,9 @@ List<Widget> getDrawerKids(User user, BuildContext context) {
 
 class DrawerNavigation extends StatelessWidget {
   final User user;
-  const DrawerNavigation({super.key, required this.user});
+  final String protocol;
+  final String domain;
+  const DrawerNavigation({super.key, required this.user, required this.protocol, required this.domain});
   final TextStyle style = const TextStyle(
       color: Colors.white, fontWeight: FontWeight.w500, fontSize: 18);
 
@@ -417,7 +430,7 @@ class DrawerNavigation extends StatelessWidget {
           Expanded(
             flex: 80,
             child: ListView(
-              children: getDrawerKids(user, context),
+              children: getDrawerKids(protocol, domain, user, context),
             ),
           ),
           Expanded(
@@ -463,7 +476,14 @@ class DrawerNavigation extends StatelessWidget {
                         style: style,
                       ),
                       onTap: () {
-                        Navigator.pushReplacementNamed(context, '/login');
+                        Navigator.pushReplacementNamed(
+                            context,
+                            '/login',
+                            arguments: {
+                              "domain": protocol,
+                              "protocol": domain,
+                            }
+                        );
                       },
                     ),
                   ],
@@ -477,7 +497,12 @@ class DrawerNavigation extends StatelessWidget {
   }
 }
 
-Scaffold getScaffold(Widget thingy, User user, {bool appBar = true}) {
+Scaffold getScaffold(
+    Widget thingy,
+    User user,
+  String protocol,
+  String domain,
+{bool appBar = true}) {
   final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
 
   return Scaffold(
@@ -506,7 +531,11 @@ Scaffold getScaffold(Widget thingy, User user, {bool appBar = true}) {
             ),
           )
         : null,
-    drawer: DrawerNavigation(user: user),
+    drawer: DrawerNavigation(
+        protocol: protocol,
+        domain: domain,
+        user: user
+    ),
     backgroundColor: hexToColor("#222222"),
     body: thingy,
   );
@@ -591,3 +620,4 @@ Future<http.Response> patchRequest(
     return response;
   }
 }
+

@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 
 import '../application_models.dart';
 import 'drop_down_selector.dart';
+import '../input_validations.dart';
 import '../supporting.dart' as supporting;
 
 
@@ -30,8 +31,10 @@ class CreateDepartment extends StatefulWidget {
 }
 
 class _CreateDepartmentState extends State<CreateDepartment> {
-  TextEditingController nameController = TextEditingController();
-  String name = "";
+  InputField name = InputField(
+    display: "Department Name",
+    mandatory: true
+  );
   String selectedView = "";
   bool viewSelected = false;
   bool ticketable = false;
@@ -76,39 +79,6 @@ class _CreateDepartmentState extends State<CreateDepartment> {
     options: widget.departments
   );
 
-  Padding inputField(
-      TextEditingController controller, String holder, String display,
-      {int maximumLines = 1, int minimumLines = 1}) {
-       return Padding(
-         padding: const EdgeInsets.all(10),
-         child: TextField(
-           controller: controller,
-           cursorColor: Colors.red,
-           minLines: minimumLines,
-           maxLines: maximumLines,
-           onChanged: (value) => holder = value,
-           style: const TextStyle(fontSize: 18, color: Colors.white),
-           decoration: InputDecoration(
-             border: const OutlineInputBorder(),
-             focusedBorder: const OutlineInputBorder(
-               borderSide: BorderSide(color: Colors.red), // Change the color here
-             ),
-             enabledBorder: const OutlineInputBorder(
-               borderSide: BorderSide(color: Colors.red), // Change the color here
-             ),
-             errorBorder: const OutlineInputBorder(
-               borderSide: BorderSide(color: Colors.red), // Change the color here
-             ),
-             labelText: display,
-             labelStyle: const TextStyle(
-               fontSize: 18,
-               color: Colors.white
-             ),
-           ),
-         ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     return supporting.getScaffold(
@@ -133,7 +103,6 @@ class _CreateDepartmentState extends State<CreateDepartment> {
               ),
             ),
           ),
-
           Center(
             child: Padding(
               padding: EdgeInsets.fromLTRB(
@@ -151,9 +120,10 @@ class _CreateDepartmentState extends State<CreateDepartment> {
               ),
             ),
           ),
-
-          inputField(nameController, name, "Name"),
-
+          Padding(
+            padding: const EdgeInsets.all(10),
+            child: name.inputField,
+          ),
           Align(
             alignment: Alignment.bottomLeft,
             child: Container(
@@ -178,7 +148,6 @@ class _CreateDepartmentState extends State<CreateDepartment> {
               ),
             ),
           ),
-
           Padding(
             padding: const EdgeInsets.fromLTRB(10, 30, 10, 30),
             child: DropdownButton<String>(
@@ -270,9 +239,22 @@ class _CreateDepartmentState extends State<CreateDepartment> {
                      return;
                    }
 
+                   String departmentName;
+
+                   try {
+                     departmentName = name.text();
+                   } on MandatoryInputError catch (e) {
+                     supporting.showPopUp(
+                       context,
+                       "Validation Error!",
+                       e.message
+                     );
+                     return;
+                   }
+
                    Department department = Department(
                      dId: 0,
-                     name: nameController.text,
+                     name: departmentName,
                      defaultView: selectedView,
                      ticketable: ticketable,
                      modules: selectedModules,
@@ -307,7 +289,9 @@ class _CreateDepartmentState extends State<CreateDepartment> {
          )
         ],
       ),
-      widget.user
+      widget.user,
+      widget.protocol,
+      widget.domain,
     );
   }
 }

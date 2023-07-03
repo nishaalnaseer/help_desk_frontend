@@ -9,6 +9,7 @@ import 'package:flutter/foundation.dart' show kIsWeb;
 
 import '../supporting.dart' as supporting;
 import '../application_models.dart';
+import '../input_validations.dart';
 
 class CreateTicket extends StatefulWidget {
   final String protocol;
@@ -17,10 +18,10 @@ class CreateTicket extends StatefulWidget {
   final List<String> modules;
   const CreateTicket(
       {Key? key,
-      required this.protocol,
-      required this.domain,
-      required this.user,
-      required this.modules})
+        required this.protocol,
+        required this.domain,
+        required this.user,
+        required this.modules})
       : super(key: key);
 
   @override
@@ -28,47 +29,64 @@ class CreateTicket extends StatefulWidget {
 }
 
 class _CreateTicketState extends State<CreateTicket> {
-  TextEditingController nameController = TextEditingController();
-  TextEditingController emailController = TextEditingController();
-  String email = "";
-  String name = "";
-  TextEditingController numController = TextEditingController();
-  String contacts = "";
-  TextEditingController locationController = TextEditingController();
-  String location = "";
-  TextEditingController subjectController = TextEditingController();
-  String subject = "";
-  TextEditingController messageController = TextEditingController();
-  String message = "";
-  String username = "";
+  // TextEditingController nameController = TextEditingController();
+  // TextEditingController emailController = TextEditingController();
+  // String email = "";
+  // String name = "";
+  // TextEditingController numController = TextEditingController();
+  // String contacts = "";
+  // TextEditingController locationController = TextEditingController();
+  // String location = "";
+  // TextEditingController subjectController = TextEditingController();
+  // String subject = "";
+  // TextEditingController messageController = TextEditingController();
+  // String message = "";
+  // String username = "";
+
+  var name = InputField(display: "Name");
+  var email = InputField(display: "Email");
+  var number = InputField(display: "Contact Number");
+  var location = InputField(display: "Location");
+  var subject = InputField(display: "Subject");
+  var message = InputField(
+      display: "Message",
+      maximumLines: 50,
+      minimumLines: 1
+  );
+  late final List<InputField>  inputs = [
+    name, email, number,
+    location, subject, message
+  ];
+
   bool isThisDevice = false;
   List<String> ticketableDepartments = [];
 
   Padding inputField(
       TextEditingController controller, String holder, String display,
       {int maximumLines = 1, int minimumLines = 1}) {
-        return Padding(
-          padding: const EdgeInsets.all(10),
-          child: TextField(
-           controller: controller,
-           cursorColor: Colors.red,
-           minLines: minimumLines,
-           maxLines: maximumLines,
-           onChanged: (value) => holder = value,
-           style: const TextStyle(fontSize: 18, color: Colors.white),
-           decoration: InputDecoration(
-             border: const OutlineInputBorder(),
-             focusedBorder: const OutlineInputBorder(
-               borderSide: BorderSide(color: Colors.red), // Change the color here
-             ),
-             enabledBorder: const OutlineInputBorder(
-               borderSide: BorderSide(color: Colors.red), // Change the color here
-             ),
-             errorBorder: const OutlineInputBorder(
-               borderSide: BorderSide(color: Colors.red), // Change the color here
-             ),
-             labelText: display,
-             labelStyle: const TextStyle(fontSize: 18, color: Colors.white),
+    return Padding(
+      padding: const EdgeInsets.all(10),
+      child: TextField(
+        controller: controller,
+        cursorColor: Colors.red,
+        minLines: minimumLines,
+        maxLines: maximumLines,
+        onChanged: (value) => holder = value,
+        style: const TextStyle(fontSize: 18, color: Colors.white),
+        decoration: InputDecoration(
+          // label: const Text("Text *"),
+          border: const OutlineInputBorder(),
+          focusedBorder: const OutlineInputBorder(
+            borderSide: BorderSide(color: Colors.red), // Change the color here
+          ),
+          enabledBorder: const OutlineInputBorder(
+            borderSide: BorderSide(color: Colors.red), // Change the color here
+          ),
+          errorBorder: const OutlineInputBorder(
+            borderSide: BorderSide(color: Colors.red), // Change the color here
+          ),
+          labelText: "$display*",
+          labelStyle: const TextStyle(fontSize: 18, color: Colors.white),
         ),
       ),
     );
@@ -78,11 +96,11 @@ class _CreateTicketState extends State<CreateTicket> {
 
   void getData() async {
     var response = await http.get(
-      Uri.parse(
-          "${widget.protocol}://"
-          "${widget.domain}/all_departments_and_modules"
-      ),
-      headers: widget.user.getAuth()
+        Uri.parse(
+            "${widget.protocol}://"
+                "${widget.domain}/all_departments_and_modules"
+        ),
+        headers: widget.user.getAuth()
     );
 
     if (response.statusCode != 200) {
@@ -121,9 +139,9 @@ class _CreateTicketState extends State<CreateTicket> {
               child: const Text(
                 "Create a Ticket!",
                 style: TextStyle(
-                  fontSize: 25,
-                  fontWeight: FontWeight.w500,
-                  color: Colors.red),
+                    fontSize: 25,
+                    fontWeight: FontWeight.w500,
+                    color: Colors.red),
               ),
             ),
           ),
@@ -134,18 +152,18 @@ class _CreateTicketState extends State<CreateTicket> {
                 width: 250,
                 child: ElevatedButton(
                   onPressed: () {
-                    nameController.text = widget.user.name;
-                    emailController.text = widget.user.email;
-                    numController.text = widget.user.number;
-                    locationController.text = widget.user.location;
+                    name.setText(widget.user.name);
+                    email.setText(widget.user.email);
+                    number.setText(widget.user.number);
+                    location.setText(widget.user.location);
                     setState(() {});
                   },
                   child: const Text(
                     "Autofill with your details!",
                     style: TextStyle(
-                      fontSize: 17,
-                      color: Colors.red,
-                      fontWeight: FontWeight.w500),
+                        fontSize: 17,
+                        color: Colors.red,
+                        fontWeight: FontWeight.w500),
                   ),
                 ),
               ),
@@ -157,21 +175,21 @@ class _CreateTicketState extends State<CreateTicket> {
               focusColor: Colors.transparent,
               dropdownColor: Colors.red[800],
               hint: departmentSelected
-                ? Text(
-                  'Send Ticket to: $selectedDepartment',
-                  style: const TextStyle(
+                  ? Text(
+                'Send Ticket to: $selectedDepartment',
+                style: const TextStyle(
                     fontSize: 17,
                     fontWeight: FontWeight.w500,
                     color: Colors.white),
-                  )
-                : const Text(
-                    'Send Ticket to: ',
-                    style: TextStyle(
-                      fontSize: 17,
-                      fontWeight: FontWeight.w500,
-                      color: Colors.white
-                    ),
-                  ),
+              )
+                  : const Text(
+                'Send Ticket to: ',
+                style: TextStyle(
+                    fontSize: 17,
+                    fontWeight: FontWeight.w500,
+                    color: Colors.white
+                ),
+              ),
               elevation: 16,
               onChanged: (String? newValue) {
                 if (newValue == null) {
@@ -188,9 +206,9 @@ class _CreateTicketState extends State<CreateTicket> {
                   child: Text(
                     value,
                     style: const TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.w500,
-                      fontSize: 18),
+                        color: Colors.white,
+                        fontWeight: FontWeight.w500,
+                        fontSize: 18),
                   ),
                 );
               }).toList(),
@@ -201,16 +219,31 @@ class _CreateTicketState extends State<CreateTicket> {
             child: Text(
               "Ticket From: ${widget.user.department.name}",
               style: const TextStyle(
-                fontSize: 18,
-                color: Colors.white
+                  fontSize: 18,
+                  color: Colors.white
               ),
             ),
           ),
-          inputField(nameController, name, "Name"),
-          inputField(emailController, email, "Email"),
-          inputField(numController, contacts, "Contact Number"),
-          inputField(locationController, location, "Location"),
-          inputField(subjectController, subject, "Subject"),
+          Padding(
+            padding: const EdgeInsets.all(10),
+            child: name.inputField,
+          ),
+          Padding(
+            padding: const EdgeInsets.all(10),
+            child: email.inputField,
+          ),
+          Padding(
+            padding: const EdgeInsets.all(10),
+            child: number.inputField,
+          ),
+          Padding(
+            padding: const EdgeInsets.all(10),
+            child: location.inputField,
+          ),
+          Padding(
+            padding: const EdgeInsets.all(10),
+            child: subject.inputField,
+          ),
           Align(
             alignment: Alignment.bottomLeft,
             child: SizedBox(
@@ -234,26 +267,34 @@ class _CreateTicketState extends State<CreateTicket> {
               ),
             ),
           ),
-          inputField(messageController, message, "Message",
-              maximumLines: 50, minimumLines: 1),
+          Padding(
+            padding: const EdgeInsets.all(10),
+            child: message.inputField,
+          ),
           Center(
             child: Padding(
               padding: const EdgeInsets.all(20),
               child: SizedBox(
                 child: ElevatedButton(
                   onPressed: () async {
+
+                    bool ok = inputValidation(inputs, context);
+                    if (!ok) {
+                      return;
+                    }
+
                     Platform platform = const LocalPlatform();
                     String host;
                     String username;
                     DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
                     if (kIsWeb) {
                       WebBrowserInfo webBrowserInfo =
-                          await deviceInfo.webBrowserInfo;
+                      await deviceInfo.webBrowserInfo;
                       host = webBrowserInfo.browserName.name;
                       username = "";
                     } else if (platform.isWindows) {
                       WindowsDeviceInfo windowsInfo =
-                          await deviceInfo.windowsInfo;
+                      await deviceInfo.windowsInfo;
                       host = windowsInfo.computerName;
                       username = windowsInfo.userName;
                     } else if (platform.isLinux) {
@@ -262,7 +303,7 @@ class _CreateTicketState extends State<CreateTicket> {
                       username = linuxInfo.name;
                     } else if (platform.isAndroid) {
                       AndroidDeviceInfo android =
-                          await deviceInfo.androidInfo;
+                      await deviceInfo.androidInfo;
                       host = android.host;
                       username = "";
                     } else if (platform.isIOS) {
@@ -279,13 +320,13 @@ class _CreateTicketState extends State<CreateTicket> {
                         submittedOn: 0,
                         submittedBy: widget.user.email,
                         ticketTo: selectedDepartment,
-                        nameTicket: nameController.text,
-                        emailTicket: emailController.text,
-                        numberTicket: numController.text,
+                        nameTicket: name.text(),
+                        emailTicket: email.text(),
+                        numberTicket: number.text(),
                         deptTicket: widget.user.department.name,
-                        location: locationController.text,
-                        subject: subjectController.text,
-                        message: messageController.text,
+                        location: location.text(),
+                        subject: subject.text(),
+                        message: message.text(),
                         ip: "",
                         host: host,
                         username: username,
@@ -300,24 +341,24 @@ class _CreateTicketState extends State<CreateTicket> {
                     header.putIfAbsent(
                         "Content-Type", () => "application/json");
                     var response = await supporting.postRequest2(
-                      jsonEncode(ticketInfo),
-                      widget.protocol,
-                      widget.domain,
-                      "ticket",
-                      context,
-                      headers: header,
-                      showPrompt: true,
-                      promptTitle: "Nice!",
-                      promptMessage: "Ticket Submitted"
+                        jsonEncode(ticketInfo),
+                        widget.protocol,
+                        widget.domain,
+                        "ticket",
+                        context,
+                        headers: header,
+                        showPrompt: true,
+                        promptTitle: "Nice!",
+                        promptMessage: "Ticket Submitted"
                     );
                     if(response.statusCode == 200 ||
-                      response.statusCode == 201) {
-                      nameController.text = "";
-                      emailController.text = "";
-                      numController.text = "";
-                      locationController.text = "";
-                      subjectController.text = "";
-                      messageController.text = "";
+                        response.statusCode == 201) {
+                      name.clear();
+                      email.clear();
+                      number.clear();
+                      location.clear();
+                      subject.clear();
+                      message.clear();
                       selectedDepartment = "";
                       departmentSelected = false;
                     }
@@ -326,9 +367,9 @@ class _CreateTicketState extends State<CreateTicket> {
                   child: const Text(
                     "Submit!",
                     style: TextStyle(
-                      fontWeight: FontWeight.w500,
-                      color: Colors.red,
-                      fontSize: 17
+                        fontWeight: FontWeight.w500,
+                        color: Colors.red,
+                        fontSize: 17
                     ),
                   ),
                 ),
@@ -337,7 +378,9 @@ class _CreateTicketState extends State<CreateTicket> {
           ),
         ],
       ),
-      widget.user
+      widget.user,
+      widget.protocol,
+      widget.domain,
     );
   }
 }
