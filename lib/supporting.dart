@@ -32,7 +32,7 @@ Map<String, dynamic> convertDynamicToMap(dynamic object) {
 }
 
 Future<String> getApiData(
-    String path, String domain, String protocol, dynamic context,
+    String path, String server, dynamic context,
     {var headers = const {'Content-Type': 'application/json'},
     int delay = 0}) async {
   ProgressDialog pd = ProgressDialog(context: context);
@@ -44,7 +44,7 @@ Future<String> getApiData(
       progressBgColor: Colors.red,
       msgColor: Colors.white,
       valueColor: Colors.white);
-  var uri = Uri.parse('$protocol://$domain/$path');
+  var uri = Uri.parse('$server$path');
   var response = await http.get(uri, headers: headers);
 
   pd.close(delay: delay);
@@ -148,10 +148,10 @@ class CustomRequest {
 }
 
 Future<http.StreamedResponse> postRequest(
-    var data, String protocol, String domain, String path, dynamic context,
+    var data, String server, String path, dynamic context,
     {var headers = const {'Content-Type': 'application/json'}}) async {
   ProgressDialog pd = ProgressDialog(context: context);
-  String url = '$protocol://$domain/$path';
+  String url = '$server$path';
 
   pd.show(
       msg: 'Loading',
@@ -211,13 +211,13 @@ Future<http.StreamedResponse> postRequest(
 }
 
 Future<http.Response> getRequest(
-    String protocol, String domain, String path, dynamic context,
+    String server, String path, dynamic context,
     {var headers = const {'Content-Type': 'application/json'},
       bool showPrompt = false,
       String promptTitle = "",
       String promptMessage = ""}) async {
   ProgressDialog pd = ProgressDialog(context: context);
-  Uri url = Uri.parse('$protocol://$domain/$path');
+  Uri url = Uri.parse('$server$path');
 
   pd.show(
     msg: 'Loading',
@@ -291,13 +291,13 @@ Future<http.Response> getRequest(
 }
 
 Future<http.Response> postRequest2(
-    var data, String protocol, String domain, String path, dynamic context,
+    var data, String server, String path, dynamic context,
     {bool backTwice = false, var headers = const {'Content-Type': 'application/json'},
     bool showPrompt = false,
     String promptTitle = "",
     String promptMessage = ""}) async {
   ProgressDialog pd = ProgressDialog(context: context);
-  Uri url = Uri.parse('$protocol://$domain/$path');
+  Uri url = Uri.parse('$server$path');
 
   pd.show(
       msg: 'Loading',
@@ -370,8 +370,7 @@ Future<http.Response> postRequest2(
 }
 
 List<Widget> getDrawerKids(
-    String protocol,
-    String domain,
+    String server,
     User user,
     BuildContext context
     ) {
@@ -390,9 +389,10 @@ List<Widget> getDrawerKids(
           child: Text(
             name,
             style: const TextStyle(
-                color: Colors.white, // Change the text color here
-                fontSize: 21,
-                fontWeight: FontWeight.w500),
+              color: Colors.white, // Change the text color here
+              fontSize: 21,
+              fontWeight: FontWeight.w500
+            ),
           ),
         ),
         onTap: () {
@@ -400,8 +400,7 @@ List<Widget> getDrawerKids(
           Navigator.pushNamed(context, route,
               arguments: {
                 "user": user,
-                "protocol": protocol,
-                "domain": domain
+                "server": server,
             }
           );
         },
@@ -415,9 +414,8 @@ List<Widget> getDrawerKids(
 
 class DrawerNavigation extends StatelessWidget {
   final User user;
-  final String protocol;
-  final String domain;
-  const DrawerNavigation({super.key, required this.user, required this.protocol, required this.domain});
+  final String server;
+  const DrawerNavigation({super.key, required this.user, required this.server});
   final TextStyle style = const TextStyle(
       color: Colors.white, fontWeight: FontWeight.w500, fontSize: 18);
 
@@ -428,31 +426,31 @@ class DrawerNavigation extends StatelessWidget {
       child: Column(
         children: [
           Expanded(
-            flex: 80,
+            flex: 82,
             child: ListView(
-              children: getDrawerKids(protocol, domain, user, context),
+              children: getDrawerKids(server, user, context),
             ),
           ),
           Expanded(
-            flex: 20,
+            flex: 18,
             child: Padding(
               padding: const EdgeInsets.all(10),
               child: SingleChildScrollView(
                 child: Column(
                   children: [
-                    ListTile(
-                      leading: const Icon(
-                        Icons.settings,
-                        color: Colors.red,
-                      ),
-                      title: Text(
-                        'Settings',
-                        style: style,
-                      ),
-                      onTap: () {
-                        Navigator.pushReplacementNamed(context, '/settings');
-                      },
-                    ),
+                    // ListTile(
+                    //   leading: const Icon(
+                    //     Icons.settings,
+                    //     color: Colors.red,
+                    //   ),
+                    //   title: Text(
+                    //     'Settings',
+                    //     style: style,
+                    //   ),
+                    //   onTap: () {
+                    //     Navigator.pushReplacementNamed(context, '/settings');
+                    //   },
+                    // ),
                     ListTile(
                       leading: const Icon(
                         Icons.person,
@@ -463,7 +461,14 @@ class DrawerNavigation extends StatelessWidget {
                         style: style,
                       ),
                       onTap: () {
-                        Navigator.pushReplacementNamed(context, '/profile');
+                        Navigator.pushReplacementNamed(
+                            context,
+                            '/profile',
+                          arguments: {
+                            "user": user,
+                            "server": server,
+                          }
+                        );
                       },
                     ),
                     ListTile(
@@ -480,8 +485,7 @@ class DrawerNavigation extends StatelessWidget {
                             context,
                             '/login',
                             arguments: {
-                              "domain": protocol,
-                              "protocol": domain,
+                              "domain": server,
                             }
                         );
                       },
@@ -498,10 +502,9 @@ class DrawerNavigation extends StatelessWidget {
 }
 
 Scaffold getScaffold(
-    Widget thingy,
-    User user,
-  String protocol,
-  String domain,
+  Widget thingy,
+  User user,
+  String server,
 {bool appBar = true}) {
   final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
 
@@ -532,8 +535,7 @@ Scaffold getScaffold(
           )
         : null,
     drawer: DrawerNavigation(
-        protocol: protocol,
-        domain: domain,
+        server: server,
         user: user
     ),
     backgroundColor: hexToColor("#222222"),
@@ -542,14 +544,14 @@ Scaffold getScaffold(
 }
 
 Future<http.Response> patchRequest(
-    var data, String protocol, String domain,
+    var data, String server,
     String path, dynamic context,var headers,
     {bool showPrompt = false,
      String promptTitle = "",
      String promptMessage = "", backTwice = false
     }) async {
   ProgressDialog pd = ProgressDialog(context: context);
-  Uri url = Uri.parse('$protocol://$domain/$path');
+  Uri url = Uri.parse('$server/$path');
 
   pd.show(
       msg: 'Loading',

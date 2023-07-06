@@ -12,14 +12,12 @@ import '../application_models.dart';
 import '../input_validations.dart';
 
 class CreateTicket extends StatefulWidget {
-  final String protocol;
-  final String domain;
+  final String server;
   final User user;
   final List<String> modules;
   const CreateTicket(
       {Key? key,
-        required this.protocol,
-        required this.domain,
+        required this.server,
         required this.user,
         required this.modules})
       : super(key: key);
@@ -29,20 +27,7 @@ class CreateTicket extends StatefulWidget {
 }
 
 class _CreateTicketState extends State<CreateTicket> {
-  // TextEditingController nameController = TextEditingController();
-  // TextEditingController emailController = TextEditingController();
-  // String email = "";
-  // String name = "";
-  // TextEditingController numController = TextEditingController();
-  // String contacts = "";
-  // TextEditingController locationController = TextEditingController();
-  // String location = "";
-  // TextEditingController subjectController = TextEditingController();
-  // String subject = "";
-  // TextEditingController messageController = TextEditingController();
-  // String message = "";
-  // String username = "";
-
+  List<String> categories = [];
   var name = InputField(display: "Name");
   var email = InputField(display: "Email");
   var number = InputField(display: "Contact Number");
@@ -60,45 +45,16 @@ class _CreateTicketState extends State<CreateTicket> {
 
   bool isThisDevice = false;
   List<String> ticketableDepartments = [];
-
-  Padding inputField(
-      TextEditingController controller, String holder, String display,
-      {int maximumLines = 1, int minimumLines = 1}) {
-    return Padding(
-      padding: const EdgeInsets.all(10),
-      child: TextField(
-        controller: controller,
-        cursorColor: Colors.red,
-        minLines: minimumLines,
-        maxLines: maximumLines,
-        onChanged: (value) => holder = value,
-        style: const TextStyle(fontSize: 18, color: Colors.white),
-        decoration: InputDecoration(
-          // label: const Text("Text *"),
-          border: const OutlineInputBorder(),
-          focusedBorder: const OutlineInputBorder(
-            borderSide: BorderSide(color: Colors.red), // Change the color here
-          ),
-          enabledBorder: const OutlineInputBorder(
-            borderSide: BorderSide(color: Colors.red), // Change the color here
-          ),
-          errorBorder: const OutlineInputBorder(
-            borderSide: BorderSide(color: Colors.red), // Change the color here
-          ),
-          labelText: "$display*",
-          labelStyle: const TextStyle(fontSize: 18, color: Colors.white),
-        ),
-      ),
-    );
-  }
   bool departmentSelected = false;
   String selectedDepartment = "";
+
+  String selectedCategory = "";
+  bool categorySelected = false;
 
   void getData() async {
     var response = await http.get(
         Uri.parse(
-            "${widget.protocol}://"
-                "${widget.domain}/all_departments_and_modules"
+            "${widget.server}/all_departments_and_modules"
         ),
         headers: widget.user.getAuth()
     );
@@ -139,9 +95,10 @@ class _CreateTicketState extends State<CreateTicket> {
               child: const Text(
                 "Create a Ticket!",
                 style: TextStyle(
-                    fontSize: 25,
-                    fontWeight: FontWeight.w500,
-                    color: Colors.red),
+                  fontSize: 25,
+                  fontWeight: FontWeight.w500,
+                  color: Colors.red
+                ),
               ),
             ),
           ),
@@ -156,14 +113,17 @@ class _CreateTicketState extends State<CreateTicket> {
                     email.setText(widget.user.email);
                     number.setText(widget.user.number);
                     location.setText(widget.user.location);
-                    setState(() {});
+                    setState(() {
+
+                    });
                   },
                   child: const Text(
                     "Autofill with your details!",
                     style: TextStyle(
                         fontSize: 17,
                         color: Colors.red,
-                        fontWeight: FontWeight.w500),
+                        fontWeight: FontWeight.w500
+                    ),
                   ),
                 ),
               ),
@@ -183,7 +143,7 @@ class _CreateTicketState extends State<CreateTicket> {
                     color: Colors.white),
               )
                   : const Text(
-                'Send Ticket to: ',
+                'Send Ticket to: *',
                 style: TextStyle(
                     fontSize: 17,
                     fontWeight: FontWeight.w500,
@@ -191,13 +151,30 @@ class _CreateTicketState extends State<CreateTicket> {
                 ),
               ),
               elevation: 16,
-              onChanged: (String? newValue) {
+              onChanged: (String? newValue) async {
                 if (newValue == null) {
                   return;
                 }
                 selectedDepartment = newValue;
                 departmentSelected = true;
-                setState(() {});
+
+                var response = await supporting.getRequest(
+                  widget.server,
+                  "/department/ticket_categories?department=$selectedDepartment",
+                  context,
+                  headers: widget.user.getAuth()
+                );
+
+                if (response.statusCode != 200) {
+                  return;
+                }
+
+                var categories = jsonDecode(response.body);
+                setState(() {
+                  this.categories = List.generate(
+                      categories.length, (index) => categories[index]
+                  );
+                });
               },
               items: ticketableDepartments
                   .map<DropdownMenuItem<String>>((String value) {
@@ -214,6 +191,54 @@ class _CreateTicketState extends State<CreateTicket> {
               }).toList(),
             ),
           ),
+          departmentSelected ? Padding(
+            padding: const EdgeInsets.all(10),
+            child: DropdownButton<String>(
+              focusColor: Colors.transparent,
+              dropdownColor: Colors.red[800],
+              hint: categorySelected
+                  ? Text(
+                'Category: $selectedCategory',
+                style: const TextStyle(
+                  fontSize: 17,
+                  fontWeight: FontWeight.w500,
+                  color: Colors.white),
+              )
+                  : const Text(
+                'Select a Category: *',
+                style: TextStyle(
+                  fontSize: 17,
+                  fontWeight: FontWeight.w500,
+                  color: Colors.white
+                ),
+              ),
+              elevation: 16,
+              onChanged: (String? newValue) async {
+                if (newValue == null) {
+                  return;
+                }
+                selectedCategory = newValue;
+                categorySelected = true;
+
+                setState(() {});
+              },
+              items: categories
+                  .map<DropdownMenuItem<String>>((String value) {
+                return DropdownMenuItem<String>(
+                  value: value,
+                  child: Text(
+                    value,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.w500,
+                      fontSize: 18
+                    ),
+                  ),
+                );
+              }).toList(),
+            ),
+          ) :
+          Container(),
           Padding(
             padding: const EdgeInsets.all(10),
             child: Text(
@@ -278,6 +303,15 @@ class _CreateTicketState extends State<CreateTicket> {
                 child: ElevatedButton(
                   onPressed: () async {
 
+                    if (!(departmentSelected || categorySelected)) {
+                      supporting.showPopUp(
+                          context,
+                          "Validation Error",
+                          "Department AND OR Category Can't be Empty!"
+                      );
+                      return;
+                    }
+
                     bool ok = inputValidation(inputs, context);
                     if (!ok) {
                       return;
@@ -333,6 +367,7 @@ class _CreateTicketState extends State<CreateTicket> {
                         hostIssue: isThisDevice,
                         platform: platform.operatingSystem,
                         status: "RAISED",
+                        category: selectedCategory,
                         devices: [],
                         messages: [],
                         updates: []);
@@ -342,8 +377,7 @@ class _CreateTicketState extends State<CreateTicket> {
                         "Content-Type", () => "application/json");
                     var response = await supporting.postRequest2(
                         jsonEncode(ticketInfo),
-                        widget.protocol,
-                        widget.domain,
+                        widget.server,
                         "ticket",
                         context,
                         headers: header,
@@ -379,8 +413,7 @@ class _CreateTicketState extends State<CreateTicket> {
         ],
       ),
       widget.user,
-      widget.protocol,
-      widget.domain,
+      widget.server,
     );
   }
 }

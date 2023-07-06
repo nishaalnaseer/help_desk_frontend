@@ -7,8 +7,7 @@ import 'drop_down_selector.dart';
 import 'package:http/http.dart' as http;
 
 class ViewDepartment extends StatefulWidget {
-  final String protocol;
-  final String domain;
+  final String server;
   final Department department;
   final User user;
   final List<String> modules;
@@ -17,8 +16,7 @@ class ViewDepartment extends StatefulWidget {
 
   const ViewDepartment({
     super.key,
-    required this.protocol,
-    required this.domain,
+    required this.server,
     required this.department,
     required this.user,
     required this.modules,
@@ -53,6 +51,8 @@ class _ViewDepartmentState extends State<ViewDepartment> {
   late DropDownSelector ticketFromSelector;
   late DropDownSelector reportsTicketable;
   late DropDownSelector reportsNonTicketable;
+  List<Widget> categories = [];
+  late Map<String, String> newCategories = widget.department.ticketCategories;
 
   @override
   void dispose() {
@@ -64,7 +64,7 @@ class _ViewDepartmentState extends State<ViewDepartment> {
     if(!releaseSent) {
       http.post(
           Uri.parse(
-              "${widget.protocol}://${widget.domain}/"
+              "${widget.server}/"
                   "release_lock?module=DEPARTMENTS&resource_id="
                   "${widget.department.dId}"
           ),
@@ -75,6 +75,8 @@ class _ViewDepartmentState extends State<ViewDepartment> {
   }
 
   void initData() async {
+    assignCategoryWidgets();
+
     var modulesSelectorDisplay = "Available Modules:";
     var ticketToSelectorDisplay = "Which ticketable department's"
         " tickets can this department can access?";
@@ -154,6 +156,86 @@ class _ViewDepartmentState extends State<ViewDepartment> {
       initialValues: widget.department.nonTicketableReports,
       initialText: reportsNonTicketableDisplay,
     );
+
+    setState(() {
+
+    });
+  }
+
+  void assignCategoryWidgets() {
+    List<Widget> newWidgets = [];
+    widget.department.ticketCategories.forEach((key, value) {
+      String _holder = value;
+      newWidgets.add(
+          SizedBox(
+            width: 800,
+            child: Align(
+              alignment: Alignment.bottomLeft,
+              child: Row(
+                children: [
+                  Expanded(
+                      flex: 75,
+                      child: Wrap(
+                        children: [
+                          Text(
+                            key,
+                            style: const TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.w500,
+                                color: Colors.white
+                            ),
+                          )
+                        ],
+                      )
+                  ),
+                  Expanded(
+                      flex: 25,
+                      child: DropdownButton<String>(
+                        focusColor: Colors.transparent,
+                        dropdownColor: Colors.red[800],
+                        hint: Text(
+                          'Set Status: $_holder',
+                          style: const TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.w500,
+                              color: Colors.white
+                          ),
+                        ),
+                        elevation: 16,
+                        onChanged: (String? newValue) {
+                          if (newValue == null) {
+                            return;
+                          }
+                          _holder = newValue;
+                          newCategories.update(key, (value) => _holder);
+                          assignCategoryWidgets();
+                        },
+                        items: const ["ENABLED", "DISABLED"]
+                            .map<DropdownMenuItem<String>>((String value) {
+                          return DropdownMenuItem<String>(
+                            value: value,
+                            child: Text(
+                              value,
+                              style: const TextStyle(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.w500,
+                                  fontSize: 18
+                              ),
+                            ),
+                          );
+                        }).toList(),
+                      )
+                  ),
+                ],
+              ),
+            ),
+          )
+      );
+    });
+    categories = newWidgets;
+    setState(() {
+
+    });
   }
 
   List<String> getDepartments() {
@@ -280,6 +362,193 @@ class _ViewDepartmentState extends State<ViewDepartment> {
               ),
             ),
           ),
+
+          newTicketable ?
+          Container(
+            width: 200,
+            padding: const EdgeInsets.fromLTRB(10, 40, 10, 10),
+            child: Center(
+              child: ElevatedButton(
+                onPressed: () {
+                  showDialog(
+                    context: context,
+                    builder: (BuildContext context) {
+                      TextEditingController controller = TextEditingController();
+                      String _holder = "";
+                      return AlertDialog(
+                        backgroundColor: supporting.hexToColor("#222222"),
+                        title: const Text(
+                          'Add a Category',
+                          style: TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.w500,
+                              color: Colors.white
+                          ),
+                        ),
+                        content: SizedBox(
+                          width: 300,
+                          height: 200,
+                          child: Column(
+                            children: [
+                              Padding(
+                                padding: const EdgeInsets.all(10),
+                                child: TextField(
+                                  controller: controller,
+                                  cursorColor: Colors.red,
+                                  onChanged: (value) => _holder = value,
+                                  style: const TextStyle(fontSize: 18, color: Colors.white),
+                                  decoration: const InputDecoration(
+                                    // label: const Text("Text *"),
+                                    border: OutlineInputBorder(),
+                                    focusedBorder: OutlineInputBorder(
+                                      borderSide: BorderSide(color: Colors.red), // Change the color here
+                                    ),
+                                    enabledBorder: OutlineInputBorder(
+                                      borderSide: BorderSide(color: Colors.red), // Change the color here
+                                    ),
+                                    errorBorder: OutlineInputBorder(
+                                      borderSide: BorderSide(color: Colors.red), // Change the color here
+                                    ),
+                                    labelText: "Category*",
+                                    labelStyle: TextStyle(fontSize: 18, color: Colors.white),
+                                  ),
+                                ),
+                              ),
+                              Padding(
+                                padding: const EdgeInsets.all(10),
+                                child: ElevatedButton(
+                                  child: const Text(
+                                    "Add Category",
+                                    style: TextStyle(
+                                        fontSize: 18,
+                                        fontWeight: FontWeight.w500,
+                                        color: Colors.red
+                                    ),
+                                  ),
+                                  onPressed: () {
+                                    String category = controller.text;
+                                    if (category.trim().isEmpty) {
+                                      supporting.showPopUp(
+                                          context,
+                                          "Error",
+                                          "Category Cannot be Empty!"
+                                      );
+                                    }
+
+                                    newCategories.putIfAbsent(category, () => "ENABLED");
+                                    controller.text = "";
+                                    categories.add(
+                                        SizedBox(
+                                          width: 800,
+                                          child: Align(
+                                            alignment: Alignment.bottomLeft,
+                                            child: Row(
+                                              children: [
+                                                Expanded(
+                                                    flex: 75,
+                                                    child: Wrap(
+                                                      children: [
+                                                        Text(
+                                                          category,
+                                                          style: const TextStyle(
+                                                              fontSize: 18,
+                                                              fontWeight: FontWeight.w500,
+                                                              color: Colors.white
+                                                          ),
+                                                        )
+                                                      ],
+                                                    )
+                                                ),
+                                                Expanded(
+                                                    flex: 25,
+                                                    child: DropdownButton<String>(
+                                                      focusColor: Colors.transparent,
+                                                      dropdownColor: Colors.red[800],
+                                                      hint: const Text(
+                                                        'Set Status: ENABLED',
+                                                        style: TextStyle(
+                                                            fontSize: 18,
+                                                            fontWeight: FontWeight.w500,
+                                                            color: Colors.white
+                                                        ),
+                                                      ),
+                                                      elevation: 16,
+                                                      onChanged: (String? newValue) {
+                                                        if (newValue == null) {
+                                                          return;
+                                                        }
+                                                        selectedView = newValue;
+                                                        setState(() {});
+                                                        newCategories.update(category, (value) => value);
+                                                      },
+                                                      items: ["ENABLED", "DISABLED"]
+                                                          .map<DropdownMenuItem<String>>((String value) {
+                                                        return DropdownMenuItem<String>(
+                                                          value: value,
+                                                          child: Text(
+                                                            value,
+                                                            style: const TextStyle(
+                                                                color: Colors.white,
+                                                                fontWeight: FontWeight.w500,
+                                                                fontSize: 18
+                                                            ),
+                                                          ),
+                                                        );
+                                                      }).toList(),
+                                                    )
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                        )
+                                    );
+                                    setState(() {
+
+                                    });
+                                  },
+                                ),
+                              ),
+                              Padding(
+                                padding: const EdgeInsets.all(10),
+                                child: ElevatedButton(
+                                  child: const Text(
+                                    "Close",
+                                    style: TextStyle(
+                                        fontSize: 18,
+                                        fontWeight: FontWeight.w500,
+                                        color: Colors.red
+                                    ),
+                                  ),
+                                  onPressed: () { Navigator.pop(context); },
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      );
+                    },
+                  );
+                },
+                child: const Text(
+                  "Add Category",
+                  style: TextStyle(
+                      color: Colors.red,
+                      fontWeight: FontWeight.w500,
+                      fontSize: 18
+                  ),
+                ),
+              ),
+            )
+          )
+              : Container(),
+
+          newTicketable ? Container(
+            padding: const EdgeInsets.fromLTRB(10, 10, 10, 40),
+            child: Column(
+              children: categories,
+            ),
+          ) :
+          Container(),
           Padding(
             padding: const EdgeInsets.fromLTRB(10, 30, 10, 30),
             child: DropdownButton<String>(
@@ -316,6 +585,7 @@ class _ViewDepartmentState extends State<ViewDepartment> {
               }).toList(),
             ),
           ),
+
           modulesSelector,
           ticketToSelector,
           ticketFromSelector,
@@ -369,7 +639,8 @@ class _ViewDepartmentState extends State<ViewDepartment> {
                       accessibleTickets: selectedToTicketable,
                       ticketsRaisedFrom: selectedFromTicketable,
                       nonTicketableReports: nonTicketableReports,
-                      ticketableReports: ticketableReports
+                      ticketableReports: ticketableReports,
+                      ticketCategories: newCategories
                     );
 
                     var data = department.toJson();
@@ -379,8 +650,7 @@ class _ViewDepartmentState extends State<ViewDepartment> {
 
                     var response = await supporting.patchRequest(
                       jsonEncode(data),
-                      widget.protocol,
-                      widget.domain,
+                      widget.server,
                       "department",
                       context,
                       widget.user.getAuth(),
@@ -402,8 +672,7 @@ class _ViewDepartmentState extends State<ViewDepartment> {
         ],
       ),
       widget.user,
-      widget.protocol,
-      widget.domain,
+      widget.server,
     );
   }
 }

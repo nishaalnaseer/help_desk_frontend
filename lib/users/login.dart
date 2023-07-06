@@ -1,19 +1,19 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
 import '../application_models.dart';
 import '../input_validations.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../supporting.dart' as supporting;
 
 class LoginPage extends StatefulWidget {
-  final String domain;
-  final String protocol;
+  final String server;
   const LoginPage({
     super.key,
-    required this.domain,
-    required this.protocol,
+    required this.server,
   });
 
   @override
@@ -21,17 +21,65 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
-  InputField username = InputField(
-      display: "Email",
-      // padding: const EdgeInsets.fromLTRB(10, 50, 10, 10
-      // )
-  );
+  String _usernameHolder = "";
   InputField password = InputField(
       display: "Password",
       obscureText: true
   );
+  bool saveUserDetails = false;
+  late final List<InputField> inputs = [password];
+  late final List<String> _suggestedUsernames;
+  final TextEditingController _usernameController = TextEditingController();
+  final Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
 
-  late final List<InputField> inputs = [username, password];
+  void _showUsernameSuggestions(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          backgroundColor: supporting.hexToColor("#222222"),
+          title: const Text(
+              'Select an Email',
+            style: TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.w500,
+              color: Colors.white
+            ),
+          ),
+          content: SizedBox(
+            width: 300,
+            child: ListView.builder(
+              shrinkWrap: true,
+              itemCount: _suggestedUsernames.length,
+              itemBuilder: (context, index) {
+                final username = _suggestedUsernames[index];
+                return InkWell(
+                  onTap: () {
+                    if (_usernameController.text == "cancel") {
+                      return;
+                    }
+                    _usernameController.text = username;
+                    Navigator.of(context).pop();
+                  },
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 8.0),
+                    child: Text(
+                        username,
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.w500,
+                        fontSize: 18
+                      ),
+                    ),
+                  ),
+                );
+              },
+            ),
+          ),
+        );
+      },
+    );
+  }
 
   Future<void> login() async {
 
@@ -40,8 +88,16 @@ class _LoginPageState extends State<LoginPage> {
       return;
     }
 
+    if(_usernameController.text == "") {
+      supporting.showPopUp(
+          context,
+          "Validation Error!",
+          "Email not entered"
+      );
+      return;
+    }
+
     String pass = password.text();
-    String email = username.text();
     var headers = {
       'Accept': 'application/json, text/plain, */*',
       "Access-Control-Allow-Origin": "*",
@@ -51,7 +107,7 @@ class _LoginPageState extends State<LoginPage> {
 
     var data = {
       'grant_type': 'password',
-      'username': email,
+      'username': _usernameController.text,
       'password': pass,
     };
 
@@ -60,12 +116,12 @@ class _LoginPageState extends State<LoginPage> {
     try {
       response = await supporting.postRequest2(
         data,
-        widget.protocol,
-        widget.domain,
-        "token",
+        widget.server,
+        "/token",
         headers: headers,
         context,
-        showPrompt: false);
+        showPrompt: false
+      );
     } on Exception catch (e) {
       return;
     }
@@ -80,11 +136,13 @@ class _LoginPageState extends State<LoginPage> {
     headers.putIfAbsent('Content-Type', () => 'application/json');
 
     String jsonRaw = await supporting.getApiData(
-        "users/me/", widget.domain, widget.protocol, context,
+        "/users/me/", widget.server, context,
         headers: headers, delay: 500);
     var json = jsonDecode(jsonRaw);
     User user = User.fromJson(json);
     user.setAuth(headers);
+
+    addUsername(_usernameController.text);
 
     String? defaultView = supporting.map[user.defaultView];
 
@@ -93,10 +151,32 @@ class _LoginPageState extends State<LoginPage> {
         defaultView ?? "/logged_in",
         arguments: {
           "user": user,
-          "protocol": widget.protocol,
-          "domain": widget.domain
+          "server": widget.server,
         }
     );
+  }
+
+  void initialiseUsername() async {
+    _suggestedUsernames = await _prefs.then((SharedPreferences prefs) {
+      return prefs.getStringList('emails') ?? [];
+    });
+  }
+
+  void addUsername(String value) async {
+
+    if(!_suggestedUsernames.contains(value)) {
+      _suggestedUsernames.add(value);
+    }
+
+    final SharedPreferences prefs = await _prefs;
+    await prefs.setStringList('emails', _suggestedUsernames);
+  }
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    initialiseUsername();
   }
 
   @override
@@ -118,7 +198,8 @@ class _LoginPageState extends State<LoginPage> {
                         color: Colors.redAccent,
                         fontWeight: FontWeight.w500,
                         fontSize: 30),
-                    )),
+                    )
+                  ),
                   Container(
                     alignment: Alignment.center,
                     padding: const EdgeInsets.all(10),
@@ -128,13 +209,39 @@ class _LoginPageState extends State<LoginPage> {
                     )),
                   Padding(
                     padding: const EdgeInsets.fromLTRB(10, 30, 10, 10),
-                    child: username.inputField,
+                    child: TextField(
+                      controller: _usernameController,
+                      cursorColor: Colors.red,
+                      onChanged: (value) => _usernameHolder = value,
+                      style: const TextStyle(fontSize: 18, color: Colors.white),
+                      onTap: () {
+
+                        if (_suggestedUsernames.isEmpty) {
+                          return;
+                        }
+                        _showUsernameSuggestions(context);
+                      },
+                      decoration: const InputDecoration(
+                        border: OutlineInputBorder(),
+                        focusedBorder: OutlineInputBorder(
+                          borderSide: BorderSide(color: Colors.red), // Change the color here
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderSide: BorderSide(color: Colors.red), // Change the color here
+                        ),
+                        errorBorder: OutlineInputBorder(
+                          borderSide: BorderSide(color: Colors.red), // Change the color here
+                        ),
+                        labelText: "Email*",
+                        labelStyle: TextStyle(fontSize: 18, color: Colors.white),
+                      ),
+                    ),
+                    // child: username.inputField,
                   ),
                   Padding(
                     padding: const EdgeInsets.all(10),
                     child: password.inputField,
                   ),
-
                   Container(
                     padding: const EdgeInsets.all(10),
                     child: ElevatedButton(
@@ -151,6 +258,27 @@ class _LoginPageState extends State<LoginPage> {
                       ),
                     ),
                   ),
+                  Container(
+                    padding: const EdgeInsets.all(10),
+                    width: 50,
+                    child: CheckboxListTile(
+                      title: const Text(
+                        "Remember me?",
+                        style: TextStyle(color: Colors.white, fontSize: 17),
+                      ),
+                      // activeColor: Colors.white,
+                      selectedTileColor: Colors.red,
+                      checkColor: Colors.white,
+                      value: saveUserDetails,
+                      fillColor: MaterialStateProperty.all<Color>(Colors.red),
+                      hoverColor: Colors.red[100],
+                      onChanged: (bool? value) {
+                        setState(() {
+                          saveUserDetails = value ?? false;
+                        });
+                      },
+                    ),
+                  ),
                   TextButton(
                     onPressed: () {
                       //forgot password screen
@@ -164,6 +292,7 @@ class _LoginPageState extends State<LoginPage> {
                       ),
                     ),
                   ),
+
                 ],
               ),
             ),
@@ -183,7 +312,8 @@ class _LoginPageState extends State<LoginPage> {
             accessibleTickets: [],
             ticketsRaisedFrom: [],
             nonTicketableReports: [],
-            ticketableReports: []
+            ticketableReports: [],
+            ticketCategories: {}
           ),
           email: "email",
           number: "number",
@@ -191,8 +321,7 @@ class _LoginPageState extends State<LoginPage> {
           defaultView: "",
           socialMedia: ""
         ),
-        widget.protocol,
-        widget.domain,
+        widget.server,
         appBar: false
     );
   }

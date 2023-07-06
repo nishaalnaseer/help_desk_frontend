@@ -5,16 +5,16 @@ import 'package:intl/intl.dart';
 
 import '../application_models.dart';
 import '../supporting.dart' as supporting;
+import 'package:http/http.dart' as http;
+
 
 class ViewTicket extends StatefulWidget {
-  final String protocol;
-  final String domain;
+  final String server;
   final Ticket ticket;
   final User user;
   const ViewTicket(
       {super.key,
-      required this.protocol,
-      required this.domain,
+      required this.server,
       required this.ticket,
       required this.user,
       });
@@ -41,6 +41,9 @@ class _ViewTicketState extends State<ViewTicket> {
       widget.ticket.status != "REJECTED");
   late bool showChangeStatus =
       (widget.ticket.ticketTo == widget.user.department.name) && canAddMessages;
+  late String newCategory = widget.ticket.category;
+  bool newCategorySelected = false;
+  List<String> categoryOptions = [];
 
   Padding getText(String text) {
     return Padding(
@@ -133,10 +136,7 @@ class _ViewTicketState extends State<ViewTicket> {
     );
   }
 
-  @override
-  void initState() {
-    super.initState();
-
+  void initData() async {
     Map<int, UpdateBox> updateMap = {};
 
     for (Message message in widget.ticket.messages) {
@@ -163,6 +163,36 @@ class _ViewTicketState extends State<ViewTicket> {
     getUpdates(orderedMap);
 
     hideButtons = !messagesHidden && widget.ticket.messages.length > 2;
+
+    String uri = "${widget.server}/department/ticket_categories?department="
+        "${widget.ticket.ticketTo}";
+    var response = await http.get(
+        Uri.parse(uri),
+      headers: widget.user.getAuth()
+    );
+
+    if (response.statusCode != 200) {
+      setState(() {
+
+      });
+      return;
+    }
+
+    var json = jsonDecode(response.body);
+    categoryOptions = List.generate(
+        json.length,
+            (index) => json[index]
+    );
+    setState(() {
+
+    });
+
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    initData();
   }
 
   @override
@@ -173,6 +203,41 @@ class _ViewTicketState extends State<ViewTicket> {
 
   void _focusOnTextField() {
     _textFieldFocusNode.requestFocus();
+  }
+
+  Future<void> sendMessage(String newMessage) async {
+    Message message = Message(
+        time: DateTime.now().millisecondsSinceEpoch ~/
+            1000,
+        personFrom: widget.user.email,
+        message: newMessage);
+    var header = widget.user.getAuth();
+    header.putIfAbsent(
+        "Content-Type", () => "application/json"
+    );
+    var response = await supporting.postRequest2(
+        jsonEncode({}),
+        widget.server,
+        "message?message=$newMessage"
+            "&ticket_id=${widget.ticket.tId}",
+        context,
+        headers: header,
+        showPrompt: false,
+        promptTitle: "Nice",
+        promptMessage: "$newMessage Submitted");
+
+    if (response.statusCode == 200 ||
+        response.statusCode == 201) {
+      widget.ticket.messages.add(message);
+      controller.clear();
+      updates.add(
+          listChild(
+              "Just Now", widget.user.email, newMessage
+          ));
+      setState(() {
+
+      });
+    }
   }
 
   @override
@@ -211,8 +276,23 @@ class _ViewTicketState extends State<ViewTicket> {
                 ),
               ),
             ),
-         !showChangeStatus
-         ? Container()
+
+          getText('Ticket ID: ${widget.ticket.tId}'),
+
+          !showChangeStatus
+         ? Padding(
+            padding: const EdgeInsets.all(10),
+            child: Text(
+              "Status: ${widget.ticket.status}",
+              style: TextStyle(
+                  color: widget.ticket.status == "COMPLETED" ||
+                      widget.ticket.status == "REJECTED"
+                      ? Colors.red
+                      : Colors.white,
+                  fontWeight: FontWeight.w700,
+                  fontSize: 18),
+            ),
+          )
          : Padding(
            padding: const EdgeInsets.all(10),
            child: Row(
@@ -224,16 +304,16 @@ class _ViewTicketState extends State<ViewTicket> {
                    dropdownColor: Colors.red[800],
                    hint: newStatusSelected
                        ? Text(
-                           'Mark Ticket as:  $selectedNewStatus',
+                           'Mark Ticket as:  ${widget.ticket.status}',
                            style: const TextStyle(
-                               fontSize: 17,
+                               fontSize: 18,
                                fontWeight: FontWeight.w500,
                                color: Colors.white),
                          )
-                       : const Text(
-                           'Mark Ticket as: ',
-                           style: TextStyle(
-                               fontSize: 17,
+                       : Text(
+                           'Ticket Status: ${widget.ticket.status}',
+                           style: const TextStyle(
+                               fontSize: 18,
                                fontWeight: FontWeight.w500,
                                color: Colors.white),
                          ),
@@ -275,10 +355,9 @@ class _ViewTicketState extends State<ViewTicket> {
                      var response =
                        await supporting.patchRequest(
                          jsonEncode({}),
-                         widget.protocol,
-                         widget.domain,
-                         "status?new_status=$selectedNewStatus"
-                         "&ticket_id=${widget.ticket.tId}",
+                         widget.server,
+                         "/status?new_status=$selectedNewStatus"
+                           "&ticket_id=${widget.ticket.tId}",
                          context,
                          header,
                          showPrompt: true,
@@ -329,22 +408,118 @@ class _ViewTicketState extends State<ViewTicket> {
              ],
            ),
          ),
-         getText('Ticket ID: ${widget.ticket.tId}'),
+
+          !showChangeStatus
+              ? Padding(
+                  padding: const EdgeInsets.all(10),
+                  child: Text(
+                    "Category: ${widget.ticket.category}",
+                    style: TextStyle(
+                      color: widget.ticket.status == "COMPLETED" ||
+                        widget.ticket.status == "REJECTED"
+                        ? Colors.red
+                        : Colors.white,
+                      fontWeight: FontWeight.w700,
+                      fontSize: 18
+                    ),
+                  ),
+                )
+              : Padding(
+                  padding: const EdgeInsets.all(10),
+                  child: Row(
+                      children: [
+                        SizedBox(
+                          width: 600,
+                          child: DropdownButton<String>(
+                            focusColor: Colors.transparent,
+                            dropdownColor: Colors.red[800],
+                            hint: newCategorySelected
+                                ? Text(
+                              'Set Category as:  $newCategory',
+                              style: const TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.w500,
+                                  color: Colors.white),
+                            )
+                                : Text(
+                              'Ticket Category: $newCategory',
+                              style: const TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.w500,
+                                  color: Colors.white),
+                            ),
+                            elevation: 16,
+                            onChanged: (String? newValue) {
+                              if (newValue != null) {
+                                newCategory = newValue;
+                                newCategorySelected = true;
+                              }
+                              setState(() {});
+                            },
+                            items: categoryOptions.map<DropdownMenuItem<String>>((String value) {
+                              return DropdownMenuItem<String>(
+                                value: value,
+                                child: Text(
+                                  value,
+                                  style: const TextStyle(
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.w500,
+                                      fontSize: 18),
+                                ),
+                              );
+                            }).toList(),
+                          ),
+                        ),
+                        newCategorySelected
+                            ? Padding(
+                              padding: const EdgeInsets.all(10),
+                              child: ElevatedButton(
+                                onPressed: () async {
+                                  var header = widget.user.getAuth();
+                                  header.putIfAbsent(
+                                      "Content-Type", () => "application/json"
+                                  );
+                                  int tId = widget.ticket.tId;
+                                  var response =
+                                    await supporting.patchRequest(
+                                        jsonEncode({"t_id": tId, "new_category": newCategory}),
+                                      widget.server,
+                                      "/ticket/category",
+                                      context,
+                                      header,
+                                      showPrompt: true,
+                                      promptTitle: "Category Changed!",
+                                      promptMessage:
+                                      "Category Changed to: $newCategory"
+                                    );
+
+                                  await sendMessage("Category Changed to: $newCategory");
+
+                                  if (response.statusCode == 200 ||
+                                      response.statusCode == 201) {
+                                    widget.ticket.category = newCategory;
+                                    newCategorySelected = false;
+
+                                    setState(() {});
+                                  }
+                                },
+                                child: const Text(
+                                  "Set Category",
+                                  style: TextStyle(
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.w500,
+                                      color: Colors.red
+                                  ),
+                                )
+                          ),
+                        )
+                            : Container()
+                      ],
+            ),
+          ),
+
          getText('Submitted On: ${formatDate(widget.ticket.submittedOn)}'),
          getText('Submitted By: ${widget.ticket.submittedBy}'),
-         Padding(
-           padding: const EdgeInsets.all(10),
-           child: Text(
-             "Status: ${widget.ticket.status}",
-             style: TextStyle(
-               color: widget.ticket.status == "COMPLETED" ||
-                     widget.ticket.status == "REJECTED"
-                 ? Colors.red
-                 : Colors.white,
-               fontWeight: FontWeight.w700,
-               fontSize: 18),
-           ),
-         ),
          getText('Ticket To: ${widget.ticket.ticketTo}'),
          getText('Name on Ticket: ${widget.ticket.nameTicket}'),
          getText('Email on Ticket: ${widget.ticket.emailTicket}'),
@@ -378,7 +553,8 @@ class _ViewTicketState extends State<ViewTicket> {
                  style: TextStyle(
                    fontSize: 18,
                    fontWeight: FontWeight.w500,
-                   color: Colors.red),
+                   color: Colors.red
+                 ),
                )
              ),
             ),
@@ -527,39 +703,12 @@ class _ViewTicketState extends State<ViewTicket> {
                           );
                           return;
                         }
+                        await sendMessage(newMessage);
 
                         setState(() {
                           addingMessage = false;
                         });
 
-                        Message message = Message(
-                            time: DateTime.now().millisecondsSinceEpoch ~/
-                                1000,
-                            personFrom: widget.user.email,
-                            message: newMessage);
-                        var header = widget.user.getAuth();
-                        header.putIfAbsent(
-                            "Content-Type", () => "application/json"
-                        );
-                        var response = await supporting.postRequest2(
-                            jsonEncode({}),
-                            widget.protocol,
-                            widget.domain,
-                            "message?message=$newMessage"
-                            "&ticket_id=${widget.ticket.tId}",
-                            context,
-                            headers: header,
-                            showPrompt: false,
-                            promptTitle: "Nice",
-                            promptMessage: "Message Submitted");
-
-                        if (response.statusCode == 200 ||
-                            response.statusCode == 201) {
-                          widget.ticket.messages.add(message);
-                          controller.clear();
-                          updates.add(listChild(
-                              "Just Now", widget.user.email, newMessage));
-                        }
                         WidgetsBinding.instance.addPostFrameCallback((_) {
                           scroll.animateTo(
                             scroll.position.maxScrollExtent,
@@ -584,8 +733,7 @@ class _ViewTicketState extends State<ViewTicket> {
         ],
       ),
       widget.user,
-      widget.protocol,
-      widget.domain,
+      widget.server,
     );
   }
 }

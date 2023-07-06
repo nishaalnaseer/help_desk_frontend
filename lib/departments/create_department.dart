@@ -10,8 +10,7 @@ import '../supporting.dart' as supporting;
 
 class CreateDepartment extends StatefulWidget {
   final User user;
-  final String protocol;
-  final String domain;
+  final String server;
   final List<String> modules;
   final List<String> departments;
   final List<String> ticketableList;
@@ -19,8 +18,7 @@ class CreateDepartment extends StatefulWidget {
   const CreateDepartment({
     super.key,
     required this.user,
-    required this.protocol,
-    required this.domain,
+    required this.server,
     required this.modules,
     required this.departments,
     required this.ticketableList,
@@ -78,6 +76,91 @@ class _CreateDepartmentState extends State<CreateDepartment> {
     buttonText: "Department",
     options: widget.departments
   );
+
+  Map<String, String> ticketCategories = {"Other": "ENABLED"};
+  List<Widget> categories = [];
+
+  void assignCategoryWidgets() {
+    List<Widget> newWidgets = [];
+    ticketCategories.forEach((key, value) {
+      String _holder = value;
+      newWidgets.add(
+          SizedBox(
+            width: 800,
+            child: Align(
+              alignment: Alignment.bottomLeft,
+              child: Row(
+                children: [
+                  Expanded(
+                      flex: 75,
+                      child: Wrap(
+                        children: [
+                          Text(
+                            key,
+                            style: const TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.w500,
+                                color: Colors.white
+                            ),
+                          )
+                        ],
+                      )
+                  ),
+                  Expanded(
+                      flex: 25,
+                      child: DropdownButton<String>(
+                        focusColor: Colors.transparent,
+                        dropdownColor: Colors.red[800],
+                        hint: Text(
+                          'Set Status: $_holder',
+                          style: const TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.w500,
+                              color: Colors.white
+                          ),
+                        ),
+                        elevation: 16,
+                        onChanged: (String? newValue) {
+                          if (newValue == null) {
+                            return;
+                          }
+                          _holder = newValue;
+                          ticketCategories.update(key, (value) => _holder);
+                          assignCategoryWidgets();
+                        },
+                        items: const ["ENABLED", "DISABLED"]
+                            .map<DropdownMenuItem<String>>((String value) {
+                          return DropdownMenuItem<String>(
+                            value: value,
+                            child: Text(
+                              value,
+                              style: const TextStyle(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.w500,
+                                  fontSize: 18
+                              ),
+                            ),
+                          );
+                        }).toList(),
+                      )
+                  ),
+                ],
+              ),
+            ),
+          )
+      );
+    });
+    categories = newWidgets;
+    setState(() {
+
+    });
+  }
+
+  @override
+  void initState() {
+    assignCategoryWidgets();
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -148,6 +231,196 @@ class _CreateDepartmentState extends State<CreateDepartment> {
               ),
             ),
           ),
+
+          ticketable ?
+          Container(
+            width: 200,
+            padding: const EdgeInsets.fromLTRB(10, 40, 10, 10),
+            child: Center(
+              child: ElevatedButton(
+                onPressed: () {
+                  showDialog(
+                    context: context,
+                    builder: (BuildContext context) {
+                      TextEditingController controller = TextEditingController();
+                      String _holder = "";
+                      return AlertDialog(
+                        backgroundColor: supporting.hexToColor("#222222"),
+                        title: const Text(
+                          'Add a Category',
+                          style: TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.w500,
+                              color: Colors.white
+                          ),
+                        ),
+                        content: SizedBox(
+                          width: 300,
+                          height: 200,
+                          child: Column(
+                            children: [
+                              Padding(
+                                padding: const EdgeInsets.all(10),
+                                child: TextField(
+                                  controller: controller,
+                                  cursorColor: Colors.red,
+                                  onChanged: (value) => _holder = value,
+                                  style: const TextStyle(fontSize: 18, color: Colors.white),
+                                  decoration: const InputDecoration(
+                                    // label: const Text("Text *"),
+                                    border: OutlineInputBorder(),
+                                    focusedBorder: OutlineInputBorder(
+                                      borderSide: BorderSide(color: Colors.red), // Change the color here
+                                    ),
+                                    enabledBorder: OutlineInputBorder(
+                                      borderSide: BorderSide(color: Colors.red), // Change the color here
+                                    ),
+                                    errorBorder: OutlineInputBorder(
+                                      borderSide: BorderSide(color: Colors.red), // Change the color here
+                                    ),
+                                    labelText: "Category*",
+                                    labelStyle: TextStyle(fontSize: 18, color: Colors.white),
+                                  ),
+                                ),
+                              ),
+                              Padding(
+                                padding: const EdgeInsets.all(10),
+                                child: ElevatedButton(
+                                  child: const Text(
+                                    "Submit",
+                                    style: TextStyle(
+                                        fontSize: 18,
+                                        fontWeight: FontWeight.w500,
+                                        color: Colors.red
+                                    ),
+                                  ),
+                                  onPressed: () {
+                                    String category = controller.text;
+                                    if (category.trim().isEmpty) {
+                                      supporting.showPopUp(
+                                          context,
+                                          "Error",
+                                          "Category Cannot be Empty!"
+                                      );
+                                    }
+
+                                    ticketCategories.putIfAbsent(
+                                        category, () => "ENABLED"
+                                    );
+                                    controller.text = "";
+                                    categories.add(
+                                      SizedBox(
+                                        width: 800,
+                                        child: Align(
+                                          alignment: Alignment.bottomLeft,
+                                          child: Row(
+                                            children: [
+                                              Expanded(
+                                                flex: 75,
+                                                child: Wrap(
+                                                  children: [
+                                                    Text(
+                                                      category,
+                                                      style: const TextStyle(
+                                                          fontSize: 18,
+                                                          fontWeight: FontWeight.w500,
+                                                          color: Colors.white
+                                                      ),
+                                                    )
+                                                  ],
+                                                )
+                                              ),
+                                              Expanded(
+                                                flex: 25,
+                                                child: DropdownButton<String>(
+                                                  focusColor: Colors.transparent,
+                                                  dropdownColor: Colors.red[800],
+                                                  hint: const Text(
+                                                    'Set Status: ENABLED',
+                                                    style: TextStyle(
+                                                      fontSize: 18,
+                                                      fontWeight: FontWeight.w500,
+                                                      color: Colors.white
+                                                    ),
+                                                  ),
+                                                  elevation: 16,
+                                                  onChanged: (String? newValue) {
+                                                    if (newValue == null) {
+                                                      return;
+                                                    }
+                                                    selectedView = newValue;
+                                                    setState(() {});
+                                                    ticketCategories.update(category, (value) => value);
+                                                  },
+                                                  items: ["ENABLED", "DISABLED"]
+                                                      .map<DropdownMenuItem<String>>((String value) {
+                                                    return DropdownMenuItem<String>(
+                                                      value: value,
+                                                      child: Text(
+                                                        value,
+                                                        style: const TextStyle(
+                                                          color: Colors.white,
+                                                          fontWeight: FontWeight.w500,
+                                                          fontSize: 18
+                                                        ),
+                                                      ),
+                                                    );
+                                                  }).toList(),
+                                                )
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      )
+                                    );
+                                    setState(() {
+
+                                    });
+                                  },
+                                ),
+                              ),
+                              Padding(
+                                padding: const EdgeInsets.all(10),
+                                child: ElevatedButton(
+                                  child: const Text(
+                                    "Close",
+                                    style: TextStyle(
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.w500,
+                                      color: Colors.red
+                                    ),
+                                  ),
+                                  onPressed: () { Navigator.pop(context); },
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      );
+                    },
+                  );
+                },
+                child: const Text(
+                  "Add Category",
+                  style: TextStyle(
+                      color: Colors.red,
+                      fontWeight: FontWeight.w500,
+                      fontSize: 18
+                  ),
+                ),
+              ),
+            )
+          )
+              : Container(),
+
+          ticketable ? Container(
+            padding: const EdgeInsets.fromLTRB(10, 10, 10, 40),
+            child: Column(
+              children: categories,
+            ),
+          ) :
+          Container(),
+
           Padding(
             padding: const EdgeInsets.fromLTRB(10, 30, 10, 30),
             child: DropdownButton<String>(
@@ -263,16 +536,17 @@ class _CreateDepartmentState extends State<CreateDepartment> {
                      nonTicketableReports: nonTicketableReports,
                      ticketableReports: ticketableReports,
                      submittedBy: widget.user.email,
+                     ticketCategories: ticketCategories
                    );
                    var data = jsonEncode(department.toJson());
-
+                   var header = widget.user.getAuth();
+                   header.putIfAbsent("Content-type", () => "application/json");
                    supporting.postRequest2(
                      data,
-                     widget.protocol,
-                     widget.domain,
+                     widget.server,
                      "department",
                      context,
-                     headers: widget.user.getAuth(),
+                     headers: header,
                      showPrompt: true,
                      promptTitle: "Nice",
                      promptMessage: "Department Created",
@@ -290,8 +564,7 @@ class _CreateDepartmentState extends State<CreateDepartment> {
         ],
       ),
       widget.user,
-      widget.protocol,
-      widget.domain,
+      widget.server,
     );
   }
 }

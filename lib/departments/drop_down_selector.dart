@@ -121,36 +121,36 @@ class DropDownSelectorState extends State<DropDownSelector> {
           ),
 
           Container(
-          padding: const EdgeInsets.fromLTRB(10, 10, 10, 30),
-          width: 300,
-          child: Center(
-            child: ElevatedButton(
-              onPressed: () {
-                if(selections.contains(valueHolder)) {
-                  selections.remove(valueHolder);
-                  buttonText = "Add ${widget.buttonText}";
-                } else {
-                  selections.add(valueHolder);
-                  buttonText = "Remove ${widget.buttonText}";
-                }
-                trackText = widget.trackText;
+            padding: const EdgeInsets.fromLTRB(10, 10, 10, 30),
+            width: 300,
+            child: Center(
+              child: ElevatedButton(
+                onPressed: () {
+                  if(selections.contains(valueHolder)) {
+                    selections.remove(valueHolder);
+                    buttonText = "Add ${widget.buttonText}";
+                  } else {
+                    selections.add(valueHolder);
+                    buttonText = "Remove ${widget.buttonText}";
+                  }
+                  trackText = widget.trackText;
 
-                for(String value in selections) {
-                  trackText += " $value,";
-                }
-                setState(() {
+                  for(String value in selections) {
+                    trackText += " $value,";
+                  }
+                  setState(() {
 
-                });
-              },
-              child: Text(
-                buttonText,
-                style: const TextStyle(
-                  color: Colors.red,
-                  fontSize: 18
-                ),
-              )
+                  });
+                },
+                child: Text(
+                  buttonText,
+                  style: const TextStyle(
+                    color: Colors.red,
+                    fontSize: 18
+                  ),
+                )
+              ),
             ),
-          ),
           ),
         ],
     );

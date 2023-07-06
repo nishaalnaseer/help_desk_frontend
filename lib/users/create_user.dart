@@ -7,14 +7,11 @@ import 'package:http/http.dart' as http;
 import '../input_validations.dart';
 
 class CreateUser extends StatefulWidget {
-  final String protocol;
-  final String domain;
+  final String server;
   final User user;
   const CreateUser({
     super.key,
-    required this.protocol,
-    required this.domain,
-    required this.user
+    required this.user, required this.server
   });
 
   @override
@@ -43,8 +40,7 @@ class _CreateUserState extends State<CreateUser> {
 
   void getModulesDepartments() async {
     var response = await http.get(
-      Uri.parse("${widget.protocol}://"
-          "${widget.domain}/all_departments_and_modules"),
+      Uri.parse("${widget.server}/all_departments_and_modules"),
       headers: widget.user.getAuth()
     );
 
@@ -225,6 +221,14 @@ class _CreateUserState extends State<CreateUser> {
                     if (!ok) {
                       return;
                     }
+                    if(department == "") {
+                      supporting.showPopUp(
+                          context,
+                          "Validation Error",
+                          "Department Can't Be Empty"
+                      );
+                      return;
+                    }
 
                     User user = User(
                       id: 0,
@@ -241,6 +245,7 @@ class _CreateUserState extends State<CreateUser> {
                         ticketsRaisedFrom: [],
                         nonTicketableReports: [],
                         ticketableReports: [],
+                        ticketCategories: {}
                       ),
                       socialMedia: socialMedia.text(),
                       email: email.text(),
@@ -256,8 +261,7 @@ class _CreateUserState extends State<CreateUser> {
                     var headers = widget.user.getAuth();
                     var response = await supporting.postRequest2(
                       jsonEncode(data),
-                      widget.protocol,
-                      widget.domain,
+                      widget.server,
                       "user",
                       context,
                       headers: headers,
@@ -281,8 +285,7 @@ class _CreateUserState extends State<CreateUser> {
           ],
         ),
         widget.user,
-        widget.domain,
-        widget.protocol,
+        widget.server,
     );
   }
 }

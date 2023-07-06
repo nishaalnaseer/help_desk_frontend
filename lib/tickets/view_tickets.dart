@@ -6,14 +6,11 @@ import '../application_models.dart';
 import '../supporting.dart' as supporting;
 
 class ViewTickets extends StatefulWidget {
-  final String domain;
-  final String protocol;
+  final String server;
   final User user;
   const ViewTickets({
     Key? key,
-    required this.domain,
-    required this.protocol,
-    required this.user,
+    required this.user, required this.server,
   }) : super(key: key);
 
   @override
@@ -65,6 +62,36 @@ class _ViewTicketsState extends State<ViewTickets> {
     setState(() {});
   }
 
+  void pushTicket(int tId) async {
+    String json;
+    try {
+      json = await supporting.getApiData(
+          "/ticket?ticket_id=$tId",
+          widget.server,
+          context,
+          headers: widget.user.getAuth());
+    } catch (e) {
+      return;
+    }
+
+    Map<String, dynamic> map = jsonDecode(json);
+
+    Ticket bigTicket = Ticket.fromJson(map);
+
+    var args = {
+      "user": widget.user,
+      "ticket": bigTicket,
+      "server": widget.server,
+    };
+
+    Navigator.pushNamed
+      (
+        context,
+        "/view_ticket",
+        arguments: args
+    );
+  }
+
   Future<List<DataRow>> getAsyncTickets() async {
     if(selectedStatus == "On hold") {
       selectedStatus = "On_hold";
@@ -72,8 +99,7 @@ class _ViewTicketsState extends State<ViewTickets> {
     String contents = await supporting.getApiData(
         "tickets?tickets_from=$selectedDepartmentFrom&"
         "department=$selectedDepartment&ticket_status=${selectedStatus.toUpperCase()}",
-        widget.domain,
-        widget.protocol,
+        widget.server,
         context,
         headers: widget.user.getAuth());
 
@@ -100,27 +126,9 @@ class _ViewTicketsState extends State<ViewTickets> {
           SizedBox(
             width: 200,
             child: ElevatedButton(
-              onPressed: () async {
-                var json = await supporting.getApiData(
-                  "ticket?ticket_id=${ticket.tId}",
-                  widget.domain,
-                  widget.protocol,
-                  context,
-                  headers: widget.user.getAuth());
-                Ticket bigTicket = Ticket.fromJson(jsonDecode(json));
-
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (context) => ViewTicket(
-                        protocol: widget.protocol,
-                        domain: widget.domain,
-                        user: widget.user,
-                        ticket: ticket,
-                      )
-                    ),
-                  );
-                },
+              onPressed: ()  {
+                pushTicket(ticket.tId);
+              },
                 child: const Text(
                   "Inspect/Edit",
                   style: TextStyle(
@@ -227,32 +235,7 @@ class _ViewTicketsState extends State<ViewTickets> {
                           return;
                         }
 
-                        String json;
-                        try {
-                          json = await supporting.getApiData(
-                              "ticket?ticket_id=$ticketId",
-                              widget.domain,
-                              widget.protocol,
-                              context,
-                              headers: widget.user.getAuth());
-                        } catch (e) {
-                          return;
-                        }
-
-                        Map<String, dynamic> map = jsonDecode(json);
-
-                        Ticket bigTicket = Ticket.fromJson(map);
-
-                        var args = {
-                          "user": widget.user,
-                          "ticket": bigTicket,
-                          "from": selectedDepartmentFrom,
-                          "to": selectedDepartment,
-                          "status": selectedStatus
-                        };
-
-                        Navigator.pushNamed(context, "/view_ticket",
-                            arguments: args);
+                        pushTicket(ticketId);
                       },
                       child: const Text(
                         "Search",
@@ -465,8 +448,7 @@ class _ViewTicketsState extends State<ViewTickets> {
         ],
       ),
       widget.user,
-      widget.protocol,
-      widget.domain,
+      widget.server,
     );
   }
 }

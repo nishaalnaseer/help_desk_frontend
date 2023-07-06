@@ -18,6 +18,7 @@ class Department {
   final List<String> ticketsRaisedFrom;
   final List<String> nonTicketableReports;
   final List<String> ticketableReports;
+  final Map<String, String> ticketCategories;
 
   Department({
     required this.dId,
@@ -30,6 +31,7 @@ class Department {
     required this.ticketsRaisedFrom,
     required this.nonTicketableReports,
     required this.ticketableReports,
+    required this.ticketCategories,
   });
 
   factory Department.fromJson(Map<String, dynamic> json) {
@@ -64,6 +66,9 @@ class Department {
           json["ticketable_reports"].length,
               (index) => json["ticketable_reports"][index]
       ),
+      ticketCategories: Map<String, String>.from(json["ticket_categories"]).map(
+            (key, value) => MapEntry(key, value.toString()),
+      )
     );
   }
 
@@ -79,6 +84,7 @@ class Department {
       "tickets_raised_from": ticketsRaisedFrom,
       "non_ticketable_reports": nonTicketableReports,
       "ticketable_reports": ticketableReports,
+      "ticket_categories": ticketCategories
     };
   }
 }
@@ -306,6 +312,7 @@ class Ticket {
   final String platform;
   List<Message> messages = [];
   List<TicketUpdate> updates = [];
+  String category;
 
   final int submittedOn;
   List<dynamic>? devices = [];
@@ -330,7 +337,9 @@ class Ticket {
       required this.host,
       required this.hostIssue,
       required this.updates,
-      required this.platform});
+      required this.platform,
+      required this.category,
+      });
 
   factory Ticket.fromJson(Map<String, dynamic> json) {
     return Ticket(
@@ -351,6 +360,7 @@ class Ticket {
       username: json["username"] ?? "",
       hostIssue: json["host_issue"],
       platform: json["platform"],
+      category: json["category"],
       devices: json["devices"] ?? [],
       messages: List.generate(json["messages"].length,
           (index) => Message.fromJson(json["messages"][index])),
@@ -374,7 +384,8 @@ class Ticket {
       "username": username,
       "host_issue": hostIssue,
       "message": message,
-      "platform": platform
+      "platform": platform,
+      "category": category
     };
   }
 }

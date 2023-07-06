@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import 'departments/view_departments.dart';
 import 'users/login.dart';
@@ -11,24 +12,21 @@ import 'supporting.dart' as supporting;
 
 import 'package:flutter/foundation.dart' show kIsWeb;
 
-// TODO give hints to mandatory text fields with *
+// TODO when on login screen make hitting enter to hit login button
 
-late String protocol;
-late String domain;
+late String server;
 List<String> modules = [];
 late User user;
 
 void main() async {
   if (kIsWeb) {
-    domain = "nishawl.ddns.net";
-    protocol = "https";
-    // domain = "localhost:8000";
-    // protocol = "http";
+
+
+    // server = "https://nishawl.ddns.net";
+    server = "http://localhost:8000";
   } else {
-    // domain = "nishawl.ddns.net";
-    // protocol = "https";
-    domain = "localhost:8000";
-    protocol = "http";
+    // server = "https://nishawl.ddns.net";
+    server = "http://localhost:8000";
   }
 
   runApp(const DrawerNavigationApp());
@@ -86,8 +84,7 @@ class DrawerNavigationApp extends StatelessWidget {
         ),
       ),
       home: LoginPage(
-        domain: domain,
-        protocol: protocol,
+        server: server,
       ),
       onGenerateRoute: (settings) {
         switch (settings.name) {
@@ -96,15 +93,13 @@ class DrawerNavigationApp extends StatelessWidget {
             // Extract the necessary data from settings.arguments
             User user = arguments['user'];
             List<String> modules = arguments['modules'];
-            String domain = arguments['domain'];
-            String protocol = arguments['protocol'];
+            String server = arguments['server'];
 
             return MaterialPageRoute(
               builder: (context) => CreateTicket(
                 user: user,
                 modules: modules,
-                domain: domain,
-                protocol: protocol,
+                server: server,
               ),
             );
 
@@ -112,16 +107,14 @@ class DrawerNavigationApp extends StatelessWidget {
             Map<String, dynamic> arguments = settings.arguments as Map<String, dynamic>;
             return MaterialPageRoute(
               builder: (context) => LoginPage(
-                domain: domain,
-                protocol: protocol,
+                server: server
               ),
             );
 
           case "/settings":
             Map<String, dynamic> arguments = settings.arguments as Map<String, dynamic>;
             User user = arguments['user'];
-            String domain = arguments['domain'];
-            String protocol = arguments['protocol'];
+            String server = arguments['server'];
             return MaterialPageRoute(
               builder: (context) => SettingsPage(
                   args: {
@@ -132,8 +125,7 @@ class DrawerNavigationApp extends StatelessWidget {
           case "/profile":
             Map<String, dynamic> arguments = settings.arguments as Map<String, dynamic>;
             User user = arguments['user'];
-            String domain = arguments['domain'];
-            String protocol = arguments['protocol'];
+            String server = arguments['server'];
             return MaterialPageRoute(
               builder: (context) => ProfilePage(
                   args: {
@@ -144,73 +136,63 @@ class DrawerNavigationApp extends StatelessWidget {
           case "/create_ticket":
             Map<String, dynamic> arguments = settings.arguments as Map<String, dynamic>;
             User user = arguments['user'];
-            String domain = arguments['domain'];
-            String protocol = arguments['protocol'];
+            String server = arguments['server'];
 
             return MaterialPageRoute(
               builder: (context) => CreateTicket(
                   user: user,
                   modules: modules,
-                  domain: domain,
-                  protocol: protocol
+                  server: server,
               ),
             );
 
           case "/view_tickets":
             Map<String, dynamic> arguments = settings.arguments as Map<String, dynamic>;
             User user = arguments['user'];
-            String domain = arguments['domain'];
-            String protocol = arguments['protocol'];
+            String server = arguments['server'];
 
             return MaterialPageRoute(
               builder: (context) => ViewTickets(
                 user: user,
-                domain: domain,
-                protocol: protocol,
+                server: server
               ),
             );
 
           case "/view_ticket":
             Map<String, dynamic> arguments = settings.arguments as Map<String, dynamic>;
             User user = arguments['user'];
-            String domain = arguments['domain'];
-            String protocol = arguments['protocol'];
+            String server = arguments['server'];
             Ticket ticket = arguments["ticket"];
 
             return MaterialPageRoute(
               builder: (context) => ViewTicket(
                 user: user,
                 ticket: ticket,
-                domain: domain,
-                protocol: protocol,
+                server: server
               ),
             );
 
           case "/users":
             Map<String, dynamic> arguments = settings.arguments as Map<String, dynamic>;
             User user = arguments['user'];
-            String domain = arguments['domain'];
-            String protocol = arguments['protocol'];
+            String server = arguments['domain'];
 
             return MaterialPageRoute(
               builder: (context) => ViewUsers(
                 user: user,
-                domain: domain,
-                protocol: protocol,
+                server: server,
               ),
             );
 
           case "/departments":
             Map<String, dynamic> arguments = settings.arguments as Map<String, dynamic>;
             User user = arguments['user'];
-            String domain = arguments['domain'];
-            String protocol = arguments['protocol'];
+            String server = arguments['server'];
 
             return MaterialPageRoute(
               builder: (context) => DepartmentsView(
                 user: user,
-                domain: domain,
-                protocol: protocol,
+                server: server,
               ),
             );
         }
@@ -234,8 +216,7 @@ class MainPage extends StatelessWidget {
         title: const Text('Home'),
       ),
       drawer: supporting.DrawerNavigation(
-        domain: domain,
-        protocol: protocol,
+        server: server,
         user: user,
       ),
       body: const Center(
@@ -259,8 +240,7 @@ class SettingsPage extends StatelessWidget {
         title: const Text('Settings'),
       ),
       drawer: supporting.DrawerNavigation(
-        domain: domain,
-        protocol: protocol,
+        server: server,
         user: user,
       ),
       body: const Center(
@@ -284,14 +264,21 @@ class ProfilePage extends StatelessWidget {
         title: const Text('Profile'),
       ),
       drawer: supporting.DrawerNavigation(
-          domain: domain,
-          protocol: protocol,
+          server: server,
           user: user
       ),
-      body: const Center(
-        child: Text(
-          'Profile Page',
-          style: TextStyle(fontSize: 24),
+      body: Center(
+        child: KeyboardListener(
+            focusNode: FocusNode(),
+            child: Text(
+              'Profile Page',
+              style: TextStyle(fontSize: 24),
+            ),
+          onKeyEvent: (event) {
+            if (event.logicalKey == LogicalKeyboardKey.enter) {
+              print("Enter");
+            }
+          },
         ),
       ),
     );

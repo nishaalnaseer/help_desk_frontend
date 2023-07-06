@@ -10,11 +10,10 @@ import 'create_user.dart';
 
 class ViewUsers extends StatefulWidget {
   final User user;
-  final String protocol;
-  final String domain;
+  final String server;
   const ViewUsers({
     super.key, required this.user,
-    required this.protocol, required this.domain
+    required this.server
   });
 
   @override
@@ -38,12 +37,13 @@ class _ViewUsersState extends State<ViewUsers> {
 
   void getDepartments() async {
     var response = await http.get(
-      Uri.parse("${widget.protocol}://${widget.domain}"
-          "/departments"), headers: widget.user.getAuth(),
-    );
+      Uri.parse(
+          "${widget.server}/departments"),
+          headers: widget.user.getAuth(),
+      );
 
     if(response.statusCode != 200) {
-      throw Exception("Unhandled exception on GET /departments route");
+      print("Got status code ${response.statusCode}");
     }
     List<dynamic> data = jsonDecode(response.body);
 
@@ -104,8 +104,7 @@ class _ViewUsersState extends State<ViewUsers> {
 
   void getUsers() async {
     var response = await supporting.getRequest(
-      widget.protocol,
-      widget.domain,
+      widget.server,
       "users?d_name=${selectedDepartment.toUpperCase()}",
       headers: widget.user.getAuth(),
       context
@@ -135,8 +134,7 @@ class _ViewUsersState extends State<ViewUsers> {
             child: ElevatedButton(
                 onPressed: () async {
                   var response = await supporting.getRequest(
-                    widget.protocol,
-                    widget.domain,
+                    widget.server,
                     "user?username=${user.email}",
                     context,
                     headers: widget.user.getAuth()
@@ -154,8 +152,7 @@ class _ViewUsersState extends State<ViewUsers> {
                     context,
                     MaterialPageRoute(
                       builder: (context) => ViewUser(
-                        protocol: widget.protocol,
-                        domain: widget.domain,
+                        server: widget.server,
                         user: widget.user,
                         userScope: userScope
                       )
@@ -212,8 +209,7 @@ class _ViewUsersState extends State<ViewUsers> {
                     context,
                     MaterialPageRoute(
                       builder: (context) => CreateUser(
-                        protocol: widget.protocol,
-                        domain: widget.domain,
+                        server: widget.server,
                         user: widget.user
                       )
                     ),
@@ -327,8 +323,7 @@ class _ViewUsersState extends State<ViewUsers> {
         ],
       ),
       widget.user,
-      widget.protocol,
-      widget.domain,
+      widget.server,
     );
   }
 }

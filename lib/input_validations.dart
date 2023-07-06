@@ -68,15 +68,15 @@ class InputField {
       throw MandatoryInputError("$_display Cant be Empty!");
     }
 
-    return _holder;
+    return value;
   }
 
   void setText(String value) {
-    _holder = value;
+    controller.text = value;
   }
 
   void clear() {
-    _holder = "";
+    controller.text = "";
   }
 }
 
@@ -90,8 +90,6 @@ bool inputValidation(List<InputField> inputs, BuildContext context) {
       output += '${e.message}\n';
     }
   }
-
-
 
   if (output == "") {
     return true;

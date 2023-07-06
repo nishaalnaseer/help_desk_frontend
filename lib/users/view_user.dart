@@ -6,17 +6,14 @@ import  'package:flutter/material.dart';
 import 'package:help_desk_frontend/application_models.dart';
 
 class ViewUser extends StatefulWidget {
-  final String protocol;
-  final String domain;
+  final String server;
   final User user;
   final User userScope;
 
   const ViewUser({
     super.key,
-    required this.protocol,
-    required this.domain,
     required this.user,
-    required this.userScope
+    required this.userScope, required this.server
   });
 
   @override
@@ -44,8 +41,7 @@ class _ViewUserState extends State<ViewUser> {
   void init() async {
 
     var response = await http.get(
-        Uri.parse("${widget.protocol}://"
-            "${widget.domain}/all_departments_and_modules"),
+        Uri.parse("${widget.server}/all_departments_and_modules"),
         headers: widget.user.getAuth()
     );
 
@@ -254,7 +250,8 @@ class _ViewUserState extends State<ViewUser> {
                     accessibleTickets: user.department.accessibleTickets,
                     ticketsRaisedFrom: user.department.ticketsRaisedFrom,
                     nonTicketableReports: user.department.nonTicketableReports,
-                    ticketableReports: user.department.ticketableReports
+                    ticketableReports: user.department.ticketableReports,
+                    ticketCategories: user.department.ticketCategories
                   );
 
                   User newUser = User(
@@ -273,8 +270,7 @@ class _ViewUserState extends State<ViewUser> {
 
                   var response = supporting.patchRequest(
                     jsonEncode(data),
-                    widget.protocol,
-                    widget.domain,
+                    widget.server,
                     "user?reset_password=$resetPassword",
                     context,
                     widget.user.getAuth(),
@@ -298,8 +294,7 @@ class _ViewUserState extends State<ViewUser> {
         ],
       ),
       widget.user,
-      widget.protocol,
-      widget.domain,
+      widget.server,
     );
   }
 }

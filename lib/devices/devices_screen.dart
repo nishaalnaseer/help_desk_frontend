@@ -6,9 +6,8 @@ import '../supporting.dart' as supporting;
 import '../application_models.dart';
 
 class DevicesScreen extends StatefulWidget {
-  final String protocol;
-  final String domain;
-  const DevicesScreen({Key? key, required this.protocol, required this.domain})
+  final String server;
+  const DevicesScreen({Key? key, required this.server})
       : super(key: key);
 
   @override
@@ -30,7 +29,7 @@ class _DevicesScreenState extends State<DevicesScreen> {
 
   Future<List<String>> getDepartments() async {
     String contents = await supporting.getApiData(
-        "departments", widget.domain, widget.protocol, context);
+        "/departments", widget.server, context);
     List<dynamic> coded = await jsonDecode(contents);
     List<String> departments = [];
     for (var x in coded) {
@@ -46,10 +45,10 @@ class _DevicesScreenState extends State<DevicesScreen> {
 
   Future<void> getCategories() async {
     String contents = await supporting.getApiData(
-        "categories?department=$selectedDepartment",
-        widget.domain,
-        widget.protocol,
-        context);
+        "/categories?department=$selectedDepartment",
+        widget.server,
+        context)
+    ;
     categories = [];
     List<dynamic> coded = jsonDecode(contents);
     for (var x in coded) {
@@ -62,9 +61,9 @@ class _DevicesScreenState extends State<DevicesScreen> {
   Future<void> getDevices() async {
     String contents = await supporting.getApiData(
         "devices?department=$selectedDepartment&category=$selectedCategory",
-        widget.domain,
-        widget.protocol,
-        context);
+        widget.server,
+        context
+    );
     rows = [];
     List<dynamic> coded = jsonDecode(contents);
     for (var x in coded) {

@@ -11,13 +11,11 @@ import 'view_department.dart';
 
 class DepartmentsView extends StatefulWidget {
   final User user;
-  final String protocol;
-  final String domain;
+  final String server;
   const DepartmentsView({
     super.key,
     required this.user,
-    required this.protocol,
-    required this.domain
+    required this.server,
   });
 
   @override
@@ -71,9 +69,8 @@ class _DepartmentsViewState extends State<DepartmentsView> {
     headers.remove('Content-Type');
 
     var response = await supporting.getRequest(
-      widget.protocol,
-      widget.domain,
-      "departments",
+      widget.server,
+      "/departments",
       context,
       headers: headers
     );
@@ -101,9 +98,8 @@ class _DepartmentsViewState extends State<DepartmentsView> {
                   ElevatedButton(
                     onPressed: () async {
                       var response = await supporting.getApiData(
-                        "department?d_name=${department.name}",
-                        widget.domain,
-                        widget.protocol,
+                        "/department?d_name=${department.name}",
+                        widget.server,
                         context,
                         headers: widget.user.getAuth()
                       );
@@ -119,8 +115,7 @@ class _DepartmentsViewState extends State<DepartmentsView> {
                         context,
                         MaterialPageRoute(
                             builder: (context) => ViewDepartment(
-                              protocol: widget.protocol,
-                              domain: widget.domain,
+                              server: widget.server,
                               user: widget.user,
                               department: uDepartment,
                               modules: modules,
@@ -156,7 +151,7 @@ class _DepartmentsViewState extends State<DepartmentsView> {
 
   Future<void> listsInit() async {
     var uri = Uri.parse(
-        "${widget.protocol}://${widget.domain}"
+        "${widget.server}"
             "/all_departments_and_modules"
     );
     var response = await http.get(
@@ -232,8 +227,7 @@ class _DepartmentsViewState extends State<DepartmentsView> {
                     context,
                     MaterialPageRoute(
                       builder: (context) => CreateDepartment(
-                        protocol: widget.protocol,
-                        domain: widget.domain,
+                        server: widget.server,
                         user: widget.user,
                         modules: modules,
                         departments: modifiedDeps,
@@ -295,8 +289,7 @@ class _DepartmentsViewState extends State<DepartmentsView> {
         ],
       ),
       widget.user,
-      widget.protocol,
-      widget.domain,
+      widget.server,
     );
   }
 }
