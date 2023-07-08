@@ -271,7 +271,7 @@ class _ViewUserState extends State<ViewUser> {
                   var response = supporting.patchRequest(
                     jsonEncode(data),
                     widget.server,
-                    "user?reset_password=$resetPassword",
+                    "/user?reset_password=$resetPassword",
                     context,
                     widget.user.getAuth(),
                     backTwice: true,

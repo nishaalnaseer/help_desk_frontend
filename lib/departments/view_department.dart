@@ -651,7 +651,7 @@ class _ViewDepartmentState extends State<ViewDepartment> {
                     var response = await supporting.patchRequest(
                       jsonEncode(data),
                       widget.server,
-                      "department",
+                      "/department",
                       context,
                       widget.user.getAuth(),
                       showPrompt: true,

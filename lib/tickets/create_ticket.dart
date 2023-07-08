@@ -378,7 +378,7 @@ class _CreateTicketState extends State<CreateTicket> {
                     var response = await supporting.postRequest2(
                         jsonEncode(ticketInfo),
                         widget.server,
-                        "ticket",
+                        "/ticket",
                         context,
                         headers: header,
                         showPrompt: true,

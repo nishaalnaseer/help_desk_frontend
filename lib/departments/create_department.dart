@@ -544,7 +544,7 @@ class _CreateDepartmentState extends State<CreateDepartment> {
                    supporting.postRequest2(
                      data,
                      widget.server,
-                     "department",
+                     "/department",
                      context,
                      headers: header,
                      showPrompt: true,

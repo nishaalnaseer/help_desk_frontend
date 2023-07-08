@@ -82,7 +82,6 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   Future<void> login() async {
-
     bool validated = inputValidation(inputs, context);
     if (!validated) {
       return;
@@ -137,7 +136,8 @@ class _LoginPageState extends State<LoginPage> {
 
     String jsonRaw = await supporting.getApiData(
         "/users/me/", widget.server, context,
-        headers: headers, delay: 500);
+        headers: headers, delay: 500
+    );
     var json = jsonDecode(jsonRaw);
     User user = User.fromJson(json);
     user.setAuth(headers);
@@ -206,7 +206,8 @@ class _LoginPageState extends State<LoginPage> {
                     child: const Text(
                       'Sign In',
                       style: TextStyle(color: Colors.white, fontSize: 20),
-                    )),
+                    )
+                  ),
                   Padding(
                     padding: const EdgeInsets.fromLTRB(10, 30, 10, 10),
                     child: TextField(

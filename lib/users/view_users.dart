@@ -105,7 +105,7 @@ class _ViewUsersState extends State<ViewUsers> {
   void getUsers() async {
     var response = await supporting.getRequest(
       widget.server,
-      "users?d_name=${selectedDepartment.toUpperCase()}",
+      "/users?d_name=${selectedDepartment.toUpperCase()}",
       headers: widget.user.getAuth(),
       context
     );
@@ -135,7 +135,7 @@ class _ViewUsersState extends State<ViewUsers> {
                 onPressed: () async {
                   var response = await supporting.getRequest(
                     widget.server,
-                    "user?username=${user.email}",
+                    "/user?username=${user.email}",
                     context,
                     headers: widget.user.getAuth()
                   );

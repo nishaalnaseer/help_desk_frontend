@@ -262,7 +262,7 @@ class _CreateUserState extends State<CreateUser> {
                     var response = await supporting.postRequest2(
                       jsonEncode(data),
                       widget.server,
-                      "user",
+                      "/user",
                       context,
                       headers: headers,
                       showPrompt: true,

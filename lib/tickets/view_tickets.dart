@@ -97,7 +97,7 @@ class _ViewTicketsState extends State<ViewTickets> {
       selectedStatus = "On_hold";
     }
     String contents = await supporting.getApiData(
-        "tickets?tickets_from=$selectedDepartmentFrom&"
+        "/tickets?tickets_from=$selectedDepartmentFrom&"
         "department=$selectedDepartment&ticket_status=${selectedStatus.toUpperCase()}",
         widget.server,
         context,
@@ -158,14 +158,14 @@ class _ViewTicketsState extends State<ViewTickets> {
   DataColumn getColumn(String text) {
     return DataColumn(
         label: Wrap(
-      children: [
-        Text(
-          text,
-          style: style,
-          softWrap: true,
-          overflow: TextOverflow.ellipsis,
-        )
-      ],
+          children: [
+            Text(
+              text,
+              style: style,
+              softWrap: true,
+              overflow: TextOverflow.ellipsis,
+            )
+          ],
     ));
   }
 

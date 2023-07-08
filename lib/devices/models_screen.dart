@@ -56,7 +56,7 @@ class _ModelsScreenState extends State<ModelsScreen> {
 
   Future<List<String>> getDepartments() async {
     String contents = await supporting.getApiData(
-        "departments", widget.server, context);
+        "/departments", widget.server, context);
     List<dynamic> coded = await jsonDecode(contents);
     List<String> departments = [];
     for (var x in coded) {

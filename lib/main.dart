@@ -19,49 +19,10 @@ List<String> modules = [];
 late User user;
 
 void main() async {
-  if (kIsWeb) {
-
-
-    // server = "https://nishawl.ddns.net";
-    server = "http://localhost:8000";
-  } else {
-    // server = "https://nishawl.ddns.net";
-    server = "http://localhost:8000";
-  }
+  // server = "https://nishawl.ddns.net";
+  server = "http://localhost:8000";
 
   runApp(const DrawerNavigationApp());
-}
-
-Text? assignUserData(
-  dynamic args,
-) {
-  // dynamic arguments = ModalRoute.of(context)?.settings.arguments;
-  Map<String, dynamic> argumentsMap = Map<String, dynamic>.from(args);
-  if (argumentsMap["modules"] == null) {
-    return const Text("Error no module");
-  } else {
-    modules = argumentsMap["modules"];
-  }
-  if (argumentsMap["user"] == null) {
-    return const Text("Error no user");
-  } else {
-    user = argumentsMap["user"];
-  }
-  return null;
-}
-
-Text? assignUserData2(
-  dynamic args,
-) {
-  // dynamic arguments = ModalRoute.of(context)?.settings.arguments;
-  try {
-    user = args;
-  } on Exception catch (e) {
-    return Text(
-      e.toString(),
-    );
-  }
-  return null;
 }
 
 class DrawerNavigationApp extends StatelessWidget {
@@ -175,7 +136,7 @@ class DrawerNavigationApp extends StatelessWidget {
           case "/users":
             Map<String, dynamic> arguments = settings.arguments as Map<String, dynamic>;
             User user = arguments['user'];
-            String server = arguments['domain'];
+            String server = arguments['server'];
 
             return MaterialPageRoute(
               builder: (context) => ViewUsers(

@@ -60,7 +60,7 @@ class _DevicesScreenState extends State<DevicesScreen> {
 
   Future<void> getDevices() async {
     String contents = await supporting.getApiData(
-        "devices?department=$selectedDepartment&category=$selectedCategory",
+        "/devices?department=$selectedDepartment&category=$selectedCategory",
         widget.server,
         context
     );

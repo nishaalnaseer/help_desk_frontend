@@ -218,7 +218,7 @@ class _ViewTicketState extends State<ViewTicket> {
     var response = await supporting.postRequest2(
         jsonEncode({}),
         widget.server,
-        "message?message=$newMessage"
+        "/message?message=$newMessage"
             "&ticket_id=${widget.ticket.tId}",
         context,
         headers: header,
